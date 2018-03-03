@@ -20,35 +20,49 @@ $(document).ready(function(){
 
   // Variablendefinitionen
   // Hinweis: 'i' wird bewusst ausgelassen
-  var h3header 			= $(".h3-headline--wrapper");
-  var headervideo 	= $(".hero--play");
+  
   var werbung1 			= $(".grid--col-lg-4");
   var werbung2 			= $(".advertisement--medium-rectangle");
 
-
   // ----- Generelles - Anfang -----
   // Videoplayer im Header entfernen
-  headervideo.remove();
+  removeVideoplayer();
+  
   // H3-Header entfernen
-  h3header.remove();
+  //removeH3Header();
+  
   // Werbe-DIVs entfernen
-  werbung1[1].remove();
-  werbung1[3].remove();
-  werbung2.remove();
+  //werbung1[1].remove();
+  //werbung1[3].remove();
+  //werbung2.remove();
+  
   // ----- Generelles - Ende -----
   
 
   // Funktionen etc.
   if ( series_main.test(window.location.href) ){
-		filterMainPage();
+    improveMainPage();
+    filterMainPage();
   }
 });
 
-function filterMainPage() {
-  var sections 		= $("section.has-vertical-spacing");
+// Videoplayer im Header entfernen
+function removeVideoplayer() {
+  var headervideo 	= $(".hero--play");
+  headervideo.remove();
+}
 
+function removeH3Header() {
+  var h3header 			= $(".h3-headline--wrapper");
+  h3header.remove();
+}
+
+function filterMainPage() {
+  var sections 		= $('section.has-vertical-spacing');
+	//var statistik = getElementByText(sections, 'h2', 'Statistiken');
+  console.log(sections);
   // "Statistik" entfernen
-  removeElementByText(sections, 'h2', 'Statistiken');
+  //removeElementByText(sections, 'h2', 'Statistiken');
   // "Streaming" entfernen  
   removeElementByText(sections, 'h2', 'Schaue jetzt');
   // "Handlung" entfernen
@@ -76,7 +90,30 @@ function filterMainPage() {
   removeElementByText(sections, 'h2', 'Das könnte dich auch interessieren');
 }
 
+function improveMainPage() {
+  var sections		= $('section.has-vertical-spacing');
+  
+  var statistik 				= getElementByText(sections, 'h2', 'Statistiken');
+	var statColumnLeft 		= statistik.find('.grid--col-lg-8');
+	var statColumnRight 	= statistik.find('.grid--col-lg-4');
+  statColumnLeft.removeClass('grid--col-lg-8');
+  statColumnLeft.addClass('grid--col-lg');
+//  statColumnRight.remove();
+  
+  var kommentare 	= getElementByText(sections, 'h2', 'Kommentare');
+	var kommColumnLeft 		= kommentare.find('.grid--col-lg-8');
+	var kommColumnRight 	= kommentare.find('.grid--col-lg-4');
+  kommColumnLeft.removeClass('grid--col-lg-8');
+  kommColumnLeft.addClass('grid--col-lg');
+//  kommColumnRight.remove();
+}
+
 function removeElementByText(selection, descendantSelector, text) {
   var element 	= selection.filter(":has("+descendantSelector+":contains("+ text +"))");
-  selection.remove();
+  element.remove();
+}
+
+function getElementByText(selection, descendantSelector, text) {
+  var element 	= selection.filter(":has("+descendantSelector+":contains("+ text +"))");
+  return element;
 }
