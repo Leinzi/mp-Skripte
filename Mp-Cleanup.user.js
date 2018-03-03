@@ -2,13 +2,12 @@
 // @name                MP-Cleanup (jQuery)
 // @description	        Moviepilot generell bereinigen
 // @grant               none
-// @require				https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js 
-// @include	        	http://www.moviepilot.de/*
-// @include	        	https://www.moviepilot.de/*
-// @serial				20170310
+// @require							https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js 
+// @include	        		/^(https?:)\/\/(.+\.)?(moviepilot.de)\/(.*)$/
+// @exclude							/^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
 // ==/UserScript==
 
-// jQuery-Konflikte lösen
+// jQuery-Konflikte loesen
 this.$ = this.jQuery = jQuery.noConflict(true);
 
 // Funktion, damit das Dokument erst fertig geladen wird
@@ -40,6 +39,9 @@ var vorschlaege = $("#home_personal_recommendations");
 var werbungsidebar = $(".advertisement--medium-rectangle");
 var video = $(".showheroes--sidebar");
   
+var adsOuter			= $("#ads-outer");
+console.log(adsOuter);
+adsOuter.remove();  
 // Funktionen etc.
 if ( /^http:\/\/www.moviepilot.de\/(.*)\s*$/im.test(window.location.href) ){
 footer.remove();
