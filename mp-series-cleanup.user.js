@@ -23,7 +23,7 @@ $(document).ready(function(){
   // Hinweis: 'i' wird bewusst ausgelassen
   
   var werbung1 			= $(".grid--col-lg-4");
-  var werbung2 			= $(".advertisement--medium-rectangle").parent();
+  var werbung2 			= $(".advertisement--medium-rectangle");
 
   // ----- Generelles - Anfang -----
   // Videoplayer im Header entfernen
@@ -39,6 +39,7 @@ $(document).ready(function(){
   
   // ----- Generelles - Ende -----
   
+  improveStyle();
 
   // Funktionen etc.
   if ( series_main.test(window.location.href) ){
@@ -125,11 +126,33 @@ function improveMainPage() {
 }
 
 function removeElementByText(selection, descendantSelector, text) {
-  var element 	= selection.filter(":has("+descendantSelector+":contains("+ text +"))");
+  var element 	= getElementByText(selection, descendantSelector, text);
   element.remove();
 }
 
 function getElementByText(selection, descendantSelector, text) {
   var element 	= selection.filter(":has("+descendantSelector+":contains("+ text +"))");
   return element;
+}
+
+function improveStyle() {
+	$('.hero').css('height', '250px');
+	$('.has-vertical-spacing').css('padding', '25px 0');
+	$('.item-statistics').css('margin-top', '0');
+	$('.item-statistics--area').css('margin-top', '25px');
+	$('.item-statistics--subline.typo--teaser-body').css({'font-size': '14px', 'line-height': '24px'});
+  
+	$('.typo--long-body').css({'font-size': '15px', 'line-height': '24px'});
+	$('.meta-details--heading').css({'margin-top': '0', 'font-size': '14px', 'text-transform': 'none'});
+	$('.meta-details--content').css({'margin-bottom': '15px', 'font-size': '14px'});
+	$('.slider--avatars').css({'height': '250px'});
+	$('.slider--avatars--item').css({'flex-basis': '180px', 'margin-right': '20px'});
+	$('.avatar--image').css({'filter': 'none', '-webkit-filter': 'none'});
+	$('.avatar--gradient').css({'background': 'none'});
+	$('._3gBYU').css({'filter': 'none', '-webkit-filter': 'none'});
+	$('._3WDUx').css({'background': 'none'});
+	$('.cLbdk').css({'font-size': '13px'});
+	$('.X76-l').css({'font-size': '13px', 'line-height': '1.4em'});
+	$('h2').css({'font-size': '26px', 'line-height': '29px', 'letter-spacing': '0.02em'});
+	$('.avatar--list-item--title-subline').css({'font-size': '15px'});
 }
