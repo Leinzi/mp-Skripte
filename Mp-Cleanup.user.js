@@ -41,7 +41,10 @@ var video = $(".showheroes--sidebar");
   
 var adsOuter			= $("#ads-outer");
 console.log(adsOuter);
-adsOuter.remove();  
+adsOuter.remove();
+
+//improveStyle();  
+  
 // Funktionen etc.
 if ( /^http:\/\/www.moviepilot.de\/(.*)\s*$/im.test(window.location.href) ){
 footer.remove();
@@ -141,3 +144,13 @@ if ( /^(https:)\/\/(.+\.)?(moviepilot.de)\/suche(.*$)/.test(window.location.href
 }
 
 });
+
+function improveStyle() {
+  $('#page').css({'width': '100%', 'max-width': '80%'});
+  $('#sidebar').css({'width': '30%'});
+  $('#main').css({'width': '65%'});
+  $('.layout--wrapped-content').css({'width': '100%'});
+  
+  $('._3CAHP').css({'max-width': '80%'});
+  
+}
