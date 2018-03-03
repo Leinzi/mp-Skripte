@@ -24,6 +24,7 @@ $(document).ready(function(){
   
   var werbung1 			= $(".grid--col-lg-4");
   var werbung2 			= $(".advertisement--medium-rectangle");
+  var adsOuter			= $("#ads-outer");
 
   // ----- Generelles - Anfang -----
   // Videoplayer im Header entfernen
@@ -36,7 +37,7 @@ $(document).ready(function(){
   //werbung1[1].remove();
   //werbung1[3].remove();
   werbung2.remove();
-  
+  adsOuter.remove();
   // ----- Generelles - Ende -----
   
   improveStyle();
@@ -76,8 +77,7 @@ function removeH3Header() {
 
 function filterMainPage() {
   var sections 		= $('section.has-vertical-spacing');
-	//var statistik = getElementByText(sections, 'h2', 'Statistiken');
-  console.log(sections);
+  
   // "Statistik" entfernen
   removeElementByText(sections, 'h2', 'Statistiken');
   // "Streaming" entfernen  
@@ -136,12 +136,15 @@ function getElementByText(selection, descendantSelector, text) {
 }
 
 function improveStyle() {
+  $('.layout--content-width').css({'max-width': '80%'});
+  $('._3CAHP').css({'max-width': '80%'});
+  
 	$('.hero').css('height', '250px');
 	$('.has-vertical-spacing').css('padding', '25px 0');
 	$('.item-statistics').css('margin-top', '0');
 	$('.item-statistics--area').css('margin-top', '25px');
 	$('.item-statistics--subline.typo--teaser-body').css({'font-size': '14px', 'line-height': '24px'});
-  
+
 	$('.typo--long-body').css({'font-size': '15px', 'line-height': '24px'});
 	$('.meta-details--heading').css({'margin-top': '0', 'font-size': '14px', 'text-transform': 'none'});
 	$('.meta-details--content').css({'margin-bottom': '15px', 'font-size': '14px'});
@@ -149,6 +152,7 @@ function improveStyle() {
 	$('.slider--avatars--item').css({'flex-basis': '180px', 'margin-right': '20px'});
 	$('.avatar--image').css({'filter': 'none', '-webkit-filter': 'none'});
 	$('.avatar--gradient').css({'background': 'none'});
+
 	$('._3gBYU').css({'filter': 'none', '-webkit-filter': 'none'});
 	$('._3WDUx').css({'background': 'none'});
 	$('.cLbdk').css({'font-size': '13px'});
