@@ -3,9 +3,7 @@
 // @description	        Moviepilot-Serienseite bereinigen - Framework
 // @grant               none
 // @require							https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js 
-// @include	        		https://www.moviepilot.de/serie/*
-// @include           	/^(https:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)\/(staffel)\/([0-9]|[1-9][0-9])$/
-// @exclude	        		/^(https:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)\/(staffel)\/([0-9]|[1-9][0-9])\/([a-zA-Z].*)?/
+// @include	        		/^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
 // @version							20180302
 // ==/UserScript==
 
@@ -13,7 +11,10 @@
 this.$ = this.jQuery = jQuery.noConflict(true);
 
 //RegExps
-var series_main = /^(https:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*$)/;
+var series_main = /^(https:)\/\/(.+\.)?(moviepilot.de)\/serie\/((?!\/).)*$/;
+var series_stream = /^(https:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)\/(online-schauen)$/;
+var series_season = /^(https:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)\/(staffel)\/([1-9]?[0-9]+)$/
+var series_season_stream = /^(https:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)\/(staffel)\/([1-9]?[0-9]+)\/(online-schauen)$/
 
 // Funktion, damit das Dokument erst fertig geladen wird
 $(document).ready(function(){
@@ -22,7 +23,7 @@ $(document).ready(function(){
   // Hinweis: 'i' wird bewusst ausgelassen
   
   var werbung1 			= $(".grid--col-lg-4");
-  var werbung2 			= $(".advertisement--medium-rectangle");
+  var werbung2 			= $(".advertisement--medium-rectangle").parent();
 
   // ----- Generelles - Anfang -----
   // Videoplayer im Header entfernen
@@ -34,7 +35,7 @@ $(document).ready(function(){
   // Werbe-DIVs entfernen
   //werbung1[1].remove();
   //werbung1[3].remove();
-  //werbung2.remove();
+  werbung2.remove();
   
   // ----- Generelles - Ende -----
   
@@ -43,6 +44,21 @@ $(document).ready(function(){
   if ( series_main.test(window.location.href) ){
     improveMainPage();
     filterMainPage();
+  } else if ( series_stream.test(window.location.href) ){
+    var kurzbeschreibung 	= $('div').find('.grid--col-lg-8');
+  	kurzbeschreibung.removeClass('grid--col-lg-8');
+  	kurzbeschreibung.addClass('grid--col-lg');  	
+    kurzbeschreibung.removeClass('grid--col-md-7');
+  	kurzbeschreibung.addClass('grid--col-md');
+  } else if ( series_season.test(window.location.href) ){
+    improveMainPage();
+    filterMainPage();
+  } else if ( series_season_stream.test(window.location.href) ){
+    var kurzbeschreibung 	= $('div').find('.grid--col-lg-8');
+  	kurzbeschreibung.removeClass('grid--col-lg-8');
+  	kurzbeschreibung.addClass('grid--col-lg');  	
+    kurzbeschreibung.removeClass('grid--col-md-7');
+  	kurzbeschreibung.addClass('grid--col-md');
   }
 });
 
@@ -62,7 +78,7 @@ function filterMainPage() {
 	//var statistik = getElementByText(sections, 'h2', 'Statistiken');
   console.log(sections);
   // "Statistik" entfernen
-  //removeElementByText(sections, 'h2', 'Statistiken');
+  removeElementByText(sections, 'h2', 'Statistiken');
   // "Streaming" entfernen  
   removeElementByText(sections, 'h2', 'Schaue jetzt');
   // "Handlung" entfernen
@@ -98,14 +114,14 @@ function improveMainPage() {
 	var statColumnRight 	= statistik.find('.grid--col-lg-4');
   statColumnLeft.removeClass('grid--col-lg-8');
   statColumnLeft.addClass('grid--col-lg');
-//  statColumnRight.remove();
+  statColumnRight.remove();
   
   var kommentare 	= getElementByText(sections, 'h2', 'Kommentare');
 	var kommColumnLeft 		= kommentare.find('.grid--col-lg-8');
 	var kommColumnRight 	= kommentare.find('.grid--col-lg-4');
   kommColumnLeft.removeClass('grid--col-lg-8');
   kommColumnLeft.addClass('grid--col-lg');
-//  kommColumnRight.remove();
+  kommColumnRight.remove();
 }
 
 function removeElementByText(selection, descendantSelector, text) {
