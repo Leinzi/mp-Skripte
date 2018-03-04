@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name                MP-Series-Cleanup (jQuery)
 // @description	        Moviepilot-Serienseite bereinigen - Framework
+// @author							mitcharts, leinzi
 // @grant               none
 // @require							https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include	        		/^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
