@@ -50,16 +50,7 @@ $(document).ready(function(){
     kurzbeschreibung.removeClass('grid--col-md-7');
   	kurzbeschreibung.addClass('grid--col-md');
   }
-  // } else if (  ){
-  //   improveMainPage();
-  //   filterMainPage();
-  // } else if ( series_season_stream.test(window.location.href) ){
-  //   var kurzbeschreibung 	= $('div').find('.grid--col-lg-8');
-  // 	kurzbeschreibung.removeClass('grid--col-lg-8');
-  // 	kurzbeschreibung.addClass('grid--col-lg');
-  //   kurzbeschreibung.removeClass('grid--col-md-7');
-  // 	kurzbeschreibung.addClass('grid--col-md');
-  // }
+
 });
 
 // Videoplayer im Header entfernen
@@ -152,6 +143,7 @@ function improveStyle() {
 	$('.avatar--gradient').css({'background': 'none'});
 
 	$('._3gBYU').css({'filter': 'none', '-webkit-filter': 'none'});
+
 	$('._3WDUx').css({'background': 'none'});
 	$('.cLbdk').css({'font-size': '13px'});
 	$('.X76-l').css({'font-size': '13px', 'line-height': '1.4em'});
