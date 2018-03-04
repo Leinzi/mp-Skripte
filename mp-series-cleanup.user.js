@@ -2,7 +2,7 @@
 // @name                MP-Series-Cleanup (jQuery)
 // @description	        Moviepilot-Serienseite bereinigen - Framework
 // @grant               none
-// @require							https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js 
+// @require							https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include	        		/^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
 // @version							20180302
 // ==/UserScript==
@@ -21,47 +21,45 @@ $(document).ready(function(){
 
   // Variablendefinitionen
   // Hinweis: 'i' wird bewusst ausgelassen
-  
-  var werbung1 			= $(".grid--col-lg-4");
-  var werbung2 			= $(".advertisement--medium-rectangle");
+
+  var werbung 			= $(".advertisement--medium-rectangle");
   var adsOuter			= $("#ads-outer");
 
   // ----- Generelles - Anfang -----
   // Videoplayer im Header entfernen
   removeVideoplayer();
-  
+
   // H3-Header entfernen
   //removeH3Header();
-  
+
   // Werbe-DIVs entfernen
-  //werbung1[1].remove();
-  //werbung1[3].remove();
-  werbung2.remove();
+  werbung.remove();
   adsOuter.remove();
   // ----- Generelles - Ende -----
-  
+
   improveStyle();
 
   // Funktionen etc.
-  if ( series_main.test(window.location.href) ){
+  if ( series_main.test(window.location.href) || series_season.test(window.location.href)  ){
     improveMainPage();
     filterMainPage();
-  } else if ( series_stream.test(window.location.href) ){
+  } else if ( series_stream.test(window.location.href) || series_season.test(window.location.href)){
     var kurzbeschreibung 	= $('div').find('.grid--col-lg-8');
   	kurzbeschreibung.removeClass('grid--col-lg-8');
-  	kurzbeschreibung.addClass('grid--col-lg');  	
-    kurzbeschreibung.removeClass('grid--col-md-7');
-  	kurzbeschreibung.addClass('grid--col-md');
-  } else if ( series_season.test(window.location.href) ){
-    improveMainPage();
-    filterMainPage();
-  } else if ( series_season_stream.test(window.location.href) ){
-    var kurzbeschreibung 	= $('div').find('.grid--col-lg-8');
-  	kurzbeschreibung.removeClass('grid--col-lg-8');
-  	kurzbeschreibung.addClass('grid--col-lg');  	
+  	kurzbeschreibung.addClass('grid--col-lg');
     kurzbeschreibung.removeClass('grid--col-md-7');
   	kurzbeschreibung.addClass('grid--col-md');
   }
+  // } else if (  ){
+  //   improveMainPage();
+  //   filterMainPage();
+  // } else if ( series_season_stream.test(window.location.href) ){
+  //   var kurzbeschreibung 	= $('div').find('.grid--col-lg-8');
+  // 	kurzbeschreibung.removeClass('grid--col-lg-8');
+  // 	kurzbeschreibung.addClass('grid--col-lg');
+  //   kurzbeschreibung.removeClass('grid--col-md-7');
+  // 	kurzbeschreibung.addClass('grid--col-md');
+  // }
 });
 
 // Videoplayer im Header entfernen
@@ -77,10 +75,10 @@ function removeH3Header() {
 
 function filterMainPage() {
   var sections 		= $('section.has-vertical-spacing');
-  
+
   // "Statistik" entfernen
   removeElementByText(sections, 'h2', 'Statistiken');
-  // "Streaming" entfernen  
+  // "Streaming" entfernen
   removeElementByText(sections, 'h2', 'Schaue jetzt');
   // "Handlung" entfernen
   //removeElementByText(sections, 'h2', 'Handlung');
@@ -94,29 +92,29 @@ function filterMainPage() {
   // "News" entfernen
   removeElementByText(sections, 'h2', 'News');
   // "Freunde" entfernen
-  //removeElementByText(sections, 'h2', 'Deine Freunde'); 
+  //removeElementByText(sections, 'h2', 'Deine Freunde');
   // "Kommentare" entfernen
-  //removeElementByText(sections, 'h2', 'Kommentare'); 
+  //removeElementByText(sections, 'h2', 'Kommentare');
   // "Videos & Bilder" entfernen
-  removeElementByText(sections, 'h2', 'Videos & Bilder'); 
+  removeElementByText(sections, 'h2', 'Videos & Bilder');
   // "Serien wie ..." entfernen
   removeElementByText(sections, 'h2', 'Serien wie');
   // Listen etc. entfernen
-  removeElementByText(sections, 'a', 'Listen mit'); 
+  removeElementByText(sections, 'a', 'Listen mit');
   // "Interessen" entfernen
   removeElementByText(sections, 'h2', 'Das könnte dich auch interessieren');
 }
 
 function improveMainPage() {
   var sections		= $('section.has-vertical-spacing');
-  
+
   var statistik 				= getElementByText(sections, 'h2', 'Statistiken');
 	var statColumnLeft 		= statistik.find('.grid--col-lg-8');
 	var statColumnRight 	= statistik.find('.grid--col-lg-4');
   statColumnLeft.removeClass('grid--col-lg-8');
   statColumnLeft.addClass('grid--col-lg');
   statColumnRight.remove();
-  
+
   var kommentare 	= getElementByText(sections, 'h2', 'Kommentare');
 	var kommColumnLeft 		= kommentare.find('.grid--col-lg-8');
 	var kommColumnRight 	= kommentare.find('.grid--col-lg-4');
@@ -138,7 +136,7 @@ function getElementByText(selection, descendantSelector, text) {
 function improveStyle() {
   $('.layout--content-width').css({'max-width': '80%'});
   $('._3CAHP').css({'max-width': '80%'});
-  
+
 	$('.hero').css('height', '250px');
 	$('.has-vertical-spacing').css('padding', '25px 0');
 	$('.item-statistics').css('margin-top', '0');
