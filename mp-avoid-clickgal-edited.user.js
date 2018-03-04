@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name          mp-avoid-clickgal-edited
-// @author        leinzi
+// @author        mitcharts, leinzi
 // @description	  Bilderstrecken auf Moviepilot umgehen
 // @grant         none
 // @require				https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
