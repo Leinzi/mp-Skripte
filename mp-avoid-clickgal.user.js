@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name          mp-avoid-clickgal-edited
+// @name          mp-avoid-clickgal
 // @author        mitcharts, leinzi
 // @description	  Bilderstrecken auf Moviepilot umgehen
 // @grant         none
