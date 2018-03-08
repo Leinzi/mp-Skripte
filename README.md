@@ -33,3 +33,17 @@ Analog können auch die anderen Bereich angezeigt oder ausgeblendet werden.
 In der aktuellen Version werden auch kleine Änderungen am Stil vorgenommen. So wurde die Seitenbreite erhöht und auch der Kommentar- und Statistikbereich auf die volle Breite gestreckt. Es wurden ebenfalls die Graufilter der Avatare und Cast-/Crewmitglieder entfernt (funktioniert im Kommentarbereich leider nicht korrekt).
 
 Das Skript funktioniert nun auch für die Serien- und Staffelunterseiten.
+
+# Weitere Skripte
+
+## MoviePilot-Rating-Extension
+(Autor: kevgaar / rocketschlumpf)
+
+Ein Skript zur Darstellung von zusätzlichen Ratings (z.B. imdb oder RottenTomatoes).
+https://github.com/Leinzi/MoviePilot-Rating-Extension
+
+## MoviePilot-ReleaseDate-Extension
+(Autor: kevgaar / rocketschlumpf)
+
+Ein Skript zur Erweiterung des Kinostarts um einen "noch x Tage"-Zähler.
+https://github.com/Leinzi/MoviePilot-ReleaseDate-Extension
