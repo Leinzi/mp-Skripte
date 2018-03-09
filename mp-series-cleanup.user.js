@@ -1,45 +1,20 @@
-// ==MIT License==
-//
-// Copyright (c) 2017 mitcharts
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-// 
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-// 
-// ================
-
 // ==UserScript==
 // @name                MP-Series-Cleanup (jQuery)
-// @description         Moviepilot-Serienseite bereinigen - Framework
-// @author              mitcharts, leinzi
+// @description	        Moviepilot-Serienseite bereinigen - Framework
 // @grant               none
-// @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
-// @include             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
-// @version             20180302
+// @require							https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
+// @include	        		/^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)((\/[^\/]*)*)$/
+// @version							20180302
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
 this.$ = this.jQuery = jQuery.noConflict(true);
 
 //RegExps
-var series_main = /^(https:)\/\/(.+\.)?(moviepilot.de)\/serie\/((?!\/).)*$/;
-var series_stream = /^(https:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)\/(online-schauen)$/;
-var series_season = /^(https:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)\/(staffel)\/([1-9]?[0-9]+)$/
-var series_season_stream = /^(https:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)\/(staffel)\/([1-9]?[0-9]+)\/(online-schauen)$/
+var series_main = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)$/;
+var series_stream = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(online-schauen)$/;
+var series_season = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)$/
+var series_season_stream = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)\/(online-schauen)$/
 
 // Funktion, damit das Dokument erst fertig geladen wird
 $(document).ready(function(){
@@ -69,11 +44,11 @@ $(document).ready(function(){
     improveMainPage();
     filterMainPage();
   } else if ( series_stream.test(window.location.href) || series_season.test(window.location.href)){
-    var kurzbeschreibung = $('div').find('.grid--col-lg-8');
-	  kurzbeschreibung.removeClass('grid--col-lg-8');
-	  kurzbeschreibung.addClass('grid--col-lg');
-	  kurzbeschreibung.removeClass('grid--col-md-7');
-	  kurzbeschreibung.addClass('grid--col-md');
+    var kurzbeschreibung 	= $('div').find('.grid--col-lg-8');
+  	kurzbeschreibung.removeClass('grid--col-lg-8');
+  	kurzbeschreibung.addClass('grid--col-lg');
+    kurzbeschreibung.removeClass('grid--col-md-7');
+  	kurzbeschreibung.addClass('grid--col-md');
   }
 
 });
@@ -125,15 +100,15 @@ function improveMainPage() {
   var sections = $('section.has-vertical-spacing');
 
   var statistik = getElementByText(sections, 'h2', 'Statistiken');
-  var statColumnLeft = statistik.find('.grid--col-lg-8');
-  var statColumnRight = statistik.find('.grid--col-lg-4');
+	var statColumnLeft = statistik.find('.grid--col-lg-8');
+	var statColumnRight = statistik.find('.grid--col-lg-4');
   statColumnLeft.removeClass('grid--col-lg-8');
   statColumnLeft.addClass('grid--col-lg');
   statColumnRight.remove();
 
   var kommentare = getElementByText(sections, 'h2', 'Kommentare');
-  var kommColumnLeft = kommentare.find('.grid--col-lg-8');
-  var kommColumnRight = kommentare.find('.grid--col-lg-4');
+	var kommColumnLeft = kommentare.find('.grid--col-lg-8');
+	var kommColumnRight = kommentare.find('.grid--col-lg-4');
   kommColumnLeft.removeClass('grid--col-lg-8');
   kommColumnLeft.addClass('grid--col-lg');
   kommColumnRight.remove();
@@ -150,28 +125,28 @@ function getElementByText(selection, descendantSelector, text) {
 }
 
 function improveStyle() {
-  $('.layout--content-width').css({'max-width': '70%'});
+  $('.layout--content-width').css({'max-width': '75%'});
   $('._3CAHP').css({'max-width': '80%'});
 
-  $('.hero').css('height', '250px');
-  $('.has-vertical-spacing').css('padding', '25px 0');
-  $('.item-statistics').css('margin-top', '0');
-  $('.item-statistics--area').css('margin-top', '25px');
-  $('.item-statistics--subline.typo--teaser-body').css({'font-size': '14px', 'line-height': '24px'});
+	$('.hero').css('height', '250px');
+	$('.has-vertical-spacing').css('padding', '25px 0');
+	$('.item-statistics').css('margin-top', '0');
+	$('.item-statistics--area').css('margin-top', '25px');
+	$('.item-statistics--subline.typo--teaser-body').css({'font-size': '14px', 'line-height': '24px'});
 
-  $('.typo--long-body').css({'font-size': '15px', 'line-height': '24px'});
-  $('.meta-details--heading').css({'margin-top': '0', 'font-size': '14px', 'text-transform': 'none'});
-  $('.meta-details--content').css({'margin-bottom': '15px', 'font-size': '14px'});
-  $('.slider--avatars').css({'height': '250px'});
-  $('.slider--avatars--item').css({'flex-basis': '180px', 'margin-right': '20px'});
-  $('.avatar--image').css({'filter': 'none', '-webkit-filter': 'none'});
-  $('.avatar--gradient').css({'background': 'none'});
+	$('.typo--long-body').css({'font-size': '15px', 'line-height': '24px'});
+	$('.meta-details--heading').css({'margin-top': '0', 'font-size': '14px', 'text-transform': 'none'});
+	$('.meta-details--content').css({'margin-bottom': '15px', 'font-size': '14px'});
+	$('.slider--avatars').css({'height': '250px'});
+	$('.slider--avatars--item').css({'flex-basis': '180px', 'margin-right': '20px'});
+	$('.avatar--image').css({'filter': 'none', '-webkit-filter': 'none'});
+	$('.avatar--gradient').css({'background': 'none'});
 
-  $('._3gBYU').css({'filter': 'none', '-webkit-filter': 'none'});
+	$('._3gBYU').css({'filter': 'none', '-webkit-filter': 'none'});
 
-  $('._3WDUx').css({'background': 'none'});
-  $('.cLbdk').css({'font-size': '13px'});
-  $('.X76-l').css({'font-size': '13px', 'line-height': '1.4em'});
-  $('h2').css({'font-size': '26px', 'line-height': '29px', 'letter-spacing': '0.02em'});
-  $('.avatar--list-item--title-subline').css({'font-size': '15px'});
+	$('._3WDUx').css({'background': 'none'});
+	$('.cLbdk').css({'font-size': '13px'});
+	$('.X76-l').css({'font-size': '13px', 'line-height': '1.4em'});
+	$('h2').css({'font-size': '26px', 'line-height': '29px', 'letter-spacing': '0.02em'});
+	$('.avatar--list-item--title-subline').css({'font-size': '15px'});
 }
