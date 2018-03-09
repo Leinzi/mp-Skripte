@@ -28,7 +28,9 @@ $(document).ready(function(){
   // ----- Generelles - Anfang -----
   // Videoplayer im Header entfernen
   removeVideoplayer();
-
+  // Videoplayer im Footer entfernen
+  removeFooterVideoplayer()
+  
   // H3-Header entfernen
   //removeH3Header();
 
@@ -122,6 +124,12 @@ function removeElementByText(selection, descendantSelector, text) {
 function getElementByText(selection, descendantSelector, text) {
   var element = selection.filter(":has("+descendantSelector+":contains("+ text +"))");
   return element;
+}
+
+// Videoplayer im Header entfernen
+function removeFooterVideoplayer() {
+  var footervideo = $(".video--player--footer");
+  footervideo.remove();
 }
 
 function improveStyle() {
