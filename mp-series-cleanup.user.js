@@ -2,7 +2,7 @@
 // @name                MP-Series-Cleanup (jQuery)
 // @description         Moviepilot-Serienseite bereinigen - Framework
 // @grant               none
-// @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
+// #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)((\/[^\/]*)*)$/
 // @version             20180302
@@ -17,19 +17,15 @@ var series_stream = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/
 var series_season = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)$/;
 var series_season_stream = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)\/(online-schauen)$/;
 
-var checkboxDiv = null;
 var checkboxes = [];
 
 // Funktion, damit das Dokument erst fertig geladen wird
 $(document).ready(function(){
-  load();
-  // Variablendefinitionen
-  // Hinweis: 'i' wird bewusst ausgelassen
 
+  // ----- Generelles - Anfang -----
   var werbung = $(".advertisement--medium-rectangle");
   var adsOuter = $("#ads-outer");
 
-  // ----- Generelles - Anfang -----
   // Videoplayer im Header entfernen
   removeVideoplayer();
   // Videoplayer im Footer entfernen
@@ -43,12 +39,12 @@ $(document).ready(function(){
   adsOuter.remove();
   // ----- Generelles - Ende -----
 
-  // improveStyle();
+  //improveStyle();
     
-
-  // Funktionen etc.
   if ( series_main.test(window.location.href) || series_season.test(window.location.href)  ){
-    buildCheckboxes();
+    buildAndPlaceCategorySection();
+    loadCheckboxValues();
+    
     improveMainPage();
     filterMainPage();
   } else if ( series_stream.test(window.location.href) || series_season.test(window.location.href)){
@@ -62,7 +58,6 @@ $(document).ready(function(){
 });
 
 
-
 // Videoplayer im Header entfernen
 function removeVideoplayer() {
   var headervideo = $(".hero--play");
@@ -73,6 +68,14 @@ function removeH3Header() {
   var h3header = $(".h3-headline--wrapper");
   h3header.remove();
 }
+
+// Videoplayer im Header entfernen
+function removeFooterVideoplayer() {
+  var footervideo = $(".video--player--footer");
+  footervideo.remove();
+}
+
+// ----- Filter - Anfang -----
 
 function filterMainPage() {
   var sections = $('section.has-vertical-spacing');
@@ -86,6 +89,25 @@ function filterMainPage() {
     }
    }
 }
+
+function hideElementByText(selection, descendantSelector, text) {
+  var element = getElementByText(selection, descendantSelector, text);
+  element.hide();
+}
+
+function showElementByText(selection, descendantSelector, text) {
+  var element = getElementByText(selection, descendantSelector, text);
+  element.show();
+}
+
+function getElementByText(selection, descendantSelector, text) {
+  var element = selection.filter(":has("+descendantSelector+":contains("+ text +"))");
+  return element;
+}
+
+// ----- Filter - Ende -----
+
+// ----- Improvements - Anfang -----
 
 function improveMainPage() {
   var sections = $('section.has-vertical-spacing');
@@ -105,289 +127,6 @@ function improveMainPage() {
   kommColumnRight.remove();
 }
 
-function hideElementByText(selection, descendantSelector, text) {
-  var element = getElementByText(selection, descendantSelector, text);
-  element.hide();
-}
-
-function showElementByText(selection, descendantSelector, text) {
-  var element = getElementByText(selection, descendantSelector, text);
-  element.show();
-}
-
-function getElementByText(selection, descendantSelector, text) {
-  var element = selection.filter(":has("+descendantSelector+":contains("+ text +"))");
-  return element;
-}
-
-// Videoplayer im Header entfernen
-function removeFooterVideoplayer() {
-  var footervideo = $(".video--player--footer");
-  footervideo.remove();
-}
-
-function buildCheckboxes() {
-
-  var container = $('.hot-now').closest('section');
-  
-  checkboxDiv = document.createElement('div');
-  checkboxDiv.id = 'rmvDiv';
-  $(checkboxDiv).addClass('grid--row');
-  
-  var rubrikDiv = document.createElement('div');
-  var checkbox = document.createElement('input');
-  checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', 'rmvStatistik');
-  $(checkbox).attr("data-headline", "Statistiken");
-  $(checkbox).attr("data-child", "h2");
-  checkboxes.push(checkbox);
-  
-  var label = document.createElement('label')
-  label.htmlFor = checkbox.id;
-  label.appendChild(document.createTextNode(checkbox.dataset.headline));
-
-  rubrikDiv.append(checkbox);
-  rubrikDiv.append(label);
-  checkboxDiv.append(rubrikDiv);
-  
-  rubrikDiv = document.createElement('div');
-  checkbox = document.createElement('input');
-  checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', 'rmvStreaming');
-  $(checkbox).attr("data-headline", "Schaue jetzt");
-  $(checkbox).attr("data-child", "h2");
-  checkboxes.push(checkbox);
-
-  label = document.createElement('label');
-  label.htmlFor = checkbox.id;
-  label.appendChild(document.createTextNode(checkbox.dataset.headline));
-
-  rubrikDiv.append(checkbox);
-  rubrikDiv.append(label);
-  checkboxDiv.append(rubrikDiv);
-  
-  rubrikDiv = document.createElement('div');
-  checkbox = document.createElement('input');
-  checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', 'rmvHandlung');
-  $(checkbox).attr("data-headline", "Handlung");
-  $(checkbox).attr("data-child", "h2");
-  checkboxes.push(checkbox);
-
-  label = document.createElement('label');
-  label.htmlFor = checkbox.id;
-  label.appendChild(document.createTextNode(checkbox.dataset.headline));
-
-  rubrikDiv.append(checkbox);
-  rubrikDiv.append(label);
-  checkboxDiv.append(rubrikDiv);
-  
-  rubrikDiv = document.createElement('div');
-  checkbox = document.createElement('input');
-  checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', 'rmvCast');
-  $(checkbox).attr("data-headline", "Cast & Crew");
-  $(checkbox).attr("data-child", "h2");
-  checkboxes.push(checkbox);
-
-  label = document.createElement('label')
-  label.htmlFor = checkbox.id;
-  label.appendChild(document.createTextNode(checkbox.dataset.headline));
-
-  rubrikDiv.append(checkbox);
-  rubrikDiv.append(label);
-  checkboxDiv.append(rubrikDiv);
-  
-  rubrikDiv = document.createElement('div');
-  checkbox = document.createElement('input');
-  checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', 'rmvStaffel');
-  $(checkbox).attr("data-headline", "Staffel");
-  $(checkbox).attr("data-child", "h2");
-  checkboxes.push(checkbox);
-
-  label = document.createElement('label')
-  label.htmlFor = checkbox.id;
-  label.appendChild(document.createTextNode(checkbox.dataset.headline));
-
-  rubrikDiv.append(checkbox);
-  rubrikDiv.append(label);
-  checkboxDiv.append(rubrikDiv);
-  
-  rubrikDiv = document.createElement('div');
-  checkbox = document.createElement('input');
-  checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', 'rmvRecap');
-  $(checkbox).attr("data-headline", "Recap");
-  $(checkbox).attr("data-child", "h2");
-  checkboxes.push(checkbox);
-
-  label = document.createElement('label')
-  label.htmlFor = checkbox.id;
-  label.appendChild(document.createTextNode(checkbox.dataset.headline));
-
-  rubrikDiv.append(checkbox);
-  rubrikDiv.append(label);
-  checkboxDiv.append(rubrikDiv);
-  
-  rubrikDiv = document.createElement('div');
-  checkbox = document.createElement('input');
-  checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', 'rmvNews');
-  $(checkbox).attr("data-headline", "News");
-  $(checkbox).attr("data-child", "h2");
-  checkboxes.push(checkbox);
-
-  label = document.createElement('label')
-  label.htmlFor = checkbox.id;
-  label.appendChild(document.createTextNode(checkbox.dataset.headline));
-
-  rubrikDiv.append(checkbox);
-  rubrikDiv.append(label);
-  checkboxDiv.append(rubrikDiv);
-  
-  rubrikDiv = document.createElement('div');
-  checkbox = document.createElement('input');
-  checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', 'rmvFreunde');
-  $(checkbox).attr("data-headline", "Deine Freunde");
-  $(checkbox).attr("data-child", "h2");
-  checkboxes.push(checkbox);
-
-  label = document.createElement('label')
-  label.htmlFor = checkbox.id;
-  label.appendChild(document.createTextNode(checkbox.dataset.headline));
-
-  rubrikDiv.append(checkbox);
-  rubrikDiv.append(label);
-  checkboxDiv.append(rubrikDiv);
-  
-  rubrikDiv = document.createElement('div');
-  checkbox = document.createElement('input');
-  checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', 'rmvComments');
-  $(checkbox).attr("data-headline", "Kommentare");
-  $(checkbox).attr("data-child", "h2");
-  checkboxes.push(checkbox);
-
-  label = document.createElement('label')
-  label.htmlFor = checkbox.id;
-  label.appendChild(document.createTextNode(checkbox.dataset.headline));
-
-  rubrikDiv.append(checkbox);
-  rubrikDiv.append(label);
-  checkboxDiv.append(rubrikDiv);
-  
-  rubrikDiv = document.createElement('div'); 
-  checkbox = document.createElement('input');
-  checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', 'rmvVideos');
-  $(checkbox).attr("data-headline", "Videos & Bilder");
-  $(checkbox).attr("data-child", "h2");
-  checkboxes.push(checkbox);
-
-  label = document.createElement('label')
-  label.htmlFor = checkbox.id;
-  label.appendChild(document.createTextNode(checkbox.dataset.headline));
-
-  rubrikDiv.append(checkbox);
-  rubrikDiv.append(label);
-  checkboxDiv.append(rubrikDiv);
-  
-  rubrikDiv = document.createElement('div'); 
-  checkbox = document.createElement('input');
-  checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', 'rmvLike');
-  $(checkbox).attr("data-headline", "Serien wie");
-  $(checkbox).attr("data-child", "h2");
-  checkboxes.push(checkbox);
-
-  label = document.createElement('label')
-  label.htmlFor = checkbox.id;
-  label.appendChild(document.createTextNode(checkbox.dataset.headline));
-
-  rubrikDiv.append(checkbox);
-  rubrikDiv.append(label);
-  checkboxDiv.append(rubrikDiv);
-  
-  rubrikDiv = document.createElement('div');
-  checkbox = document.createElement('input');
-  checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', 'rmvListen');
-  $(checkbox).attr("data-headline", "Listen mit");
-  $(checkbox).attr("data-child", "a");
-  checkboxes.push(checkbox);
-
-  label = document.createElement('label')
-  label.htmlFor = checkbox.id;
-  label.appendChild(document.createTextNode(checkbox.dataset.headline));
-
-  rubrikDiv.append(checkbox);
-  rubrikDiv.append(label);
-  checkboxDiv.append(rubrikDiv);
-  
-  rubrikDiv = document.createElement('div');
-  checkbox = document.createElement('input');
-  checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', 'rmvInteresse');
-  $(checkbox).attr("data-headline", "Das könnte dich auch interessieren");
-  $(checkbox).attr("data-child", "h2");
-  checkboxes.push(checkbox);
-
-  label = document.createElement('label')
-  label.htmlFor = checkbox.id;
-  label.appendChild(document.createTextNode(checkbox.dataset.headline));
-
-  rubrikDiv.append(checkbox);
-  rubrikDiv.append(label);
-  checkboxDiv.append(rubrikDiv);
-  
-  rubrikDiv = document.createElement('div');
-  var button = document.createElement('input');
-  button.type = "button";
-  button.value = "save";
-  button.id = "rmvSave";
-
-  rubrikDiv.append(button);
-  checkboxDiv.append(rubrikDiv);
-  $(button).click(save);
-  
-  load();
-  var section = document.createElement('section');
-  section.setAttribute('class', 'has-vertical-spacing');
-  var headlineWrapper = document.createElement('div');
-  headlineWrapper.setAttribute('class', 'h2-headline--wrapper');
-  var header = document.createElement("h2");
-  header.setAttribute('class', 'h2-headline');
-  $(header).text("Rubrikenauswahl");
-  headlineWrapper.append(header);
-  var header2 = document.createElement("h3");
-  header2.setAttribute('class', 'h3-headline');
-  $(header2).text("Ausgewählte Rubriken werden ausgeblendet.");
-  headlineWrapper.append(header2);
-  section.append(headlineWrapper);
-  section.append(checkboxDiv);
-  container.after(section);
-  
- $('#rmvDiv > div').css({'display': 'inline-block', 'width': '25%'});
- $('#rmvDiv > div:nth-last-child(2)').css({'width': '50%'}); 
- 
-}
-
-function save(){
-  for(var i = 0; i < checkboxes.length; i++) {
-    var checkbox = checkboxes[i];
-    localStorage.setItem(checkbox.id, checkbox.checked);
-  }
-  filterMainPage();
-}
-
-function load(){    
-  for(var i = 0; i < checkboxes.length; i++) {
-    var checkbox = checkboxes[i];
-    checkbox.checked = JSON.parse(localStorage.getItem(checkbox.id));      
-  }
-}
 
 function improveStyle() {
   //$('.layout--content-width').css({'max-width': '75%'});
@@ -415,3 +154,155 @@ function improveStyle() {
   $('h2').css({'font-size': '26px', 'line-height': '29px', 'letter-spacing': '0.02em'});
   $('.avatar--list-item--title-subline').css({'font-size': '15px'});
 }
+
+// ----- Improvements - Ende -----
+
+// ----- Rubrikauswahl - Anfang -----
+
+function buildAndPlaceCategorySection() {
+  var categorySection = buildNewSection();
+
+  var headlineWrapper = buildWrapperForHeadlines("Rubrikenauswahl", "Ausgewählte Rubriken werden ausgeblendet.");
+  categorySection.append(headlineWrapper);
+  
+  var checkboxDiv = buildCheckboxDiv();
+  categorySection.append(checkboxDiv);
+  
+  var prevSection = $('.hot-now').closest('section');
+  prevSection.after(categorySection);
+  
+  $('#rmvDiv > div').css({'display': 'inline-block', 'width': '25%'});
+  $('#rmvDiv > div:nth-last-child(2)').css({'width': '50%'});
+}
+
+function buildNewSection() {
+  var section = document.createElement('section');
+  section.setAttribute('class', 'has-vertical-spacing');
+  return section;
+}
+
+function buildWrapperForHeadlines(headline, subline) {
+  var headlineWrapper = document.createElement('div');
+  headlineWrapper.setAttribute('class', 'h2-headline--wrapper');
+  
+  var mainHeader = document.createElement("h2");
+  mainHeader.setAttribute('class', 'h2-headline');
+  $(mainHeader).text(headline);
+  headlineWrapper.append(mainHeader);
+  
+  var subHeader = document.createElement("h3");
+  subHeader.setAttribute('class', 'h3-headline');
+  $(subHeader).text(subline);
+  headlineWrapper.append(subHeader);
+  
+  return headlineWrapper;
+}
+
+function buildCheckboxDiv() {
+  var checkboxDiv = document.createElement('div');
+  checkboxDiv.id = 'rmvDiv';
+  $(checkboxDiv).addClass('grid--row');
+  
+  var categoryDiv = buildDivForCategory('rmvStatistik', 'Statistiken', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('rmvStreaming', 'Schaue jetzt', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('rmvHandlung', 'Handlung', 'h2');
+  checkboxDiv.append(categoryDiv);
+
+  categoryDiv = buildDivForCategory('rmvCast', 'Cast & Crew', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('rmvStaffel', 'Staffel', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('rmvRecap', 'Recap', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('rmvNews', 'News', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('rmvFreunde', 'Deine Freunde', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('rmvComments', 'Kommentare', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('rmvVideos', 'Videos & Bilder', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('rmvLike', 'Serien wie', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('rmvListen', 'Listen mit', 'a');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('rmvInteresse', 'Das könnte dich auch interessieren', 'h2');
+  checkboxDiv.append(categoryDiv);
+ 
+  var buttonDiv = buildDivWithSaveButton();
+  checkboxDiv.append(buttonDiv);
+
+  return checkboxDiv;
+}
+
+function buildDivForCategory(id, headline, childElem) {
+  var categoryDiv = document.createElement('div');
+  var checkbox = buildCheckboxForCategory(id, headline, childElem);
+  var label = buildLabelForCheckbox(checkbox);
+  categoryDiv.append(checkbox);
+  categoryDiv.append(label);
+  return categoryDiv;
+}
+
+function buildCheckboxForCategory(id, headline, childElem) {
+  var checkbox = document.createElement('input');
+  checkbox.setAttribute('type', 'checkbox');
+  checkbox.setAttribute('id', id);
+  $(checkbox).attr("data-headline", headline);
+  $(checkbox).attr("data-child", childElem);
+  checkboxes.push(checkbox);
+  return checkbox;
+}
+
+function buildLabelForCheckbox(checkbox) {
+  var label = document.createElement('label')
+  label.htmlFor = checkbox.id;
+  label.appendChild(document.createTextNode(checkbox.dataset.headline));
+  return label;
+}
+
+function buildDivWithSaveButton() {
+  var buttonDiv = document.createElement('div');
+  var button = buildButtonWithCallback('rmvSave', 'Speichern', saveCheckboxValues);
+  buttonDiv.append(button);
+  return buttonDiv;
+}
+
+function buildButtonWithCallback(id, label, callback) {
+  var button = document.createElement('input');
+  button.type = "button";
+  button.value = label;
+  button.id = id;
+  $(button).click(callback);
+  return button;
+}
+
+function saveCheckboxValues(){
+  for(var i = 0; i < checkboxes.length; i++) {
+    var checkbox = checkboxes[i];
+    localStorage.setItem(checkbox.id, checkbox.checked);
+  }
+  filterMainPage();
+}
+
+function loadCheckboxValues(){    
+  for(var i = 0; i < checkboxes.length; i++) {
+    var checkbox = checkboxes[i];
+    checkbox.checked = JSON.parse(localStorage.getItem(checkbox.id));      
+  }
+}
+
+// ----- Rubrikauswahl - Ende -----
