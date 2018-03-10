@@ -5,7 +5,7 @@
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             3.1.1
+// @version             3.1.2
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -221,7 +221,7 @@ function buildCheckboxDivForSeriesMain() {
   categoryDiv = buildDivForCategory('seriesCast', 'Cast & Crew', 'h2');
   checkboxDiv.append(categoryDiv);
   
-  categoryDiv = buildDivForCategory('seriesStaffel', 'Staffel', 'h2');
+  categoryDiv = buildDivForCategory('seriesStaffel', 'Staffel', '._21ykL');
   checkboxDiv.append(categoryDiv);
   
   categoryDiv = buildDivForCategory('seriesRecap', 'Recap', 'h2');
@@ -254,48 +254,39 @@ function buildCheckboxDivForSeriesMain() {
   return checkboxDiv;
 }
 
-function buildCheckboxDivForSeriesMain() {
+function buildCheckboxDivForSeasonMain() {
   var checkboxDiv = document.createElement('div');
   checkboxDiv.id = 'rmvDiv';
   $(checkboxDiv).addClass('grid--row');
   
-  var categoryDiv = buildDivForCategory('rmvStatistik', 'Statistiken', 'h2');
+  var categoryDiv = buildDivForCategory('seasonEpisodes', 'Episodenguide', 'h2');
   checkboxDiv.append(categoryDiv);
   
-  categoryDiv = buildDivForCategory('rmvStreaming', 'Schaue jetzt', 'h2');
+  categoryDiv = buildDivForCategory('seasonStreaming', 'Schaue jetzt', 'h2');
   checkboxDiv.append(categoryDiv);
   
-  categoryDiv = buildDivForCategory('rmvHandlung', 'Handlung', 'h2');
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory('rmvCast', 'Cast & Crew', 'h2');
+  categoryDiv = buildDivForCategory('seasonHandlung', 'Handlung', 'h2');
   checkboxDiv.append(categoryDiv);
   
-  categoryDiv = buildDivForCategory('rmvStaffel', 'Staffel', 'h2');
+  categoryDiv = buildDivForCategory('seasonStaffel', 'Staffel', '._21ykL');
   checkboxDiv.append(categoryDiv);
   
-  categoryDiv = buildDivForCategory('rmvRecap', 'Recap', 'h2');
+  categoryDiv = buildDivForCategory('seasonRecap', 'Recap', 'h2');
   checkboxDiv.append(categoryDiv);
   
-  categoryDiv = buildDivForCategory('rmvNews', 'News', 'h2');
+  categoryDiv = buildDivForCategory('seasonNews', 'News', 'h2');
   checkboxDiv.append(categoryDiv);
   
-  categoryDiv = buildDivForCategory('rmvFreunde', 'Deine Freunde', 'h2');
+  categoryDiv = buildDivForCategory('seasonFreunde', 'Deine Freunde', 'h2');
   checkboxDiv.append(categoryDiv);
   
-  categoryDiv = buildDivForCategory('rmvComments', 'Kommentare', 'h2');
+  categoryDiv = buildDivForCategory('seasonComments', 'Kommentare', 'h2');
   checkboxDiv.append(categoryDiv);
   
-  categoryDiv = buildDivForCategory('rmvVideos', 'Videos & Bilder', 'h2');
+  categoryDiv = buildDivForCategory('seasonVideos', 'Videos & Bilder', 'h2');
   checkboxDiv.append(categoryDiv);
   
-  categoryDiv = buildDivForCategory('rmvLike', 'Serien wie', 'h2');
-  checkboxDiv.append(categoryDiv);
-  
-  categoryDiv = buildDivForCategory('rmvListen', 'Listen mit', 'a');
-  checkboxDiv.append(categoryDiv);
-  
-  categoryDiv = buildDivForCategory('rmvInteresse', 'Das könnte dich auch interessieren', 'h2');
+  categoryDiv = buildDivForCategory('seasonInteresse', 'Das könnte dich auch interessieren', 'h2');
   checkboxDiv.append(categoryDiv);
  
   var buttonDiv = buildDivWithSaveButton();
