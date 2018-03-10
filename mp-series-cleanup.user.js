@@ -5,7 +5,7 @@
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             3.1
+// @version             3.1.1
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -17,6 +17,7 @@ var series_stream = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/
 var series_season = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)$/;
 var series_season_stream = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)\/(online-schauen)$/;
 
+var seriesMainPage = true;
 var checkboxes = [];
 
 // Funktion, damit das Dokument erst fertig geladen wird
@@ -27,7 +28,7 @@ $(document).ready(function(){
   // Videoplayer im Header entfernen
   removeVideoplayer();
   // Videoplayer im Footer entfernen
-  removeFooterVideoplayer()
+  removeFooterVideoplayer();
   
   // H3-Header entfernen
   //removeH3Header();
@@ -39,12 +40,12 @@ $(document).ready(function(){
 
   //improveStyle();
     
-  if ( series_main.test(window.location.href) || series_season.test(window.location.href)  ){
-    buildAndPlaceCategorySection();
-    loadCheckboxValues();
-    
-    improveMainPage();
-    filterMainPage();
+  if ( series_main.test(window.location.href) ){
+    seriesMainPage = true;
+    cleanUpMainPage();
+  } else if ( series_season.test(window.location.href) ){
+    seriesMainPage = false;
+    cleanUpMainPage();
   } else if ( series_stream.test(window.location.href) || series_season.test(window.location.href)){
     var kurzbeschreibung   = $('div').find('.grid--col-lg-8');
     kurzbeschreibung.removeClass('grid--col-lg-8');
@@ -55,6 +56,13 @@ $(document).ready(function(){
 
 });
 
+function cleanUpMainPage(){
+  buildAndPlaceCategorySection();
+  loadCheckboxValues();
+    
+  improveMainPage();
+  filterMainPage();
+}
 
 // Videoplayer im Header entfernen
 function removeVideoplayer() {
@@ -163,7 +171,7 @@ function buildAndPlaceCategorySection() {
   var headlineWrapper = buildWrapperForHeadlines("Rubrikenauswahl", "Nicht ausgewählte Rubriken werden ausgeblendet.");
   categorySection.append(headlineWrapper);
   
-  var checkboxDiv = buildCheckboxDiv();
+  var checkboxDiv = seriesMainPage ? buildCheckboxDivForSeriesMain(); : buildCheckboxDivForSeasonMain();
   categorySection.append(checkboxDiv);
   
   var prevSection = $('.hot-now').closest('section');
@@ -196,7 +204,57 @@ function buildWrapperForHeadlines(headline, subline) {
   return headlineWrapper;
 }
 
-function buildCheckboxDiv() {
+function buildCheckboxDivForSeriesMain() {
+  var checkboxDiv = document.createElement('div');
+  checkboxDiv.id = 'rmvDiv';
+  $(checkboxDiv).addClass('grid--row');
+  
+  var categoryDiv = buildDivForCategory('seriesStatistik', 'Statistiken', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('seriesStreaming', 'Schaue jetzt', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('seriesHandlung', 'Handlung', 'h2');
+  checkboxDiv.append(categoryDiv);
+
+  categoryDiv = buildDivForCategory('seriesCast', 'Cast & Crew', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('seriesStaffel', 'Staffel', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('seriesRecap', 'Recap', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('seriesNews', 'News', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('seriesFreunde', 'Deine Freunde', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('seriesComments', 'Kommentare', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('seriesVideos', 'Videos & Bilder', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('seriesLike', 'Serien wie', 'h2');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('seriesListen', 'Listen mit', 'a');
+  checkboxDiv.append(categoryDiv);
+  
+  categoryDiv = buildDivForCategory('seriesInteresse', 'Das könnte dich auch interessieren', 'h2');
+  checkboxDiv.append(categoryDiv);
+ 
+  var buttonDiv = buildDivWithSaveButton();
+  checkboxDiv.append(buttonDiv);
+
+  return checkboxDiv;
+}
+
+function buildCheckboxDivForSeriesMain() {
   var checkboxDiv = document.createElement('div');
   checkboxDiv.id = 'rmvDiv';
   $(checkboxDiv).addClass('grid--row');
@@ -267,7 +325,7 @@ function buildCheckboxForCategory(id, headline, childElem) {
 }
 
 function buildLabelForCheckbox(checkbox) {
-  var label = document.createElement('label')
+  var label = document.createElement('label');
   label.htmlFor = checkbox.id;
   label.appendChild(document.createTextNode(checkbox.dataset.headline));
   return label;
