@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name                MP-Cleanup (jQuery)
-// @description	        Moviepilot generell bereinigen
+// @description         Moviepilot generell bereinigen
 // @grant               none
-// @require							https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js 
-// @include	        		/^(https?:)\/\/(.+\.)?(moviepilot.de)\/(.*)$/
-// @exclude							/^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
+// @downloadURL         https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/Mp-Cleanup.user.js
+// @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js 
+// @include             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/(.*)$/
+// @exclude             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -39,7 +40,7 @@ var vorschlaege = $("#home_personal_recommendations");
 var werbungsidebar = $(".advertisement--medium-rectangle");
 var video = $(".showheroes--sidebar");
   
-var adsOuter			= $("#ads-outer");
+var adsOuter      = $("#ads-outer");
 console.log(adsOuter);
 adsOuter.remove();
 

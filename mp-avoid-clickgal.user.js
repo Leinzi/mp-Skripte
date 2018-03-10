@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name          mp-avoid-clickgal
 // @author        mitcharts, leinzi
-// @description	  Bilderstrecken auf Moviepilot umgehen
+// @description   Bilderstrecken auf Moviepilot umgehen
 // @grant         none
-// @require				https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
+// @downloadURL   https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/mp-avoid-clickgal.user.js
+// @require       https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include       /^(https?:\/\/www\.moviepilot.de\/news\/)(.*?)$/
 // @version       1.07.1
 // ==/UserScript==

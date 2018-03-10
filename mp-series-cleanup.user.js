@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name                MP-Series-Cleanup (jQuery)
-// @description	        Moviepilot-Serienseite bereinigen - Framework
+// @description         Moviepilot-Serienseite bereinigen - Framework
 // @grant               none
-// @require							https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
-// @include	        		/^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)((\/[^\/]*)*)$/
-// @version							20180302
+// @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
+// @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
+// @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)((\/[^\/]*)*)$/
+// @version             20180302
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -51,11 +52,11 @@ $(document).ready(function(){
     improveMainPage();
     filterMainPage();
   } else if ( series_stream.test(window.location.href) || series_season.test(window.location.href)){
-    var kurzbeschreibung 	= $('div').find('.grid--col-lg-8');
-  	kurzbeschreibung.removeClass('grid--col-lg-8');
-  	kurzbeschreibung.addClass('grid--col-lg');
+    var kurzbeschreibung   = $('div').find('.grid--col-lg-8');
+    kurzbeschreibung.removeClass('grid--col-lg-8');
+    kurzbeschreibung.addClass('grid--col-lg');
     kurzbeschreibung.removeClass('grid--col-md-7');
-  	kurzbeschreibung.addClass('grid--col-md');
+    kurzbeschreibung.addClass('grid--col-md');
   }
 
 });
@@ -76,8 +77,6 @@ function removeH3Header() {
 function filterMainPage() {
   var sections = $('section.has-vertical-spacing');
 
-  // "Statistik" entfernen
-  
   for(var i = 0; i < checkboxes.length; i++) {
     var checkbox = checkboxes[i];
     if(checkbox.checked){
@@ -86,51 +85,21 @@ function filterMainPage() {
       showElementByText(sections, checkbox.dataset.child, checkbox.dataset.headline);
     }
    }
-/*  
-  var checked = JSON.parse(localStorage.getItem('rmvStatistik'));
-  if (checked) {
- 	 removeElementByText(sections, 'h2', 'Statistiken');
-	}
-  // "Streaming" entfernen
-  removeElementByText(sections, 'h2', 'Schaue jetzt');
-  // "Handlung" entfernen
-  removeElementByText(sections, 'h2', 'Handlung');
-  // "Cast & Crew" entfernen
-  removeElementByText(sections, 'h2', 'Cast');
-  // "Alle Staffeln ..." entfernen
-  //removeElementByText(sections, 'h2', '1 Staffel von');
-  //removeElementByText(sections, 'h2', ' Staffeln von');
-  // "Recaps" entfernen
-  removeElementByText(sections, 'h2', 'Recaps');
-  // "News" entfernen
-  removeElementByText(sections, 'h2', 'News');
-  // "Freunde" entfernen
-  //removeElementByText(sections, 'h2', 'Deine Freunde');
-  // "Kommentare" entfernen
-  //removeElementByText(sections, 'h2', 'Kommentare');
-  // "Videos & Bilder" entfernen
-  removeElementByText(sections, 'h2', 'Videos & Bilder');
-  // "Serien wie ..." entfernen
-  removeElementByText(sections, 'h2', 'Serien wie');
-  // Listen etc. entfernen
-  removeElementByText(sections, 'a', 'Listen mit');
-  // "Interessen" entfernen
-  removeElementByText(sections, 'h2', 'Das könnte dich auch interessieren');*/
 }
 
 function improveMainPage() {
   var sections = $('section.has-vertical-spacing');
 
   var statistik = getElementByText(sections, 'h2', 'Statistiken');
-	var statColumnLeft = statistik.find('.grid--col-lg-8');
-	var statColumnRight = statistik.find('.grid--col-lg-4');
+  var statColumnLeft = statistik.find('.grid--col-lg-8');
+  var statColumnRight = statistik.find('.grid--col-lg-4');
   statColumnLeft.removeClass('grid--col-lg-8');
   statColumnLeft.addClass('grid--col-lg');
   statColumnRight.remove();
 
   var kommentare = getElementByText(sections, 'h2', 'Kommentare');
-	var kommColumnLeft = kommentare.find('.grid--col-lg-8');
-	var kommColumnRight = kommentare.find('.grid--col-lg-4');
+  var kommColumnLeft = kommentare.find('.grid--col-lg-8');
+  var kommColumnRight = kommentare.find('.grid--col-lg-4');
   kommColumnLeft.removeClass('grid--col-lg-8');
   kommColumnLeft.addClass('grid--col-lg');
   kommColumnRight.remove();
@@ -167,11 +136,11 @@ function buildCheckboxes() {
   
   var rubrikDiv = document.createElement('div');
   var checkbox = document.createElement('input');
-	checkbox.setAttribute('type', 'checkbox');
+  checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', 'rmvStatistik');
   $(checkbox).attr("data-headline", "Statistiken");
   $(checkbox).attr("data-child", "h2");
-	checkboxes.push(checkbox);
+  checkboxes.push(checkbox);
   
   var label = document.createElement('label')
   label.htmlFor = checkbox.id;
@@ -183,11 +152,11 @@ function buildCheckboxes() {
   
   rubrikDiv = document.createElement('div');
   checkbox = document.createElement('input');
-	checkbox.setAttribute('type', 'checkbox');
+  checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', 'rmvStreaming');
   $(checkbox).attr("data-headline", "Schaue jetzt");
   $(checkbox).attr("data-child", "h2");
-	checkboxes.push(checkbox);
+  checkboxes.push(checkbox);
 
   label = document.createElement('label');
   label.htmlFor = checkbox.id;
@@ -199,11 +168,11 @@ function buildCheckboxes() {
   
   rubrikDiv = document.createElement('div');
   checkbox = document.createElement('input');
-	checkbox.setAttribute('type', 'checkbox');
+  checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', 'rmvHandlung');
   $(checkbox).attr("data-headline", "Handlung");
   $(checkbox).attr("data-child", "h2");
-	checkboxes.push(checkbox);
+  checkboxes.push(checkbox);
 
   label = document.createElement('label');
   label.htmlFor = checkbox.id;
@@ -215,11 +184,11 @@ function buildCheckboxes() {
   
   rubrikDiv = document.createElement('div');
   checkbox = document.createElement('input');
-	checkbox.setAttribute('type', 'checkbox');
+  checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', 'rmvCast');
   $(checkbox).attr("data-headline", "Cast & Crew");
   $(checkbox).attr("data-child", "h2");
-	checkboxes.push(checkbox);
+  checkboxes.push(checkbox);
 
   label = document.createElement('label')
   label.htmlFor = checkbox.id;
@@ -231,11 +200,11 @@ function buildCheckboxes() {
   
   rubrikDiv = document.createElement('div');
   checkbox = document.createElement('input');
-	checkbox.setAttribute('type', 'checkbox');
+  checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', 'rmvStaffel');
   $(checkbox).attr("data-headline", "Staffel");
   $(checkbox).attr("data-child", "h2");
-	checkboxes.push(checkbox);
+  checkboxes.push(checkbox);
 
   label = document.createElement('label')
   label.htmlFor = checkbox.id;
@@ -247,11 +216,11 @@ function buildCheckboxes() {
   
   rubrikDiv = document.createElement('div');
   checkbox = document.createElement('input');
-	checkbox.setAttribute('type', 'checkbox');
+  checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', 'rmvRecap');
   $(checkbox).attr("data-headline", "Recap");
   $(checkbox).attr("data-child", "h2");
-	checkboxes.push(checkbox);
+  checkboxes.push(checkbox);
 
   label = document.createElement('label')
   label.htmlFor = checkbox.id;
@@ -263,11 +232,11 @@ function buildCheckboxes() {
   
   rubrikDiv = document.createElement('div');
   checkbox = document.createElement('input');
-	checkbox.setAttribute('type', 'checkbox');
+  checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', 'rmvNews');
   $(checkbox).attr("data-headline", "News");
   $(checkbox).attr("data-child", "h2");
-	checkboxes.push(checkbox);
+  checkboxes.push(checkbox);
 
   label = document.createElement('label')
   label.htmlFor = checkbox.id;
@@ -279,11 +248,11 @@ function buildCheckboxes() {
   
   rubrikDiv = document.createElement('div');
   checkbox = document.createElement('input');
-	checkbox.setAttribute('type', 'checkbox');
+  checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', 'rmvFreunde');
   $(checkbox).attr("data-headline", "Deine Freunde");
   $(checkbox).attr("data-child", "h2");
-	checkboxes.push(checkbox);
+  checkboxes.push(checkbox);
 
   label = document.createElement('label')
   label.htmlFor = checkbox.id;
@@ -295,11 +264,11 @@ function buildCheckboxes() {
   
   rubrikDiv = document.createElement('div');
   checkbox = document.createElement('input');
-	checkbox.setAttribute('type', 'checkbox');
+  checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', 'rmvComments');
   $(checkbox).attr("data-headline", "Kommentare");
   $(checkbox).attr("data-child", "h2");
-	checkboxes.push(checkbox);
+  checkboxes.push(checkbox);
 
   label = document.createElement('label')
   label.htmlFor = checkbox.id;
@@ -311,11 +280,11 @@ function buildCheckboxes() {
   
   rubrikDiv = document.createElement('div'); 
   checkbox = document.createElement('input');
-	checkbox.setAttribute('type', 'checkbox');
+  checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', 'rmvVideos');
   $(checkbox).attr("data-headline", "Videos & Bilder");
   $(checkbox).attr("data-child", "h2");
-	checkboxes.push(checkbox);
+  checkboxes.push(checkbox);
 
   label = document.createElement('label')
   label.htmlFor = checkbox.id;
@@ -327,11 +296,11 @@ function buildCheckboxes() {
   
   rubrikDiv = document.createElement('div'); 
   checkbox = document.createElement('input');
-	checkbox.setAttribute('type', 'checkbox');
+  checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', 'rmvLike');
   $(checkbox).attr("data-headline", "Serien wie");
   $(checkbox).attr("data-child", "h2");
-	checkboxes.push(checkbox);
+  checkboxes.push(checkbox);
 
   label = document.createElement('label')
   label.htmlFor = checkbox.id;
@@ -343,11 +312,11 @@ function buildCheckboxes() {
   
   rubrikDiv = document.createElement('div');
   checkbox = document.createElement('input');
-	checkbox.setAttribute('type', 'checkbox');
+  checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', 'rmvListen');
   $(checkbox).attr("data-headline", "Listen mit");
   $(checkbox).attr("data-child", "a");
-	checkboxes.push(checkbox);
+  checkboxes.push(checkbox);
 
   label = document.createElement('label')
   label.htmlFor = checkbox.id;
@@ -359,11 +328,11 @@ function buildCheckboxes() {
   
   rubrikDiv = document.createElement('div');
   checkbox = document.createElement('input');
-	checkbox.setAttribute('type', 'checkbox');
+  checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', 'rmvInteresse');
   $(checkbox).attr("data-headline", "Das könnte dich auch interessieren");
   $(checkbox).attr("data-child", "h2");
-	checkboxes.push(checkbox);
+  checkboxes.push(checkbox);
 
   label = document.createElement('label')
   label.htmlFor = checkbox.id;
@@ -389,11 +358,11 @@ function buildCheckboxes() {
   var headlineWrapper = document.createElement('div');
   headlineWrapper.setAttribute('class', 'h2-headline--wrapper');
   var header = document.createElement("h2");
-	header.setAttribute('class', 'h2-headline');
+  header.setAttribute('class', 'h2-headline');
   $(header).text("Rubrikenauswahl");
   headlineWrapper.append(header);
   var header2 = document.createElement("h3");
-	header2.setAttribute('class', 'h3-headline');
+  header2.setAttribute('class', 'h3-headline');
   $(header2).text("Ausgewählte Rubriken werden ausgeblendet.");
   headlineWrapper.append(header2);
   section.append(headlineWrapper);
@@ -424,25 +393,25 @@ function improveStyle() {
   //$('.layout--content-width').css({'max-width': '75%'});
   //$('._3CAHP').css({'max-width': '80%'});
 
-	$('.hero').css('height', '250px');
-	$('.has-vertical-spacing').css('padding', '25px 0');
-	$('.item-statistics').css('margin-top', '0');
-	$('.item-statistics--area').css('margin-top', '25px');
-	$('.item-statistics--subline.typo--teaser-body').css({'font-size': '14px', 'line-height': '24px'});
+  $('.hero').css('height', '250px');
+  $('.has-vertical-spacing').css('padding', '25px 0');
+  $('.item-statistics').css('margin-top', '0');
+  $('.item-statistics--area').css('margin-top', '25px');
+  $('.item-statistics--subline.typo--teaser-body').css({'font-size': '14px', 'line-height': '24px'});
 
-	$('.typo--long-body').css({'font-size': '15px', 'line-height': '24px'});
-	$('.meta-details--heading').css({'margin-top': '0', 'font-size': '14px', 'text-transform': 'none'});
-	$('.meta-details--content').css({'margin-bottom': '15px', 'font-size': '14px'});
-	$('.slider--avatars').css({'height': '250px'});
-	$('.slider--avatars--item').css({'flex-basis': '180px', 'margin-right': '20px'});
-	$('.avatar--image').css({'filter': 'none', '-webkit-filter': 'none'});
-	$('.avatar--gradient').css({'background': 'none'});
+  $('.typo--long-body').css({'font-size': '15px', 'line-height': '24px'});
+  $('.meta-details--heading').css({'margin-top': '0', 'font-size': '14px', 'text-transform': 'none'});
+  $('.meta-details--content').css({'margin-bottom': '15px', 'font-size': '14px'});
+  $('.slider--avatars').css({'height': '250px'});
+  $('.slider--avatars--item').css({'flex-basis': '180px', 'margin-right': '20px'});
+  $('.avatar--image').css({'filter': 'none', '-webkit-filter': 'none'});
+  $('.avatar--gradient').css({'background': 'none'});
 
-	$('._3gBYU').css({'filter': 'none', '-webkit-filter': 'none'});
+  $('._3gBYU').css({'filter': 'none', '-webkit-filter': 'none'});
 
-	$('._3WDUx').css({'background': 'none'});
-	$('.cLbdk').css({'font-size': '13px'});
-	$('.X76-l').css({'font-size': '13px', 'line-height': '1.4em'});
-	$('h2').css({'font-size': '26px', 'line-height': '29px', 'letter-spacing': '0.02em'});
-	$('.avatar--list-item--title-subline').css({'font-size': '15px'});
+  $('._3WDUx').css({'background': 'none'});
+  $('.cLbdk').css({'font-size': '13px'});
+  $('.X76-l').css({'font-size': '13px', 'line-height': '1.4em'});
+  $('h2').css({'font-size': '26px', 'line-height': '29px', 'letter-spacing': '0.02em'});
+  $('.avatar--list-item--title-subline').css({'font-size': '15px'});
 }
