@@ -171,7 +171,7 @@ function buildAndPlaceCategorySection() {
   var headlineWrapper = buildWrapperForHeadlines("Rubrikenauswahl", "Nicht ausgewählte Rubriken werden ausgeblendet.");
   categorySection.append(headlineWrapper);
   
-  var checkboxDiv = seriesMainPage ? buildCheckboxDivForSeriesMain(); : buildCheckboxDivForSeasonMain();
+  var checkboxDiv = seriesMainPage ? buildCheckboxDivForSeriesMain() : buildCheckboxDivForSeasonMain();
   categorySection.append(checkboxDiv);
   
   var prevSection = $('.hot-now').closest('section');
