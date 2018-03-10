@@ -21,11 +21,9 @@ var checkboxes = [];
 
 // Funktion, damit das Dokument erst fertig geladen wird
 $(document).ready(function(){
-
   // ----- Generelles - Anfang -----
   var werbung = $(".advertisement--medium-rectangle");
   var adsOuter = $("#ads-outer");
-
   // Videoplayer im Header entfernen
   removeVideoplayer();
   // Videoplayer im Footer entfernen
@@ -83,9 +81,9 @@ function filterMainPage() {
   for(var i = 0; i < checkboxes.length; i++) {
     var checkbox = checkboxes[i];
     if(checkbox.checked){
-      hideElementByText(sections, checkbox.dataset.child, checkbox.dataset.headline);
-    } else {
       showElementByText(sections, checkbox.dataset.child, checkbox.dataset.headline);
+    } else {
+      hideElementByText(sections, checkbox.dataset.child, checkbox.dataset.headline);
     }
    }
 }
@@ -162,7 +160,7 @@ function improveStyle() {
 function buildAndPlaceCategorySection() {
   var categorySection = buildNewSection();
 
-  var headlineWrapper = buildWrapperForHeadlines("Rubrikenauswahl", "Ausgewählte Rubriken werden ausgeblendet.");
+  var headlineWrapper = buildWrapperForHeadlines("Rubrikenauswahl", "Nicht ausgewählte Rubriken werden ausgeblendet.");
   categorySection.append(headlineWrapper);
   
   var checkboxDiv = buildCheckboxDiv();
@@ -261,6 +259,7 @@ function buildCheckboxForCategory(id, headline, childElem) {
   var checkbox = document.createElement('input');
   checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', id);
+  checkbox.checked = true;
   $(checkbox).attr("data-headline", headline);
   $(checkbox).attr("data-child", childElem);
   checkboxes.push(checkbox);
