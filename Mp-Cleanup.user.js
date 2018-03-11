@@ -6,7 +6,7 @@
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/(.*)$/
 // @exclude             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
-// @version             1.0.5
+// @version             1.0.6
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -87,5 +87,5 @@ function justifyTextContent(){
   // Filmdetailseiten
   $('.movie--summary').css({'text-align': 'justify'});
   // Kommentare
-  $('comment--body js--body').css({'text-align': 'justify'});
+  $('.js--comments').css({'text-align': 'justify'});
 }
