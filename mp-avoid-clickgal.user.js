@@ -6,7 +6,7 @@
 // @downloadURL   https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/mp-avoid-clickgal.user.js
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include       /^(https?:\/\/www\.moviepilot.de\/news\/)(.*?)$/
-// @version       1.07.2
+// @version       1.07.3
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -47,7 +47,7 @@ function buildTableOfContents(defURL, pageCount) {
   var contentBody = $('.article--content-body');
   contentBody.after('<p id=clickgal_cont_p></p>');
   contentBody.after('<hr>');
-
+  $('#clickgal_cont_p').css({'margin': '0 100px 20px 200px'});
   var clickGalContP = $('#clickgal_cont_p');
   clickGalContP.append('<span id=clickgal_index><strong>Inhaltsverzeichnis:</strong></br>'+ divider +'</span></br>');
   clickGalContP.append('<span id=clickgal_content></span>');
@@ -72,6 +72,6 @@ function buildTableOfContents(defURL, pageCount) {
     });
   }
 
-	$('.article--content-wrapper').css({'margin': '40px 0 0 0', 'text-align': 'justify'});
-  $('#clickgal_cont_p').css({'margin': '0 100px 20px 200px'});
+  $('.article--content-wrapper').css({'margin': '40px 0 0 0', 'text-align': 'justify'});
+
 }
