@@ -3,9 +3,10 @@
 // @description         Moviepilot generell bereinigen
 // @grant               none
 // @downloadURL         https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/Mp-Cleanup.user.js
-// @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js 
+// @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/(.*)$/
 // @exclude             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
+// @version             1.0
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -14,144 +15,66 @@ this.$ = this.jQuery = jQuery.noConflict(true);
 // Funktion, damit das Dokument erst fertig geladen wird
 $(document).ready(function(){
 
-// Variablendefinitionen
-// Hinweis: 'i' wird bewusst ausgelassen
-var articleadvertisement1 = $(".article--article-advertising");
-var articleadvertisement2 = $(".js--consumptions--widget-poster");
-var articleauthorsidebar = $(".user--authorbox");
-var articlesocialbar = $(".article--social-header-bar");
-var articlesocialbarshare = $ (".article--social-header-bar--share");
-var boxmoresidebar = $(".box-more");
-var commentsarticle = $(".h3");
-var communitybox = $(".banner--vdt");
-var keywords = $(".keywords");
-var footer = $(".footer_ng--secondary");
-var footervideo = $(".video--player--footer");
-var newssidebar = $(".news-sidebar");
-var separatorssidebar = $(".seperators");
-var subsocial = $(".navigation--sub--social");
-var themenlongnews = $(".cards--grid");
-var themensidebar = $(".lists--timeline");
-var toplistsidebar = $(".lists--toplist");
-var toptrailer = $(".home--trailer-slider");
-var trendingbox = $(".lists--toplist");
-var vormerkbox = $(".widget--followships");
-var vorschlaege = $("#home_personal_recommendations");
-var werbungsidebar = $(".advertisement--medium-rectangle");
-var video = $(".showheroes--sidebar");
-  
-var adsOuter      = $("#ads-outer");
-console.log(adsOuter);
-adsOuter.remove();
+  // Variablendefinitionen
+  // Hinweis: 'i' wird bewusst ausgelassen
+  var communitybox = $(".banner--vdt");
+  var separatorssidebar = $(".seperators");
+  var subsocial = $(".navigation--sub--social");
+  var themensidebar = $(".lists--timeline");
+  var vormerkbox = $(".widget--followships");
 
-//improveStyle();  
-  
-// Funktionen etc.
-if ( /^http:\/\/www.moviepilot.de\/(.*)\s*$/im.test(window.location.href) ){
-footer.remove();
-footervideo.remove();
-}
-
-if ( /^(http:)\/\/(.+\.)?(moviepilot.de)\/myprofile/.test(window.location.href) || /^(http:)\/\/(.+\.)?(moviepilot.de)\/users\/(.*$)/.test(window.location.href) ){
-
-}
-  
-else if ( /^(http:)\/\/(.+\.)?(moviepilot.de)/.test(window.location.href) ){
-boxmoresidebar.remove();
-//communitybox.remove();
-newssidebar.remove();
-subsocial.remove();
-//toplistsidebar.remove();
-toptrailer.remove();
-//trendingbox.remove();
-vormerkbox.remove();
-vorschlaege.remove();
-werbungsidebar.remove();
-}
-  
-if ( /^(http:)\/\/(.+\.)?(moviepilot.de)\/news\/(.*$)/.test(window.location.href) ){
-articleadvertisement1.remove();
-articleadvertisement2.remove();
-//articleauthorsidebar.remove();
-//articlesocialbar[0].remove();
-articlesocialbarshare.remove();
-commentsarticle.remove();
-keywords.remove();
-separatorssidebar.remove();
-themenlongnews.remove();
-themensidebar.remove();
-video.remove();
-}
-  
-if ( /^(http:)\/\/(.+\.)?(moviepilot.de)\/movies\/(.*$)/.test(window.location.href) ){
-
-}
-  
-if ( /^(http:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*$)/.test(window.location.href) ){
-
-}
-   
-if ( /^(http:)\/\/(.+\.)?(moviepilot.de)\/suche(.*$)/.test(window.location.href) ){
- 
-}
-  
-// Funktionen etc.
-if ( /^https:\/\/www.moviepilot.de\/(.*)\s*$/im.test(window.location.href) ){
-footer.remove();
-footervideo.remove();
-}
-
-if ( /^(https:)\/\/(.+\.)?(moviepilot.de)\/myprofile/.test(window.location.href) || /^(https:)\/\/(.+\.)?(moviepilot.de)\/users\/(.*$)/.test(window.location.href) ){
-
-}
-  
-else if ( /^(https:)\/\/(.+\.)?(moviepilot.de)/.test(window.location.href) ){
-boxmoresidebar.remove();
-//communitybox.remove();
-newssidebar.remove();
-subsocial.remove();
-//toplistsidebar.remove();
-toptrailer.remove();
-//trendingbox.remove();
-vormerkbox.remove();
-vorschlaege.remove();
-werbungsidebar.remove();
-}
-  
-if ( /^(https:)\/\/(.+\.)?(moviepilot.de)\/news\/(.*$)/.test(window.location.href) ){
-articleadvertisement1.remove();
-articleadvertisement2.remove();
-//articleauthorsidebar.remove();
-//articlesocialbar[0].remove();
-articlesocialbarshare.remove();
-commentsarticle.remove();
-keywords.remove();
-separatorssidebar.remove();
-themenlongnews.remove();
-themensidebar.remove();
-video.remove();
-}
-  
-if ( /^(https:)\/\/(.+\.)?(moviepilot.de)\/movies\/(.*$)/.test(window.location.href) ){
-
-}
-  
-if ( /^(https:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*$)/.test(window.location.href) ){
-
-}
-   
-if ( /^(https:)\/\/(.+\.)?(moviepilot.de)\/suche(.*$)/.test(window.location.href) ){
- 
-}
-
+  cleanUpHeader();
+  cleanUpFooter();
+  cleanUpSidebar();
+  cleanUpMiddleBar();
+  cleanUpMainPage();
 });
 
-function improveStyle() {
-  $('#page').css({'width': '100%', 'max-width': '80%'});
-  $('#sidebar').css({'width': '30%'});
-  $('#main').css({'width': '65%'});
-  $('.layout--wrapped-content').css({'width': '100%'});
-  
-  $('._3CAHP').css({'max-width': '80%'});
-  
+function cleanUpMiddleBar(){
+  var recentNews = $(".cards--grid");
+  recentNews.remove();
+  var newsKeywords = $(".keywords");
+  //newsKeywords.remove();
+  var adNews = $(".article--article-advertising");
+  adNews.remove();
+  var socialMediaBar = $(".article--social-header-bar--share");
+  socialMediaBar.remove();
+  var newsShopping = $(".js--consumptions--widget-poster");
+  newsShopping.remove();
+}
+
+function cleanUpSidebar(){
+  var sidebarWerbung = $('#ad-rectangle1-outer');
+  sidebarWerbung.remove();
+  var sidebarTrending = $(".lists--toplist");
+  //sidebarTrending.remove();
+  var sidebarWerbung2 = $(".advertisement--medium-rectangle");
+  sidebarWerbung2.remove();
+  var sidebarNews = $(".news-sidebar");
+  sidebarNews.remove();
+  var sidebarNewsButton = $(".box-more");
+  sidebarNewsButton.remove();
+  var sidebarVideo = $(".showheroes--sidebar");
+  sidebarVideo.remove();
+}
+
+function cleanUpFooter(){
+  var footerVideo = $(".video--player--footer");
+  footerVideo.remove();
+  var footerLinks = $(".footer_ng--secondary");
+  footerLinks.remove();
+  var footerElements = $('article--footer-elements');
+  footerElements.remove();
+}
+
+function cleanUpHeader(){
+  var headerBanner = $("#ads-outer");
+  headerBanner.remove();
+}
+
+function cleanUpMainPage() {
+  var topTrailer = $(".home--trailer-slider");
+  topTrailer.remove();
+  var topRecommendation = $("#home_personal_recommendations");
+  topRecommendation.remove();
 }
