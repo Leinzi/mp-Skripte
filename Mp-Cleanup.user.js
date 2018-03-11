@@ -55,8 +55,6 @@ function cleanUpSidebar(){
   sidebarWerbung2.remove();
   var sidebarNews = $(".news-sidebar");
   sidebarNews.remove();
-  var sidebarNewsButton = $(".box-more");
-  sidebarNewsButton.remove();
   var sidebarVideo = $(".showheroes--sidebar");
   sidebarVideo.remove();
 }
