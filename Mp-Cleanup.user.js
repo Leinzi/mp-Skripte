@@ -6,7 +6,7 @@
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/(.*)$/
 // @exclude             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
-// @version             1.0.1.1
+// @version             1.0.2
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
