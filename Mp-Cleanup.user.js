@@ -6,7 +6,7 @@
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/(.*)$/
 // @exclude             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
-// @version             1.0.6
+// @version             1.0.7
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -33,7 +33,7 @@ $(document).ready(function(){
 });
 
 function cleanUpMiddleBar(){
-  var recentNews = $(".cards--grid");
+  var recentNews = $(".article--footer-elements > .cards--grid");
   recentNews.remove();
   var newsKeywords = $(".keywords");
   //newsKeywords.remove();
