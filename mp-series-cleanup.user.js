@@ -38,7 +38,7 @@ $(document).ready(function(){
   adsOuter.remove();
   // ----- Generelles - Ende -----
 
-  //improveStyle();
+  improveStyle();
 
   if ( series_main.test(window.location.href) ){
     seriesMainPage = true;
