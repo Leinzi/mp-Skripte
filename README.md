@@ -17,33 +17,24 @@ Das Skript dient auch als eine Art Framework für den Nutzer, da dieser selber e
 
 Anpassungen am HTML-Code für die Moviepilot-Serienseite.
 
-Mit diesem Skript lassen sich einzelne Rubriken der neuen Serienseite ausblenden. Hierfür müssen die zugehörigen Zeilen auskommentiert werden. Zum Beispiel entfernt diese Zeile den Statistikenbereich der Seite:
-```
-// "Statistik" entfernen
-removeElementByText(sections, 'h2', 'Statistiken');
-```
+Mit diesem Skript lassen sich einzelne Rubriken der neuen Serienseite ein- und ausblenden. Hierfür müssen die zugehörigen Checkboxen verwendet werden. Ausgewählte Bereiche werden angezeigt, nicht-ausgewählte werden versteckt. Durch einen Klick auf Speichern wird die aktuelle Konfiguration angewendet. Dies ist auch ohne Neuladen der Seite möglich. Für die Staffelübersichtsseite ist eine eigene Konfiguration möglich.
 
-Um diesen wieder anzuzeigen, muss die Zeile so abgeändert werden:
-```
-// "Statistik" entfernen
-//removeElementByText(sections, 'h2', 'Statistiken');
-```
-Analog können auch die anderen Bereich angezeigt oder ausgeblendet werden.
+Die Konfiguration bleibt so lange gespeichert, bis der Browser-Cache geleert wird.
 
-In der aktuellen Version werden auch kleine Änderungen am Stil vorgenommen. So wurde die Seitenbreite erhöht und auch der Kommentar- und Statistikbereich auf die volle Breite gestreckt. Es wurden ebenfalls die Graufilter der Avatare und Cast-/Crewmitglieder entfernt (funktioniert im Kommentarbereich leider nicht korrekt).
+In der aktuellen Version werden auch kleine Änderungen am Stil vorgenommen. So wurde der Kommentar- und Statistikbereich auf die volle Breite gestreckt. Es wurden ebenfalls die Graufilter der Avatare und Cast-/Crewmitglieder entfernt (funktioniert im Kommentarbereich leider nicht korrekt).
 
 Das Skript funktioniert nun auch für die Serien- und Staffelunterseiten.
 
 # Weitere Skripte
 
 ## MoviePilot-Rating-Extension
-(Autor: [kevgaar / rocketschlumpf](https://github.com/kevgaar))
+(Autor: [kevgaar / rockschlumpf](https://github.com/kevgaar))
 
 Ein Skript zur Darstellung von zusätzlichen Ratings (z.B. imdb oder RottenTomatoes).
 [Mein Fork](https://github.com/Leinzi/MoviePilot-Rating-Extension)
 
 ## MoviePilot-ReleaseDate-Extension
-(Autor: [kevgaar / rocketschlumpf](https://github.com/kevgaar))
+(Autor: [kevgaar / rockschlumpf](https://github.com/kevgaar))
 
 Ein Skript zur Erweiterung des Kinostarts um einen "noch x Tage"-Zähler.
 [Mein Fork](https://github.com/Leinzi/MoviePilot-ReleaseDate-Extension)
