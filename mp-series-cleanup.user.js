@@ -5,7 +5,7 @@
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             3.1.2
+// @version             3.1.3
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -29,7 +29,7 @@ $(document).ready(function(){
   removeVideoplayer();
   // Videoplayer im Footer entfernen
   removeFooterVideoplayer();
-  
+
   // H3-Header entfernen
   //removeH3Header();
 
@@ -39,7 +39,7 @@ $(document).ready(function(){
   // ----- Generelles - Ende -----
 
   //improveStyle();
-    
+
   if ( series_main.test(window.location.href) ){
     seriesMainPage = true;
     cleanUpMainPage();
@@ -59,7 +59,7 @@ $(document).ready(function(){
 function cleanUpMainPage(){
   buildAndPlaceCategorySection();
   loadCheckboxValues();
-    
+
   improveMainPage();
   filterMainPage();
 }
@@ -159,6 +159,9 @@ function improveStyle() {
   $('.X76-l').css({'font-size': '13px', 'line-height': '1.4em'});
   $('h2').css({'font-size': '26px', 'line-height': '29px', 'letter-spacing': '0.02em'});
   $('.avatar--list-item--title-subline').css({'font-size': '15px'});
+
+  $('.typo--long-body').css({'text-align': 'justify'});
+  $('.typo--teaser-body').css({'text-align': 'justify'});
 }
 
 // ----- Improvements - Ende -----
@@ -170,13 +173,13 @@ function buildAndPlaceCategorySection() {
 
   var headlineWrapper = buildWrapperForHeadlines("Rubrikenauswahl", "Nicht ausgewählte Rubriken werden ausgeblendet.");
   categorySection.append(headlineWrapper);
-  
+
   var checkboxDiv = seriesMainPage ? buildCheckboxDivForSeriesMain() : buildCheckboxDivForSeasonMain();
   categorySection.append(checkboxDiv);
-  
+
   var prevSection = $('.hot-now').closest('section');
   prevSection.after(categorySection);
-  
+
   $('#rmvDiv > div').css({'display': 'inline-block', 'width': '25%'});
   $('#rmvDiv > div:nth-last-child(2)').css({'width': '50%'});
 }
@@ -190,17 +193,17 @@ function buildNewSection() {
 function buildWrapperForHeadlines(headline, subline) {
   var headlineWrapper = document.createElement('div');
   headlineWrapper.setAttribute('class', 'h2-headline--wrapper');
-  
+
   var mainHeader = document.createElement("h2");
   mainHeader.setAttribute('class', 'h2-headline');
   $(mainHeader).text(headline);
   headlineWrapper.append(mainHeader);
-  
+
   var subHeader = document.createElement("h3");
   subHeader.setAttribute('class', 'h3-headline');
   $(subHeader).text(subline);
   headlineWrapper.append(subHeader);
-  
+
   return headlineWrapper;
 }
 
@@ -208,46 +211,46 @@ function buildCheckboxDivForSeriesMain() {
   var checkboxDiv = document.createElement('div');
   checkboxDiv.id = 'rmvDiv';
   $(checkboxDiv).addClass('grid--row');
-  
+
   var categoryDiv = buildDivForCategory('seriesStatistik', 'Statistiken', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seriesStreaming', 'Schaue jetzt', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seriesHandlung', 'Handlung', 'h2');
   checkboxDiv.append(categoryDiv);
 
   categoryDiv = buildDivForCategory('seriesCast', 'Cast & Crew', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seriesStaffel', 'Staffel', '._21ykL');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seriesRecap', 'Recap', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seriesNews', 'News', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seriesFreunde', 'Deine Freunde', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seriesComments', 'Kommentare', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seriesVideos', 'Videos & Bilder', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seriesLike', 'Serien wie', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seriesListen', 'Listen mit', 'a');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seriesInteresse', 'Das könnte dich auch interessieren', 'h2');
   checkboxDiv.append(categoryDiv);
- 
+
   var buttonDiv = buildDivWithSaveButton();
   checkboxDiv.append(buttonDiv);
 
@@ -258,37 +261,37 @@ function buildCheckboxDivForSeasonMain() {
   var checkboxDiv = document.createElement('div');
   checkboxDiv.id = 'rmvDiv';
   $(checkboxDiv).addClass('grid--row');
-  
+
   var categoryDiv = buildDivForCategory('seasonEpisodes', 'Episodenguide', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seasonStreaming', 'Schaue jetzt', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seasonHandlung', 'Handlung', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seasonStaffel', 'Staffel', '._21ykL');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seasonRecap', 'Recap', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seasonNews', 'News', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seasonFreunde', 'Deine Freunde', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seasonComments', 'Kommentare', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seasonVideos', 'Videos & Bilder', 'h2');
   checkboxDiv.append(categoryDiv);
-  
+
   categoryDiv = buildDivForCategory('seasonInteresse', 'Das könnte dich auch interessieren', 'h2');
   checkboxDiv.append(categoryDiv);
- 
+
   var buttonDiv = buildDivWithSaveButton();
   checkboxDiv.append(buttonDiv);
 
@@ -346,10 +349,10 @@ function saveCheckboxValues(){
   filterMainPage();
 }
 
-function loadCheckboxValues(){    
+function loadCheckboxValues(){
   for(var i = 0; i < checkboxes.length; i++) {
     var checkbox = checkboxes[i];
-    checkbox.checked = JSON.parse(localStorage.getItem(checkbox.id));      
+    checkbox.checked = JSON.parse(localStorage.getItem(checkbox.id));
   }
 }
 

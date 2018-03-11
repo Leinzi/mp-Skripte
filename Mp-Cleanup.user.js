@@ -6,7 +6,7 @@
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/(.*)$/
 // @exclude             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
-// @version             1.0.3
+// @version             1.0.4
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -29,8 +29,7 @@ $(document).ready(function(){
   cleanUpMiddleBar();
   cleanUpMainPage();
 
-  $('.article--content-wrapper').css({'margin': '40px 0 0 0', 'text-align': 'justify'});
-
+  justifyTextContent();
 });
 
 function cleanUpMiddleBar(){
@@ -80,4 +79,13 @@ function cleanUpMainPage() {
   topTrailer.remove();
   var topRecommendation = $("#home_personal_recommendations");
   topRecommendation.remove();
+}
+
+function justifyTextContent(){
+  // News-Artikel
+  $('.article--content-wrapper').css({'margin': '40px 0 0 0', 'text-align': 'justify'});
+  // Filmdetailseiten
+  $('.movie--summary').css({'text-align': 'justify'});
+  // Kommentare
+  $'comment--body js--body').css({'text-align': 'justify'});
 }
