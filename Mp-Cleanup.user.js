@@ -6,7 +6,7 @@
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/(.*)$/
 // @exclude             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
-// @version             1.0
+// @version             1.0.1
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -28,6 +28,9 @@ $(document).ready(function(){
   cleanUpSidebar();
   cleanUpMiddleBar();
   cleanUpMainPage();
+
+  $('.article--content-wrapper').css({'margin': '40px 0 0 0', 'text-align': 'justify'});
+
 });
 
 function cleanUpMiddleBar(){
