@@ -5,7 +5,7 @@
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             3.1.6
+// @version             3.1.7
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -163,6 +163,8 @@ function improveStyle() {
   $('.typo--long-body').css({'text-align': 'justify'});
   $('.typo--teaser-body').css({'text-align': 'justify', 'margin-right': '20px'});
   $('.item-statistics--subline').css({'text-align': 'center', 'margin-right': '0'});
+  
+  _$('.1w4X-').css({'text-align': 'justify'});
 }
 
 // ----- Improvements - Ende -----
