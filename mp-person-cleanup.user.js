@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-person-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
-// @version             0.1.13
+// @version             0.2.0
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -48,61 +48,7 @@ function cleanUpPeoplePage() {
   // jQuery('.js--content-editor--sidebar').remove();
 
   restructureSidebar();
-
-  var mainContent = jQuery('.js--content-editor');
-
-  var personSection = document.createElement('section');
-  personSection.setAttribute('class', 'main-person');
-  mainContent.prepend(personSection);
-  var personDetailsDiv = jQuery('.person--details');
-  var personDetailsMore = jQuery('.person--collapsible--more');
-  appendSelectionTo(personSection, personDetailsDiv);
-  appendSelectionTo(personSection, personDetailsMore);
-
-  var fanButton = $('#become_fan');
-  fanButton.css({'margin-bottom': '10px'});
-  var addToListDiv = document.createElement('div');
-  addToListDiv.setAttribute('id', 'add_to_lists');
-  $(addToListDiv).css({'margin-left': '10px', 'margin-bottom': '20px'});
-
-  var addToListButton = $('.add_to_list_button');
-  addToListButton.removeClass('float_right')
-  appendSelectionTo(addToListDiv, addToListButton);
-  fanButton.after(addToListDiv);
-
-  var movieSection = document.createElement('section');
-  movieSection.setAttribute('class', 'main-person-movies');
-  var movieHeader = jQuery('.person--movies--title');
-  var movieSubHeader = jQuery('.person--movies--subtitle');
-  var moviePosters = jQuery('.movie-posters');
-  var movieMore = moviePosters.next('.box-more');
-  appendSelectionTo(movieSection, movieHeader);
-  appendSelectionTo(movieSection, movieSubHeader);
-  appendSelectionTo(movieSection, moviePosters);
-  appendSelectionTo(movieSection, movieMore);
-  console.log(movieMore);
-  personSection.after(movieSection);
-
-  var newsSection = document.createElement('section');
-  newsSection.setAttribute('class', 'main-person-news');
-  var newsHeader = jQuery('.person--articles--title');
-  var newsSubHeader = jQuery('.person--articles--subtitle');
-  var newsEntries = jQuery('.news');
-  var newsMore = newsEntries.next('.box-more');
-  appendSelectionTo(newsSection, newsHeader);
-  appendSelectionTo(newsSection, newsSubHeader);
-  appendSelectionTo(newsSection, newsEntries);
-  appendSelectionTo(newsSection, newsMore);
-  movieSection.after(newsSection);
-
-  var commentsSection = document.createElement('section');
-  commentsSection.setAttribute('class', 'main-person-comments');
-  var commentsHeader = jQuery('h2:contains("Kommentare zu")');
-  var commentsDiv = jQuery('.comments.js--comments.is-initialized');
-  appendSelectionTo(commentsSection, commentsHeader);
-  appendSelectionTo(commentsSection, commentsDiv);
-  newsSection.after(commentsSection);
-
+  restructureMainContent();
 
   //Videos
   $('.trailer_play_button').hide();
@@ -139,32 +85,32 @@ function restructureSidebar() {
 
   sidebar.prepend(sidebarDiv);
 
-  var videoSection = buildVideoSectionForSidebar();
+  var videoSection = buildVideoSection();
   sidebarDiv.append(videoSection);
   sidebarDiv.append(buildSectionDivider());
 
-  var tvSection = buildTVSectionForSidebar();
+  var tvSection = buildTVSection();
   sidebarDiv.append(tvSection);
   sidebarDiv.append(buildSectionDivider());
 
-  var listSection = buildListSectionForSidebar();
+  var listSection = buildListSection();
   sidebarDiv.append(listSection);
   sidebarDiv.append(buildSectionDivider());
 
-  var collabSection = buildCollabSectionForSidebar();
+  var collabSection = buildCollabSection();
   sidebarDiv.append(collabSection);
   sidebarDiv.append(buildSectionDivider());
 
-  var photoSection = buildPhotoSectionForSidebar();
+  var photoSection = buildPhotoSection();
   sidebarDiv.append(photoSection);
   sidebarDiv.append(buildSectionDivider());
 
-  var fansSection = buildFansSectionForSidebar();
+  var fansSection = buildFansSection();
   sidebarDiv.append(fansSection);
   sidebarDiv.append(buildSectionDivider());
 }
 
-function buildVideoSectionForSidebar(){
+function buildVideoSection(){
   var videoSection = document.createElement('section');
   videoSection.setAttribute('class', 'sidebar-video');
 
@@ -176,7 +122,7 @@ function buildVideoSectionForSidebar(){
   return videoSection;
 }
 
-function buildTVSectionForSidebar(){
+function buildTVSection(){
   var tvSection = document.createElement('section');
   tvSection.setAttribute('class', 'sidebar-tv');
 
@@ -191,7 +137,7 @@ function buildTVSectionForSidebar(){
   return tvSection;
 }
 
-function buildListSectionForSidebar(){
+function buildListSection(){
   var listSection = document.createElement('section');
   listSection.setAttribute('class', 'sidebar-lists');
 
@@ -202,7 +148,7 @@ function buildListSectionForSidebar(){
   return listSection;
 }
 
-function buildCollabSectionForSidebar(){
+function buildCollabSection(){
   var collabSection = document.createElement('section');
   collabSection.setAttribute('class', 'sidebar-collab');
 
@@ -218,7 +164,7 @@ function buildCollabSectionForSidebar(){
   return collabSection;
 }
 
-function buildPhotoSectionForSidebar(){
+function buildPhotoSection(){
   var photoSection = document.createElement('section');
   photoSection.setAttribute('class', 'sidebar-photos');
 
@@ -238,7 +184,7 @@ function buildPhotoSectionForSidebar(){
   return photoSection;
 }
 
-function buildFansSectionForSidebar(){
+function buildFansSection(){
   var fansSection = document.createElement('section');
   fansSection.setAttribute('class', 'sidebar-fans');
 
@@ -247,4 +193,107 @@ function buildFansSectionForSidebar(){
   appendSelectionTo(fansSection, fansDiv);
 
   return fansSection;
+}
+
+function restructureMainContent() {
+  var mainContent = jQuery('.js--content-editor');
+
+  var mainContentDiv = document.createElement('div');
+  mainContentDiv.setAttribute('class', 'main-sections');
+
+  mainContent.prepend(mainContentDiv);
+
+  var personSection = buildPersonDetailsSection();
+  mainContentDiv.append(personSection);
+  mainContentDiv.append(buildSectionDivider());
+
+  var movieSection = buildMovieSection();
+  mainContentDiv.append(movieSection);
+  mainContentDiv.append(buildSectionDivider());
+
+  var newsSection = buildNewsSection();
+  mainContentDiv.append(newsSection);
+  mainContentDiv.append(buildSectionDivider());
+
+  var commentsSection = buildCommentsSection();
+  mainContentDiv.append(commentsSection);
+  mainContentDiv.append(buildSectionDivider());
+
+  moveAddToListButton();
+}
+
+function buildPersonDetailsSection() {
+  var personSection = document.createElement('section');
+  personSection.setAttribute('class', 'main-person');
+
+  var personDetailsDiv = jQuery('.person--details');
+
+  var personDetailsMore = jQuery('.person--collapsible--more');
+
+  appendSelectionTo(personSection, personDetailsDiv);
+  appendSelectionTo(personSection, personDetailsMore);
+
+  return personSection;
+}
+
+function moveAddToListButton() {
+  var fanButton = $('#become_fan');
+  fanButton.css({'margin-bottom': '10px'});
+
+  var addToListDiv = document.createElement('div');
+  addToListDiv.setAttribute('id', 'add_to_lists');
+  $(addToListDiv).css({'margin-left': '10px', 'margin-bottom': '20px'});
+
+  var addToListButton = $('.add_to_list_button');
+  addToListButton.removeClass('float_right')
+
+  appendSelectionTo(addToListDiv, addToListButton);
+  fanButton.after(addToListDiv);
+}
+
+function buildMovieSection() {
+  var movieSection = document.createElement('section');
+  movieSection.setAttribute('class', 'main-person-movies');
+
+  var movieHeader = jQuery('.person--movies--title');
+  var movieSubHeader = jQuery('.person--movies--subtitle');
+  var moviePosters = jQuery('.movie-posters');
+  var movieMore = moviePosters.next('.box-more');
+
+  appendSelectionTo(movieSection, movieHeader);
+  appendSelectionTo(movieSection, movieSubHeader);
+  appendSelectionTo(movieSection, moviePosters);
+  appendSelectionTo(movieSection, movieMore);
+
+  return movieSection;
+}
+
+function buildNewsSection() {
+  var newsSection = document.createElement('section');
+  newsSection.setAttribute('class', 'main-person-news');
+
+  var newsHeader = jQuery('.person--articles--title');
+  var newsSubHeader = jQuery('.person--articles--subtitle');
+  var newsEntries = jQuery('.news');
+  var newsMore = newsEntries.next('.box-more');
+
+  appendSelectionTo(newsSection, newsHeader);
+  appendSelectionTo(newsSection, newsSubHeader);
+  appendSelectionTo(newsSection, newsEntries);
+  appendSelectionTo(newsSection, newsMore);
+
+  return newsSection;
+}
+
+function buildCommentsSection() {
+  var commentsSection = document.createElement('section');
+  commentsSection.setAttribute('class', 'main-person-comments');
+
+  var commentsHeader = jQuery('h2:contains("Kommentare zu")');
+  var commentsDiv = jQuery('.comments.js--comments.is-initialized');
+
+  appendSelectionTo(commentsSection, commentsHeader);
+  appendSelectionTo(commentsSection, commentsDiv);
+
+  return commentsSection;
 }
