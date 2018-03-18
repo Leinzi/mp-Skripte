@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-person-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
-// @version             0.1.6
+// @version             0.1.7
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -41,6 +41,9 @@ $(document).ready(function(){
 });
 
 function cleanUpPeoplePage() {
+  $('#ads-outer').remove();
+  $('.advertisement--medium-rectangle').remove();
+
   cleanUpEmptyParagraphs();
   // Übersicht
   // Blocksatz
