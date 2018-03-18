@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-person-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
-// @version             0.1.7
+// @version             0.1.8
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -18,18 +18,11 @@ var regPeople = /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
 // Funktion, damit das Dokument erst fertig geladen wird
 $(document).ready(function(){
 
-  // Variablendefinitionen
-  // var communitybox = $(".banner--vdt");
-  // var separatorssidebar = $(".seperators");
-  // var subsocial = $(".navigation--sub--social");
-  // var themensidebar = $(".lists--timeline");
-  // var vormerkbox = $(".widget--followships");
-
   var getURL = window.location.href.replace('.html', '');
 
   // cleanUpHeader();
   // cleanUpFooter();
-  // cleanUpSidebar();
+  // restructureSidebar();
   // cleanUpMiddleBar();
   // cleanUpMainPage();
 
@@ -44,7 +37,7 @@ function cleanUpPeoplePage() {
   $('#ads-outer').remove();
   $('.advertisement--medium-rectangle').remove();
 
-  cleanUpEmptyParagraphs();
+  removeEmptyParagraphs();
   // Übersicht
   // Blocksatz
   // $('.person--description').css({'text-align': 'justify'});
@@ -53,6 +46,57 @@ function cleanUpPeoplePage() {
 
   //Rubriken verstecken
   // jQuery('.js--content-editor--sidebar').remove();
+
+  restructureSidebar();
+
+  var mainContent = jQuery('.js--content-editor');
+
+  var personSection = document.createElement('section');
+  personSection.setAttribute('class', 'main-person');
+  mainContent.prepend(personSection);
+  var personDetailsDiv = jQuery('.person--details');
+  var personDetailsMore = jQuery('.person--collapsible--more');
+  appendSelectionTo(personSection, personDetailsDiv);
+  appendSelectionTo(personSection, personDetailsMore);
+
+  var fanButton = $('#become_fan');
+  fanButton.css({'margin-bottom': '10px'});
+  var addToListDiv = document.createElement('div');
+  addToListDiv.setAttribute('id', 'add_to_lists');
+  addToListDiv.css({'margin-left': '10px', 'margin-bottom': '20px'});
+
+  var addToListButton = $('.add_to_list_button');
+  appendSelectionTo(addToListDiv, addToListButton);
+  fanButton.after(addToListDiv);
+
+  //Videos
+  $('.trailer_play_button').hide();
+  $('.sidebar_trailer_pure, .sidebar_trailer_pure_background').css({'margin': '0', 'width': 'auto'});
+
+videoDiv.after(document.createElement('hr'));
+
+}
+
+function appendSelectionTo(parent, selection){
+  selection.each(function(){
+    parent.append(this);
+  });
+}
+
+function removeEmptyParagraphs(){
+  jQuery('p').each(function() {
+      var $this = jQuery(this);
+      if($this.html().replace(/\s|&nbsp;/g, '').length == 0)
+          $this.remove();
+  });
+}
+
+function buildSectionDivider(){
+  var hLine = document.createElement('hr');
+  return hLine;
+}
+
+function restructureSidebar() {
   jQuery('#sidebar hr').remove();
 
   var sidebar = jQuery('#sidebar');
@@ -85,42 +129,6 @@ function cleanUpPeoplePage() {
   var fansSection = buildFansSectionForSidebar();
   sidebarDiv.append(fansSection);
   sidebarDiv.append(buildSectionDivider());
-
-  var mainContent = jQuery('.js--content-editor');
-
-  var personSection = document.createElement('section');
-  personSection.setAttribute('class', 'main-person');
-  mainContent.prepend(personSection);
-  var personDetailsDiv = jQuery('.person--details');
-  var personDetailsMore = jQuery('.person--collapsible--more');
-  appendSelectionTo(personSection, personDetailsDiv);
-  appendSelectionTo(personSection, personDetailsMore);
-
-  //Videos
-  $('.trailer_play_button').hide();
-  $('.sidebar_trailer_pure, .sidebar_trailer_pure_background').css({'margin': '0', 'width': 'auto'});
-
-videoDiv.after(document.createElement('hr'));
-
-}
-
-function appendSelectionTo(parent, selection){
-  selection.each(function(){
-    parent.append(this);
-  });
-}
-
-function cleanUpEmptyParagraphs(){
-  jQuery('p').each(function() {
-      var $this = jQuery(this);
-      if($this.html().replace(/\s|&nbsp;/g, '').length == 0)
-          $this.remove();
-  });
-}
-
-function buildSectionDivider(){
-  var hLine = document.createElement('hr');
-  return hLine;
 }
 
 function buildVideoSectionForSidebar(){
