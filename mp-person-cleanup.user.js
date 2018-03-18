@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-person-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
-// @version             0.1.8
+// @version             0.1.9
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -63,7 +63,7 @@ function cleanUpPeoplePage() {
   fanButton.css({'margin-bottom': '10px'});
   var addToListDiv = document.createElement('div');
   addToListDiv.setAttribute('id', 'add_to_lists');
-  addToListDiv.css({'margin-left': '10px', 'margin-bottom': '20px'});
+  $(addToListDiv).css({'margin-left': '10px', 'margin-bottom': '20px'});
 
   var addToListButton = $('.add_to_list_button');
   appendSelectionTo(addToListDiv, addToListButton);
