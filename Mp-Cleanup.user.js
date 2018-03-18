@@ -39,7 +39,7 @@ $(document).ready(function(){
 });
 
 function cleanUpMiddleBar(){
-  var recentNews = $(".cards--grid");
+  var recentNews = $(".article--footer-elements > .cards--grid");
   recentNews.remove();
   var newsKeywords = $(".keywords");
   //newsKeywords.remove();
