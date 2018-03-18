@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-person-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
-// @version             0.2.0
+// @version             0.2.1
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -217,7 +217,6 @@ function restructureMainContent() {
 
   var commentsSection = buildCommentsSection();
   mainContentDiv.append(commentsSection);
-  mainContentDiv.append(buildSectionDivider());
 
   moveAddToListButton();
 }
