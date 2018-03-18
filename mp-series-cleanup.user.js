@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name                MP-Series-Cleanup (jQuery)
 // @description         Moviepilot-Serienseite bereinigen - Framework
+// @author              mitcharts, leinzi
 // @grant               none
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
@@ -163,7 +164,7 @@ function improveStyle() {
   $('.typo--long-body').css({'text-align': 'justify'});
   $('.typo--teaser-body').css({'text-align': 'justify', 'margin-right': '20px'});
   $('.item-statistics--subline').css({'text-align': 'center', 'margin-right': '0'});
-  
+
   $('._1w4X-').css({'text-align': 'justify'});
 }
 
