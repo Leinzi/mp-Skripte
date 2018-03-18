@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-person-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
-// @version             0.1.11
+// @version             0.1.12
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -80,6 +80,7 @@ function cleanUpPeoplePage() {
   appendSelectionTo(movieSection, movieSubHeader);
   appendSelectionTo(movieSection, moviePosters);
   appendSelectionTo(movieSection, movieMore);
+  console.log(movieMore);
   personSection.after(movieSection);
 
   var newsSection = document.createElement('section');
@@ -106,8 +107,6 @@ function cleanUpPeoplePage() {
   //Videos
   $('.trailer_play_button').hide();
   $('.sidebar_trailer_pure, .sidebar_trailer_pure_background').css({'margin': '0', 'width': 'auto'});
-
-videoDiv.after(document.createElement('hr'));
 
 }
 
