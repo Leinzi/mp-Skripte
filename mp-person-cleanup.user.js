@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-person-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
-// @version             0.1.2
+// @version             0.1.4
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -44,68 +44,44 @@ function cleanUpPeoplePage() {
   cleanUpEmptyParagraphs();
   // Übersicht
   // Blocksatz
-  $('.person--description').css({'text-align': 'justify'});
-  $('.comment--replies--list').css({'text-align': 'justify'});
-  $('.comment--body').css({'text-align': 'justify'});
+  // $('.person--description').css({'text-align': 'justify'});
+  // $('.comment--replies--list').css({'text-align': 'justify'});
+  // $('.comment--body').css({'text-align': 'justify'});
 
   //Rubriken verstecken
-  jQuery('.js--content-editor--sidebar').remove();
+  // jQuery('.js--content-editor--sidebar').remove();
   jQuery('#sidebar hr').remove();
 
   var sidebar = jQuery('#sidebar');
 
-  var videoSection = document.createElement('section');
-  videoSection.setAttribute('class', 'sidebar-video');
-  sidebar.prepend(videoSection);
-  var videoHeader = jQuery('h4:contains("Videos zu")');
-  videoHeader.addClass('sidebar-video-header');
-  appendSelectionTo(videoSection, videoHeader);
+  var sidebarDiv = document.createElement('div');
+  sidebarDiv.setAttribute('class', 'sidebar-sections');
 
-  var tvSection = document.createElement('section');
-  tvSection.setAttribute('class', 'sidebar-tv');
-  videoSection.after(tvSection);
-  var tvHeader = jQuery('h4:contains("im Fernsehen")');
-  tvHeader.addClass('sidebar-tv-header');
-  appendSelectionTo(tvSection, tvHeader);
+  sidebar.prepend(sidebarDiv);
 
-  var tvItems = jQuery('.consumption_item_tv');
-  appendSelectionTo(tvSection, tvItems);
+  var videoSection = buildVideoSectionForSidebar();
+  sidebarDiv.append(videoSection);
+  sidebarDiv.append(buildSectionDivider());
 
-  var listSection = document.createElement('section');
-  listSection.setAttribute('class', 'sidebar-lists');
-  tvSection.after(listSection);
-  var listDiv = jQuery('div.page-updater.lists');
-  appendSelectionTo(listSection, listDiv);
+  var tvSection = buildTVSectionForSidebar();
+  sidebarDiv.append(tvSection);
+  sidebarDiv.append(buildSectionDivider());
 
-  var collabSection = document.createElement('section');
-  collabSection.setAttribute('class', 'sidebar-collab');
-  var collabHeader = jQuery('h4:contains("arbeitet oft zusammen mit")');
-  collabHeader.addClass('sidebar-collab-header');
-  var collabList = collabHeader.next('ul');
-  collabList.addClass('sidebar-collab-list');
-  appendSelectionTo(collabSection, collabHeader);
-  appendSelectionTo(collabSection, collabList);
-  listSection.after(collabSection);
+  var listSection = buildListSectionForSidebar();
+  sidebarDiv.append(listSection);
+  sidebarDiv.append(buildSectionDivider());
 
-  var photoSection = document.createElement('section');
-  photoSection.setAttribute('class', 'sidebar-photos');
-  var photoHeader = jQuery('h4:contains("Bilder:")');
-  photoHeader.addClass('sidebar-photo-header');
-  var photoList = photoHeader.next('.movie-photos');
-  photoList.addClass('sidebar-photo-list');
-  var photoMore = photoList.next('.box-more');
-  photoMore.addClass('sidebar-photo-more');
-  appendSelectionTo(photoSection, photoHeader);
-  appendSelectionTo(photoSection, photoList);
-  appendSelectionTo(photoSection, photoMore);
-  collabSection.after(photoSection);
+  var collabSection = buildCollabSectionForSidebar();
+  sidebarDiv.append(collabSection);
+  sidebarDiv.append(buildSectionDivider());
 
-  var fansSection = document.createElement('section');
-  fansSection.setAttribute('class', 'sidebar-fans');
-  var fansDiv = jQuery('#sidebar_followers');
-  appendSelectionTo(fansSection, fansDiv);
-  photoSection.after(fansSection);
+  var photoSection = buildPhotoSectionForSidebar();
+  sidebarDiv.append(photoSection);
+  sidebarDiv.append(buildSectionDivider());
 
+  var fansSection = buildFansSectionForSidebar();
+  sidebarDiv.append(fansSection);
+  sidebarDiv.append(buildSectionDivider());
 
   var mainContent = jQuery('.js--content-editor');
 
@@ -121,8 +97,6 @@ function cleanUpPeoplePage() {
   $('.trailer_play_button').hide();
 
 videoDiv.after(document.createElement('hr'));
-
-
 
 }
 
@@ -140,63 +114,92 @@ function cleanUpEmptyParagraphs(){
   });
 }
 
-// function cleanUpMiddleBar(){
-//   var recentNews = $(".article--footer-elements > .cards--grid");
-//   recentNews.remove();
-//   var newsKeywords = $(".keywords");
-//   //newsKeywords.remove();
-//   var adNews = $(".article--article-advertising");
-//   adNews.remove();
-//   var socialMediaBar = $(".article--social-header-bar--share");
-//   socialMediaBar.remove();
-//   var newsShopping = $(".js--consumptions--widget-poster");
-//   newsShopping.remove();
-// }
-//
-// function cleanUpSidebar(){
-//   var sidebarWerbung = $('#ad-rectangle1-outer');
-//   sidebarWerbung.remove();
-//   var sidebarTrending = $(".lists--toplist");
-//   //sidebarTrending.remove();
-//   var sidebarWerbung2 = $(".advertisement--medium-rectangle");
-//   sidebarWerbung2.remove();
-//   var sidebarNews = $(".news-sidebar");
-//   sidebarNews.remove();
-//   var sidebarVideo = $(".showheroes--sidebar");
-//   sidebarVideo.remove();
-//   var sidebarShopping = $(".consumptions--widget-list--items");
-//   sidebarShopping.remove();
-// }
-//
-// function cleanUpFooter(){
-//   var footerVideo = $(".video--player--footer");
-//   footerVideo.remove();
-//   var footerLinks = $(".footer_ng--secondary");
-//   footerLinks.remove();
-//   var footerElements = $('article--footer-elements');
-//   footerElements.remove();
-// }
-//
-// function cleanUpHeader(){
-//   var headerBanner = $("#ads-outer");
-//   headerBanner.remove();
-// }
-//
-// function cleanUpMainPage() {
-//   var topTrailer = $(".home--trailer-slider");
-//   topTrailer.remove();
-//   var topRecommendation = $("#home_personal_recommendations");
-//   topRecommendation.remove();
-// }
-//
-// function justifyTextContent(){
-//   // News-Artikel
-//   $('.article--content-wrapper').css({'margin': '40px 0 0 0', 'text-align': 'justify'});
-//   // Filmdetailseiten
-//   $('.movie--summary').css({'text-align': 'justify'});
-//   // Kommentare
-//   $('.js--comments').css({'text-align': 'justify'});
-//   // Darstellerübersicht
-//   $('.person--description').css({'text-align': 'justify'});
-//
-// }
+function buildSectionDivider(){
+  var hLine = document.createElement('hr');
+  return hLine;
+}
+
+function buildVideoSectionForSidebar(){
+  var videoSection = document.createElement('section');
+  videoSection.setAttribute('class', 'sidebar-video');
+
+  var videoHeader = jQuery('h4:contains("Videos zu")');
+  videoHeader.addClass('sidebar-video-header');
+
+  appendSelectionTo(videoSection, videoHeader);
+
+  return videoSection;
+}
+
+function buildTVSectionForSidebar(){
+  var tvSection = document.createElement('section');
+  tvSection.setAttribute('class', 'sidebar-tv');
+
+  var tvHeader = jQuery('h4:contains("im Fernsehen")');
+  tvHeader.addClass('sidebar-tv-header');
+
+  var tvItems = jQuery('.consumption_item_tv');
+
+  appendSelectionTo(tvSection, tvHeader);
+  appendSelectionTo(tvSection, tvItems);
+
+  return tvSection;
+}
+
+function buildListSectionForSidebar(){
+  var listSection = document.createElement('section');
+  listSection.setAttribute('class', 'sidebar-lists');
+
+  var listDiv = jQuery('div.page-updater.lists');
+
+  appendSelectionTo(listSection, listDiv);
+
+  return listSection;
+}
+
+function buildCollabSectionForSidebar(){
+  var collabSection = document.createElement('section');
+  collabSection.setAttribute('class', 'sidebar-collab');
+
+  var collabHeader = jQuery('h4:contains("arbeitet oft zusammen mit")');
+  collabHeader.addClass('sidebar-collab-header');
+
+  var collabList = collabHeader.next('ul');
+  collabList.addClass('sidebar-collab-list');
+
+  appendSelectionTo(collabSection, collabHeader);
+  appendSelectionTo(collabSection, collabList);
+
+  return collabSection;
+}
+
+function buildPhotoSectionForSidebar(){
+  var photoSection = document.createElement('section');
+  photoSection.setAttribute('class', 'sidebar-photos');
+
+  var photoHeader = jQuery('h4:contains("Bilder:")');
+  photoHeader.addClass('sidebar-photo-header');
+
+  var photoList = photoHeader.next('.movie-photos');
+  photoList.addClass('sidebar-photo-list');
+
+  var photoMore = photoList.next('.box-more');
+  photoMore.addClass('sidebar-photo-more');
+
+  appendSelectionTo(photoSection, photoHeader);
+  appendSelectionTo(photoSection, photoList);
+  appendSelectionTo(photoSection, photoMore);
+
+  return photoSection;
+}
+
+function buildFansSectionForSidebar(){
+  var fansSection = document.createElement('section');
+  fansSection.setAttribute('class', 'sidebar-fans');
+
+  var fansDiv = jQuery('#sidebar_followers');
+
+  appendSelectionTo(fansSection, fansDiv);
+
+  return fansSection;
+}
