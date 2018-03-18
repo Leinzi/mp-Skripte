@@ -6,14 +6,17 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-person-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
-// @version             0.2.1
+// @version             0.2.2
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
 this.$ = this.jQuery = jQuery.noConflict(true);
 
 //RegExps
-var regPeople = /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
+var regPeople = /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/;
+
+var sidebarSections = [];
+var mainSections = [];
 
 // Funktion, damit das Dokument erst fertig geladen wird
 $(document).ready(function(){
@@ -36,6 +39,7 @@ $(document).ready(function(){
 function cleanUpPeoplePage() {
   $('#ads-outer').remove();
   $('.advertisement--medium-rectangle').remove();
+  jQuery('hr').hide();
 
   removeEmptyParagraphs();
   // Übersicht
@@ -48,6 +52,7 @@ function cleanUpPeoplePage() {
   // jQuery('.js--content-editor--sidebar').remove();
 
   restructureSidebar();
+  $('sidebar-list hr').remove();
   restructureMainContent();
 
   //Videos
@@ -76,7 +81,6 @@ function buildSectionDivider(){
 }
 
 function restructureSidebar() {
-  jQuery('#sidebar hr').remove();
 
   var sidebar = jQuery('#sidebar');
 
@@ -244,7 +248,7 @@ function moveAddToListButton() {
   $(addToListDiv).css({'margin-left': '10px', 'margin-bottom': '20px'});
 
   var addToListButton = $('.add_to_list_button');
-  addToListButton.removeClass('float_right')
+  addToListButton.removeClass('float_right');
 
   appendSelectionTo(addToListDiv, addToListButton);
   fanButton.after(addToListDiv);
