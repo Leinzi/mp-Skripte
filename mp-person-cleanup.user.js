@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-person-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
-// @version             0.1.12
+// @version             0.1.13
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -88,7 +88,7 @@ function cleanUpPeoplePage() {
   var newsHeader = jQuery('.person--articles--title');
   var newsSubHeader = jQuery('.person--articles--subtitle');
   var newsEntries = jQuery('.news');
-  var newsMore = moviePosters.next('.box-more');
+  var newsMore = newsEntries.next('.box-more');
   appendSelectionTo(newsSection, newsHeader);
   appendSelectionTo(newsSection, newsSubHeader);
   appendSelectionTo(newsSection, newsEntries);
