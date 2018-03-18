@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-person-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
-// @version             0.1.10
+// @version             0.1.11
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -69,6 +69,39 @@ function cleanUpPeoplePage() {
   addToListButton.removeClass('float_right')
   appendSelectionTo(addToListDiv, addToListButton);
   fanButton.after(addToListDiv);
+
+  var movieSection = document.createElement('section');
+  movieSection.setAttribute('class', 'main-person-movies');
+  var movieHeader = jQuery('.person--movies--title');
+  var movieSubHeader = jQuery('.person--movies--subtitle');
+  var moviePosters = jQuery('.movie-posters');
+  var movieMore = moviePosters.next('.box-more');
+  appendSelectionTo(movieSection, movieHeader);
+  appendSelectionTo(movieSection, movieSubHeader);
+  appendSelectionTo(movieSection, moviePosters);
+  appendSelectionTo(movieSection, movieMore);
+  personSection.after(movieSection);
+
+  var newsSection = document.createElement('section');
+  newsSection.setAttribute('class', 'main-person-news');
+  var newsHeader = jQuery('.person--articles--title');
+  var newsSubHeader = jQuery('.person--articles--subtitle');
+  var newsEntries = jQuery('.news');
+  var newsMore = moviePosters.next('.box-more');
+  appendSelectionTo(newsSection, newsHeader);
+  appendSelectionTo(newsSection, newsSubHeader);
+  appendSelectionTo(newsSection, newsEntries);
+  appendSelectionTo(newsSection, newsMore);
+  movieSection.after(newsSection);
+
+  var commentsSection = document.createElement('section');
+  commentsSection.setAttribute('class', 'main-person-comments');
+  var commentsHeader = jQuery('h2:contains("Kommentare zu")');
+  var commentsDiv = jQuery('.comments.js--comments.is-initialized');
+  appendSelectionTo(commentsSection, commentsHeader);
+  appendSelectionTo(commentsSection, commentsDiv);
+  newsSection.after(commentsSection);
+
 
   //Videos
   $('.trailer_play_button').hide();
