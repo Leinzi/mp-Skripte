@@ -6,7 +6,7 @@
 // @downloadURL   https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/mp-avoid-clickgal.user.js
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include       /^(https?:\/\/www\.moviepilot.de\/news\/)(.*?)$/
-// @version       1.08.6
+// @version       1.08.7
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -46,14 +46,19 @@ $(document).ready(function(){
 
 function buildTableOfContents(defURL, pageCount) {
   var divider = '--------------------';
+
+  var clickGalContent = $('<div style="margin: 0 auto"></div>');
+  clickGalContent.append('<span><b>Inhaltsverzeichnis:</b></br>'+ divider +'</span></br>');
+  clickGalContent.append('<span id=clickgal_content></span>');
+  clickGalContent.append('<span>'+ divider +'</span></br>');
+
+  var clickGalDiv = $('<div style="display=flex"');
+  clickGalDiv.append('<hr>');
+  clickGalDiv.append(clickGalContent);
+  clickGalDiv.append('<hr>');
+
   var contentBody = $('.article--content-body');
-  var clickGalContP = $('<div style="margin: 0 100px 20px 200px"></div>');
-  contentBody.after(clickGalContP);
-  contentBody.after('<hr>');
-  clickGalContP.append('<span><b>Inhaltsverzeichnis:</b></br>'+ divider +'</span></br>');
-  clickGalContP.append('<span id=clickgal_content></span>');
-  clickGalContP.append('<span>'+ divider +'</span></br>');
-  clickGalContP.append('<hr>');
+  contentBody.after(clickGalDiv);
 
   pages = new Array(pageCount);
   for (var i = 2; i < pageCount; i++) {
