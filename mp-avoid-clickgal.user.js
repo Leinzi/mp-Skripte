@@ -6,7 +6,7 @@
 // @downloadURL   https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/mp-avoid-clickgal.user.js
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include       /^(https?:\/\/www\.moviepilot.de\/news\/)(.*?)$/
-// @version       1.08.7
+// @version       1.08.8
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -58,7 +58,7 @@ function buildTableOfContents(defURL, pageCount) {
   clickGalDiv.append('<hr>');
 
   var contentBody = $('.article--content-body');
-  contentBody.after(clickGalDiv);
+  contentBody.append(clickGalDiv);
 
   pages = new Array(pageCount);
   for (var i = 2; i < pageCount; i++) {
