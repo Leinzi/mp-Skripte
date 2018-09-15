@@ -6,7 +6,7 @@
 // @downloadURL   https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/mp-avoid-clickgal.user.js
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include       /^(https?:\/\/www\.moviepilot.de\/news\/)(.*?)$/
-// @version       1.07.3
+// @version       1.08.6
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -20,9 +20,11 @@ var regLatterPages          = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\
 // gibt es nicht mehr?
 var regWithCommentSuffix    = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\#(comments)$/;
 
+var pages;
+
 // Funktion, damit das Dokument erst fertig geladen wird
 $(document).ready(function(){
-  var isclicktrack = $('.js--article--click-track');
+  var isclicktrack = $('.js--article--click-track, .js--pagination');
   var getURL = window.location.href.replace('.html', '');
 
   if (isclicktrack.length > 0) {
@@ -45,33 +47,44 @@ $(document).ready(function(){
 function buildTableOfContents(defURL, pageCount) {
   var divider = '--------------------';
   var contentBody = $('.article--content-body');
-  contentBody.after('<p id=clickgal_cont_p></p>');
+  var clickGalContP = $('<div style="margin: 0 100px 20px 200px"></div>');
+  contentBody.after(clickGalContP);
   contentBody.after('<hr>');
-  $('#clickgal_cont_p').css({'margin': '0 100px 20px 200px'});
-  var clickGalContP = $('#clickgal_cont_p');
-  clickGalContP.append('<span id=clickgal_index><strong>Inhaltsverzeichnis:</strong></br>'+ divider +'</span></br>');
+  clickGalContP.append('<span><b>Inhaltsverzeichnis:</b></br>'+ divider +'</span></br>');
   clickGalContP.append('<span id=clickgal_content></span>');
-  clickGalContP.append('<span id=clickgal_bottom>'+ divider +'</span></br>');
+  clickGalContP.append('<span>'+ divider +'</span></br>');
   clickGalContP.append('<hr>');
 
-  for (var i = 1; i < pageCount - 1; i++) {
-    $.ajax({
-      url: defURL + (pageCount - i),
-      type: 'GET',
-      dataType: 'html',
-      async: false,
-      success: function (data) {
-        var html = $('<div>').html(data);
-        var header = html.find('h1.article--header--title').html();
-        if((pageCount - i - 1) % 10 == 0){
-          $('#clickgal_content').prepend('</br>');
-        }
-        $('#clickgal_content').prepend('<a href="' + this.url + '">' + this.url + '</a></br>');
-        $('#clickgal_content').prepend('<span id=clickgal_index_' + i + '>' + header + ': </span></br>');
-      }
+  pages = new Array(pageCount);
+  for (var i = 2; i < pageCount; i++) {
+    pages[i-2] = makeAjaxCall(defURL + i, "GET").then(appendEntry, function(reason){
+        console.log("error in processing your request", reason);
     });
   }
 
-  $('.article--content-wrapper').css({'margin': '40px 0 0 0', 'text-align': 'justify'});
+  Promise.all(pages).then (values => {
+    for (var i = 0; i < values.length; i++) {
+      $('#clickgal_content').append(values[i]);
+      if ((i + 1) % 10 == 0) {
+        $('#clickgal_content').append('<br>');
+      }
+    }
+  });
+}
 
+function appendEntry(data, i) {
+  var header = $(data).find('h1.article--header--title').html();
+
+  var elem = $('<div>')
+  elem.append('<span>' + header + ': </span></br>');
+  elem.append('<a href="' + this.url + '">' + this.url + '</a></br>');
+  return elem;
+}
+
+function makeAjaxCall(url, methodType, callback) {
+  return $.ajax({
+      url: url,
+      method: methodType,
+      dataType: 'html'
+  });
 }
