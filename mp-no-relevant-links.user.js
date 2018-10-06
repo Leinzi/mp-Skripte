@@ -10,7 +10,7 @@
 // ==/UserScript==
 
 var regWithoutSuffix        = /\A(https?:\/\/www\.moviepilot.de\/news)\z/;
-var regLatterPages          = /\A(https?:\/\/www\.moviepilot.de\/news)(\/seite-([1-9][0-9]*))?\z$/;
+var regLatterPages          = /\A(https?:\/\/www\.moviepilot.de\/news)(\?page=([1-9][0-9]*))?\z/;
 
 var pages;
 
