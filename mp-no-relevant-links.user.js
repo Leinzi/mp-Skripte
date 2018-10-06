@@ -6,15 +6,11 @@
 // @downloadURL   https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/mp-no-relevant-links.user.js
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include       /^(https?:\/\/www\.moviepilot.de\/news\/)(.*?)$/
-// @version       0.1.0
+// @version       0.1.1
 // ==/UserScript==
 
-var regWithoutSuffix        = /^(https?:\/\/www\.moviepilot.de\/news\/)([^\/\#]*?)$/;
-var regFirstPageOne         = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\/(seite-1)$/;
-var regLatterPages          = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\/(seite-([2-9]|2[0-6]))$/;
-
-// gibt es nicht mehr?
-var regWithCommentSuffix    = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\#(comments)$/;
+var regWithoutSuffix        = /\A(https?:\/\/www\.moviepilot.de\/news)\z/;
+var regLatterPages          = /\A(https?:\/\/www\.moviepilot.de\/news)(\/seite-([1-9][0-9]*))?\z$/;
 
 var pages;
 
