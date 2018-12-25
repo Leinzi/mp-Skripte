@@ -6,7 +6,7 @@
 // @downloadURL   https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/mp-avoid-clickgal.user.js
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include       /^(https?:\/\/www\.moviepilot.de\/news\/)(.*?)$/
-// @version       1.08.11
+// @version       1.09.0
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -61,7 +61,7 @@ function buildTableOfContents(defURL, pageCount) {
   contentBody.after('<hr>');
 
   pages = new Array(pageCount);
-  for (var i = 2; i < pageCount; i++) {
+  for (var i = 2; i <= pageCount; i++) {
     pages[i-2] = makeAjaxCall(defURL + i, "GET").then(appendEntry, function(reason){
         console.log("error in processing your request", reason);
     });
@@ -80,10 +80,14 @@ function buildTableOfContents(defURL, pageCount) {
 function appendEntry(data, i) {
   var header = $(data).find('h1.article--header--title').html();
 
-  var elem = $('<div>')
-  elem.append('<span>' + header + ': </span></br>');
-  elem.append('<a href="' + this.url + '">' + this.url + '</a></br>');
-  return elem;
+  if(/Das könnte dich auch interessieren/.test(header)) {
+    return '';
+  } else {
+    var elem = $('<div>')
+    elem.append('<span>' + header + ': </span></br>');
+    elem.append('<a href="' + this.url + '">' + this.url + '</a></br>');
+    return elem;
+  }
 }
 
 function makeAjaxCall(url, methodType, callback) {
