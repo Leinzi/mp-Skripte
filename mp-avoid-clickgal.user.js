@@ -6,7 +6,7 @@
 // @downloadURL   https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/mp-avoid-clickgal.user.js
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include       /^(https?:\/\/www\.moviepilot.de\/news\/)(.*?)$/
-// @version       1.09.0
+// @version       1.10.0
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -22,13 +22,15 @@ var regWithCommentSuffix    = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\
 
 var pages;
 
+killClickgal();
+
 // Funktion, damit das Dokument erst fertig geladen wird
-$(document).ready(function(){
-  var isclicktrack = $('.js--article--click-track, .js--pagination');
+function killClickgal() {
+  var isClicktrack = findNodes('.js--article--click-track, .js--pagination').length > 0;
   var getURL = window.location.href.replace('.html', '');
 
-  if (isclicktrack.length > 0) {
-    var lastPageURL = $('.js--pagination--last').attr('href');
+  if (isClicktrack) {
+    var lastPageURL = findNodes('.js--pagination--last')[0].href;
     var pieces = lastPageURL.split('-');
     var pageCount = Number(pieces[pieces.length-1].split('.')[0]);
 
@@ -42,7 +44,11 @@ $(document).ready(function(){
       buildTableOfContents(getURL.slice(0, - 9) + '/seite-', pageCount);
     }
   }
-});
+}
+
+function findNodes(query) {
+  return document.querySelectorAll(query);
+}
 
 function buildTableOfContents(defURL, pageCount) {
   var divider = '--------------------';
