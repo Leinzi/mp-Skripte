@@ -6,26 +6,20 @@
 // @downloadURL   https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/mp-avoid-clickgal.user.js
 // @require       https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include       /^(https?:\/\/www\.moviepilot.de\/news\/)(.*?)$/
-// @version       1.10.0
+// @version       1.10.1
 // ==/UserScript==
 
-// jQuery-Konflikte loesen
-//
-this.$ = this.jQuery = jQuery.noConflict(true);
-
-var regWithoutSuffix        = /^(https?:\/\/www\.moviepilot.de\/news\/)([^\/\#]*?)(\.html)?$/;
-var regFirstPageOne         = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\/(seite-1)(\.html)?$/;
-var regLatterPages          = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\/(seite-([2-9]|2[0-6]))(\.html)?$/;
+var regWithoutSuffix        = /^(https?:\/\/www\.moviepilot.de\/news\/)([^\/\#]*?)$/;
+var regFirstPageOne         = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\/(seite-1)$/;
+var regLatterPages          = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\/(seite-([2-9]|2[0-6]))$/;
 
 // gibt es nicht mehr?
 var regWithCommentSuffix    = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\#(comments)$/;
 
 var pages;
 
-killClickgal();
-
 // Funktion, damit das Dokument erst fertig geladen wird
-function killClickgal() {
+$(document).ready(function(){
   var isClicktrack = findNodes('.js--article--click-track, .js--pagination').length > 0;
   var getURL = window.location.href.replace('.html', '');
 
@@ -44,7 +38,7 @@ function killClickgal() {
       buildTableOfContents(getURL.slice(0, - 9) + '/seite-', pageCount);
     }
   }
-}
+});
 
 function findNodes(query) {
   return document.querySelectorAll(query);
