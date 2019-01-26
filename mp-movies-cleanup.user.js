@@ -42,7 +42,7 @@ $(document).ready(function(){
   if (moviesMain.test(window.location.href)) {
     moviesMainPage = true;
     cleanUpMainPage();
-  } else if (moviesStream.test(window.location.href) {
+  } else if (moviesStream.test(window.location.href)) {
     var kurzbeschreibung = $('div').find('.grid--col-lg-8');
     kurzbeschreibung.removeClass('grid--col-lg-8');
     kurzbeschreibung.addClass('grid--col-lg');
