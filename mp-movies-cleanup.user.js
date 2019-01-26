@@ -6,7 +6,7 @@
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-movies-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             0.0.1
+// @version             0.0.2
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -206,7 +206,7 @@ function buildWrapperForHeadlines(headline, subline) {
   return headlineWrapper;
 }
 
-function buildCheckboxDivForSeriesMain() {
+function buildCheckboxDivForMoviesMain() {
   var checkboxDiv = document.createElement('div');
   checkboxDiv.id = 'rmvDiv';
   $(checkboxDiv).addClass('grid--row');
