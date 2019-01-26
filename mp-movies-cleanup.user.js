@@ -6,11 +6,11 @@
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-movies-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             0.1.2
+// @version             0.2.0
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
-window.$ = window.jQuery;
+this.$ = this.jQuery = jQuery.noConflict(true);
 
 // RegExps
 var moviesMain = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)$/;
