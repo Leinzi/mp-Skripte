@@ -6,7 +6,7 @@
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-movies-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             0.0.2
+// @version             0.0.3
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -207,88 +207,47 @@ function buildWrapperForHeadlines(headline, subline) {
 }
 
 function buildCheckboxDivForMoviesMain() {
-  var checkboxDiv = document.createElement('div');
+  let checkboxDiv = document.createElement('div');
   checkboxDiv.id = 'rmvDiv';
   $(checkboxDiv).addClass('grid--row');
 
-  var categoryDiv = buildDivForCategory('seriesStatistik', 'Statistiken', 'h2');
+  let categoryDiv = buildDivForCategory('moviesFreunde', 'Deine Freunde', 'h2');
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesStreaming', 'Schaue jetzt', 'h2');
+  categoryDiv = buildDivForCategory('moviesStreaming', 'Schaue jetzt', 'h2');
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesHandlung', 'Handlung', 'h2');
+  categoryDiv = buildDivForCategory('moviesTrivia', 'Trivia', 'h2');
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesCast', 'Cast & Crew', 'h2');
+  categoryDiv = buildDivForCategory('moviesPresse', 'Pressestimmen', 'h2');
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesStaffel', 'Staffel', '._21ykL');
+  categoryDiv = buildDivForCategory('moviesNews', 'News', 'h2');
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesRecap', 'Recap', 'h2');
+  categoryDiv = buildDivForCategory('moviesStatistik', 'Statistiken', 'h2');
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesNews', 'News', 'h2');
+  categoryDiv = buildDivForCategory('moviesHandlung', 'Handlung', 'h2');
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesFreunde', 'Deine Freunde', 'h2');
+  categoryDiv = buildDivForCategory('moviesCast', 'Cast & Crew', 'h2');
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesComments', 'Kommentare', 'h2');
+  categoryDiv = buildDivForCategory('moviesComments', 'Kommentare', 'h2');
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesVideos', 'Videos & Bilder', 'h2');
+  categoryDiv = buildDivForCategory('moviesVideos', 'Videos & Bilder', 'h2');
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesLike', 'Serien wie', 'h2');
+  categoryDiv = buildDivForCategory('moviesLike', 'Filme wie', 'h2');
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesListen', 'Listen mit', 'a');
+  categoryDiv = buildDivForCategory('moviesListen', 'Listen mit', 'a');
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesInteresse', 'Das könnte dich auch interessieren', 'h2');
-  checkboxDiv.append(categoryDiv);
-
-  var buttonDiv = buildDivWithSaveButton();
-  checkboxDiv.append(buttonDiv);
-
-  return checkboxDiv;
-}
-
-function buildCheckboxDivForSeasonMain() {
-  var checkboxDiv = document.createElement('div');
-  checkboxDiv.id = 'rmvDiv';
-  $(checkboxDiv).addClass('grid--row');
-
-  var categoryDiv = buildDivForCategory('seasonEpisodes', 'Episodenguide', 'h2');
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory('seasonStreaming', 'Schaue jetzt', 'h2');
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory('seasonHandlung', 'Handlung', 'h2');
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory('seasonStaffel', 'Staffel', '._21ykL');
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory('seasonRecap', 'Recap', 'h2');
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory('seasonNews', 'News', 'h2');
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory('seasonFreunde', 'Deine Freunde', 'h2');
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory('seasonComments', 'Kommentare', 'h2');
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory('seasonVideos', 'Videos & Bilder', 'h2');
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory('seasonInteresse', 'Das könnte dich auch interessieren', 'h2');
+  categoryDiv = buildDivForCategory('moviesInteresse', 'Das könnte dich auch interessieren', 'h2');
   checkboxDiv.append(categoryDiv);
 
   var buttonDiv = buildDivWithSaveButton();
