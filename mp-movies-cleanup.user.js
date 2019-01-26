@@ -179,8 +179,8 @@ function buildAndPlaceCategorySection() {
   var prevSection = $('.hot-now').closest('section');
   prevSection.after(categorySection);
 
-  $('#rmvDiv > div').css({'display': 'inline-block', 'width': '25%'});
-  $('#rmvDiv > div:nth-last-child(2)').css({'width': '50%'});
+  // $('#rmvDiv > div').css({'display': 'inline-block', 'width': '25%'});
+  // $('#rmvDiv > div:nth-last-child(2)').css({'width': '50%'});
 }
 
 function buildNewSection() {
@@ -256,22 +256,24 @@ function buildCheckboxDivForMoviesMain() {
   return checkboxDiv;
 }
 
-function buildDivForCategory(id, headline, childElem) {
+function buildDivForCategory(id, headline, childElem, withinModule = false) {
   var categoryDiv = document.createElement('div');
-  var checkbox = buildCheckboxForCategory(id, headline, childElem);
+  categoryDiv.classList.add('grid--col-md-3');
+  var checkbox = buildCheckboxForCategory(id, headline, childElem, withinModule);
   var label = buildLabelForCheckbox(checkbox);
   categoryDiv.append(checkbox);
   categoryDiv.append(label);
   return categoryDiv;
 }
 
-function buildCheckboxForCategory(id, headline, childElem) {
+function buildCheckboxForCategory(id, headline, childElem, withinModule) {
   var checkbox = document.createElement('input');
   checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', id);
   checkbox.checked = true;
   $(checkbox).attr("data-headline", headline);
   $(checkbox).attr("data-child", childElem);
+  $(checkbox).attr("data-within-module", withinModule);
   checkboxes.push(checkbox);
   return checkbox;
 }
@@ -285,6 +287,7 @@ function buildLabelForCheckbox(checkbox) {
 
 function buildDivWithSaveButton() {
   var buttonDiv = document.createElement('div');
+  buttonDiv.classList.add('grid--col-md-3');
   var button = buildButtonWithCallback('rmvSave', 'Speichern', saveCheckboxValues);
   buttonDiv.append(button);
   return buttonDiv;
