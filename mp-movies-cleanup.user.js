@@ -6,7 +6,7 @@
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-movies-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             0.1.1
+// @version             0.1.2
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -14,7 +14,6 @@ window.$ = window.jQuery;
 
 // RegExps
 var moviesMain = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)$/;
-var moviesStream = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)\/(online-schauen)$/;
 
 var moviesMainPage = true;
 var checkboxes = [];
@@ -25,14 +24,7 @@ $(document).ready(function(){
   if (moviesMain.test(window.location.href)) {
     moviesMainPage = true;
     cleanUpMainPage();
-  } else if (moviesStream.test(window.location.href)) {
-    var kurzbeschreibung = $('div').find('.grid--col-lg-8');
-    kurzbeschreibung.removeClass('grid--col-lg-8');
-    kurzbeschreibung.addClass('grid--col-lg');
-    kurzbeschreibung.removeClass('grid--col-md-7');
-    kurzbeschreibung.addClass('grid--col-md');
   }
-
 });
 
 function cleanUpMainPage(){
