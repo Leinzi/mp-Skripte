@@ -6,7 +6,7 @@
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-movies-cleanup.user.js
 // @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             0.2.0
+// @version             0.2.1
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
@@ -19,19 +19,19 @@ var moviesMainPage = true;
 var checkboxes = [];
 
 // Funktion, damit das Dokument erst fertig geladen wird
-$(document).ready(function(){
+if (document.readyState !== 'loading') {
+  performCleanUp();
+} else {
+  document.addEventListener('DOMContentLoaded', performCleanUp);
+}
 
+function performCleanUp() {
   if (moviesMain.test(window.location.href)) {
     moviesMainPage = true;
-    cleanUpMainPage();
+    buildAndPlaceCategorySection();
+    loadCheckboxValues();
+    filterMainPage();
   }
-});
-
-function cleanUpMainPage(){
-  buildAndPlaceCategorySection();
-  loadCheckboxValues();
-
-  filterMainPage();
 }
 
 // ----- Filter - Anfang -----
@@ -42,21 +42,37 @@ function filterMainPage() {
   for(var i = 0; i < checkboxes.length; i++) {
     var checkbox = checkboxes[i];
     if(checkbox.checked){
-      showElementByText(sections, checkbox.dataset.child, checkbox.dataset.headline);
+      showElementByText(sections, checkbox);
     } else {
-      hideElementByText(sections, checkbox.dataset.child, checkbox.dataset.headline);
+      hideElementByText(sections, checkbox);
     }
    }
 }
 
-function hideElementByText(selection, descendantSelector, text) {
-  var element = getElementByText(selection, descendantSelector, text);
-  element.hide();
+function hideElementByText(selection, checkbox) {
+  let descendantSelector = checkbox.dataset.child
+  let text = checkbox.dataset.headline
+  let selector = checkbox.dataset.selector
+
+  if (selector) {
+    $(selector).hide()
+  } else {
+    let element = getElementByText(selection, descendantSelector, text);
+    element.hide();
+  }
 }
 
-function showElementByText(selection, descendantSelector, text) {
-  var element = getElementByText(selection, descendantSelector, text);
-  element.show();
+function showElementByText(selection, checkbox) {
+  let descendantSelector = checkbox.dataset.child
+  let text = checkbox.dataset.headline
+  let selector = checkbox.dataset.selector
+
+  if (selector) {
+    $(selector).show()
+  } else {
+    let element = getElementByText(selection, descendantSelector, text);
+    element.show();
+  }
 }
 
 function getElementByText(selection, descendantSelector, text) {
@@ -109,19 +125,35 @@ function buildCheckboxDivForMoviesMain() {
   checkboxDiv.id = 'rmvDiv';
   $(checkboxDiv).addClass('grid--row');
 
-  let categoryDiv = buildDivForCategory('moviesFreunde', 'Deine Freunde', 'h2');
+  let categoryDiv = buildDivForCategory2({
+    key: 'moviesFreunde',
+    title: 'Deine Freunde',
+    selector: 'div[data-hypernova-key="FriendsOpinionsModule"]'
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('moviesStreaming', 'Schaue jetzt', 'h2');
+  categoryDiv = buildDivForCategory2({
+    key: 'moviesStreaming',
+    title: 'Kino/Streaming/TV',
+    selector: 'div[data-hypernova-key="ConsumptionModule"], div[data-hypernova-key="MovieCinemaConsumptionModule"]'
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('moviesTrivia', 'Trivia', 'h2');
+  categoryDiv = buildDivForCategory2({
+    key: 'moviesTrivia',
+    title: 'Trivia',
+    selector: 'div[data-hypernova-key="TriviasModule"]'
+  });
   checkboxDiv.append(categoryDiv);
 
   categoryDiv = buildDivForCategory('moviesPresse', 'Pressestimmen', 'h2');
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('moviesNews', 'News', 'h2');
+  categoryDiv = buildDivForCategory2({
+    key: 'moviesArtikel',
+    title: 'Artikel',
+    selector: 'div[data-hypernova-key="ArticleSlider"]'
+  });
   checkboxDiv.append(categoryDiv);
 
   categoryDiv = buildDivForCategory('moviesStatistik', 'Statistiken', 'h2');
@@ -139,14 +171,22 @@ function buildCheckboxDivForMoviesMain() {
   categoryDiv = buildDivForCategory('moviesVideos', 'Videos & Bilder', 'h2');
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('moviesLike', 'Filme wie', 'h2');
+  categoryDiv = buildDivForCategory2({
+    key: 'moviesLike',
+    title: 'Filme wie',
+    selector: 'div[data-hypernova-key="PosterSlider"]'
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('moviesListen', 'Listen mit', 'a');
+  categoryDiv = buildDivForCategory2({
+    key: 'moviesListen',
+    title: 'Listen mit',
+    selector: 'div[data-hypernova-key="ListSlider"]'
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('moviesInteresse', 'Das könnte dich auch interessieren', 'h2');
-  checkboxDiv.append(categoryDiv);
+  // categoryDiv = buildDivForCategory('moviesInteresse', 'Das könnte dich auch interessieren', 'h2');
+  // checkboxDiv.append(categoryDiv);
 
   var buttonDiv = buildDivWithSaveButton();
   checkboxDiv.append(buttonDiv);
@@ -159,14 +199,26 @@ function buildDivForCategory(id, headline, childElem, withinModule = false) {
   categoryDiv.classList.add('grid--col-sm-6');
   categoryDiv.classList.add('grid--col-md-4');
   categoryDiv.classList.add('grid--col-lg-3');
-  var checkbox = buildCheckboxForCategory(id, headline, childElem, withinModule);
+  var checkbox = buildCheckboxForCategory(id, headline, childElem, null, withinModule);
   var label = buildLabelForCheckbox(checkbox);
   categoryDiv.append(checkbox);
   categoryDiv.append(label);
   return categoryDiv;
 }
 
-function buildCheckboxForCategory(id, headline, childElem, withinModule) {
+function buildDivForCategory2(options = {}) {
+  var categoryDiv = document.createElement('div');
+  categoryDiv.classList.add('grid--col-sm-6');
+  categoryDiv.classList.add('grid--col-md-4');
+  categoryDiv.classList.add('grid--col-lg-3');
+  var checkbox = buildCheckboxForCategory(options.key, options.title, null, options.selector);
+  var label = buildLabelForCheckbox(checkbox);
+  categoryDiv.append(checkbox);
+  categoryDiv.append(label);
+  return categoryDiv;
+}
+
+function buildCheckboxForCategory(id, headline, childElem, selector, withinModule = false) {
   var checkbox = document.createElement('input');
   checkbox.setAttribute('type', 'checkbox');
   checkbox.setAttribute('id', id);
@@ -174,6 +226,7 @@ function buildCheckboxForCategory(id, headline, childElem, withinModule) {
   $(checkbox).attr("data-headline", headline);
   $(checkbox).attr("data-child", childElem);
   $(checkbox).attr("data-within-module", withinModule);
+  $(checkbox).attr("data-selector", selector);
   checkboxes.push(checkbox);
   return checkbox;
 }
