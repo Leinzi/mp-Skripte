@@ -1,100 +1,64 @@
 // ==UserScript==
-// @name                MP-Series-Cleanup (jQuery)
+// @name                MP-Series-Cleanup
 // @description         Moviepilot-Serienseite bereinigen - Framework
 // @author              mitcharts, leinzi
 // @grant               none
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
-// @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             3.1.8
+// @version             3.2.0
 // ==/UserScript==
 
-// jQuery-Konflikte loesen
-this.$ = this.jQuery = jQuery.noConflict(true);
-
 //RegExps
-var series_main = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)$/;
-var series_stream = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(online-schauen)$/;
-var series_season = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)$/;
-var series_season_stream = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)\/(online-schauen)$/;
+var regSeriesMain = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)$/;
+var regSeriesSeason = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)$/;
 
 var seriesMainPage = true;
 var checkboxes = [];
 
-// Funktion, damit das Dokument erst fertig geladen wird
-$(document).ready(function(){
-  // ----- Generelles - Anfang -----
-  var werbung = $(".advertisement--medium-rectangle");
-  var adsOuter = $("#ads-outer");
-  // Videoplayer im Header entfernen
-  removeVideoplayer();
-  // Videoplayer im Footer entfernen
-  removeFooterVideoplayer();
+if (document.readyState !== 'loading') {
+  performCleanUp();
+} else {
+  document.addEventListener('DOMContentLoaded', performCleanUp);
+}
 
-  // H3-Header entfernen
-  //removeH3Header();
-
-  // Werbe-DIVs entfernen
-  werbung.remove();
-  adsOuter.remove();
-  // ----- Generelles - Ende -----
-
-  improveStyle();
-
-  if ( series_main.test(window.location.href) ){
+function performCleanUp() {
+  if (regSeriesMain.test(window.location.href) ) {
     seriesMainPage = true;
     cleanUpMainPage();
-  } else if ( series_season.test(window.location.href) ){
+  } else if (regSeriesSeason.test(window.location.href) ) {
     seriesMainPage = false;
     cleanUpMainPage();
-  } else if ( series_stream.test(window.location.href) || series_season.test(window.location.href)){
-    var kurzbeschreibung   = $('div').find('.grid--col-lg-8');
-    kurzbeschreibung.removeClass('grid--col-lg-8');
-    kurzbeschreibung.addClass('grid--col-lg');
-    kurzbeschreibung.removeClass('grid--col-md-7');
-    kurzbeschreibung.addClass('grid--col-md');
   }
-
-});
+}
 
 function cleanUpMainPage(){
   buildAndPlaceCategorySection();
   loadCheckboxValues();
-
-  improveMainPage();
   filterMainPage();
 }
 
-// Videoplayer im Header entfernen
-function removeVideoplayer() {
-  var headervideo = $(".hero--play");
-  headervideo.remove();
+// ----- Helper - Anfang -----
+function contains(selector, text) {
+   let elements = document.querySelectorAll(selector);
+   return Array.prototype.filter.call(elements, function(element) {
+      return RegExp(text).test(element.textContent);
+   });
 }
-
-function removeH3Header() {
-  var h3header = $(".h3-headline--wrapper");
-  h3header.remove();
-}
-
-// Videoplayer im Header entfernen
-function removeFooterVideoplayer() {
-  var footervideo = $(".video--player--footer");
-  footervideo.remove();
-}
+// ----- Helper - Ende -----
 
 // ----- Filter - Anfang -----
 
 function filterMainPage() {
-  var sections = $('section.has-vertical-spacing');
+  for (let i = 0; i < checkboxes.length; i++) {
+    let checkbox = checkboxes[i];
+    let element = getElementForCheckbox(checkbox)
 
-  for(var i = 0; i < checkboxes.length; i++) {
-    var checkbox = checkboxes[i];
-    if(checkbox.checked){
-      showElementByText(sections, checkbox.dataset.child, checkbox.dataset.headline);
+    if (checkbox.checked) {
+      if (element) { element.style.display = 'block' }
     } else {
-      hideElementByText(sections, checkbox.dataset.child, checkbox.dataset.headline);
+      if (element) { element.style.display = 'none' }
     }
-   }
+  }
 }
 
 function hideElementByText(selection, descendantSelector, text) {
@@ -107,217 +71,354 @@ function showElementByText(selection, descendantSelector, text) {
   element.show();
 }
 
-function getElementByText(selection, descendantSelector, text) {
-  var element = selection.filter(":has("+descendantSelector+":contains("+ text +"))");
-  return element;
+function getElementForCheckbox(checkbox) {
+  let elementSelector = checkbox.dataset.elementSelector
+  let elementTitle = checkbox.dataset.elementTitle
+  let selector = checkbox.dataset.selector || 'section'
+  let identifierElement = getElementByText(elementSelector, elementTitle);
+
+  if (identifierElement) {
+    return identifierElement.closest(selector)
+  } else {
+    return document.querySelector(selector)
+  }
+}
+
+function getElementByText(selector, text) {
+  let matches = Array.prototype.slice.call(contains(selector, text));
+  return matches[0];
 }
 
 // ----- Filter - Ende -----
 
 // ----- Improvements - Anfang -----
 
-function improveMainPage() {
-  var sections = $('section.has-vertical-spacing');
-
-  var statistik = getElementByText(sections, 'h2', 'Statistiken');
-  var statColumnLeft = statistik.find('.grid--col-lg-8');
-  var statColumnRight = statistik.find('.grid--col-lg-4');
-  statColumnLeft.removeClass('grid--col-lg-8');
-  statColumnLeft.addClass('grid--col-lg');
-  statColumnRight.remove();
-
-  var kommentare = getElementByText(sections, 'h2', 'Kommentare');
-  var kommColumnLeft = kommentare.find('.grid--col-lg-8');
-  var kommColumnRight = kommentare.find('.grid--col-lg-4');
-  kommColumnLeft.removeClass('grid--col-lg-8');
-  kommColumnLeft.addClass('grid--col-lg');
-  kommColumnRight.remove();
-}
-
-
-function improveStyle() {
-  //$('.layout--content-width').css({'max-width': '75%'});
-  //$('._3CAHP').css({'max-width': '80%'});
-
-  $('.hero').css('height', '250px');
-  $('.has-vertical-spacing').css('padding', '25px 0');
-  $('.item-statistics').css('margin-top', '0');
-  $('.item-statistics--area').css('margin-top', '25px');
-  $('.item-statistics--subline.typo--teaser-body').css({'font-size': '14px', 'line-height': '24px'});
-
-  $('.typo--long-body').css({'font-size': '15px', 'line-height': '24px'});
-  $('.meta-details--heading').css({'margin-top': '0', 'font-size': '14px', 'text-transform': 'none'});
-  $('.meta-details--content').css({'margin-bottom': '15px', 'font-size': '14px'});
-  $('.slider--avatars').css({'height': '250px'});
-  $('.slider--avatars--item').css({'flex-basis': '180px', 'margin-right': '20px'});
-  $('.avatar--image').css({'filter': 'none', '-webkit-filter': 'none'});
-  $('.avatar--gradient').css({'background': 'none'});
-
-  $('._3gBYU').css({'filter': 'none', '-webkit-filter': 'none'});
-
-  $('._3WDUx').css({'background': 'none'});
-  $('.cLbdk').css({'font-size': '13px'});
-  $('.X76-l').css({'font-size': '13px', 'line-height': '1.4em'});
-  $('h2').css({'font-size': '26px', 'line-height': '29px', 'letter-spacing': '0.02em'});
-  $('.avatar--list-item--title-subline').css({'font-size': '15px'});
-
-  $('.typo--long-body').css({'text-align': 'justify'});
-  $('.typo--teaser-body').css({'text-align': 'justify', 'margin-right': '20px'});
-  $('.item-statistics--subline').css({'text-align': 'center', 'margin-right': '0'});
-
-  $('._1w4X-').css({'text-align': 'justify'});
-}
+// function improveStyle() {
+//   //$('.layout--content-width').css({'max-width': '75%'});
+//   //$('._3CAHP').css({'max-width': '80%'});
+//
+//   $('.hero').css('height', '250px');
+//   $('.has-vertical-spacing').css('padding', '25px 0');
+//   $('.item-statistics').css('margin-top', '0');
+//   $('.item-statistics--area').css('margin-top', '25px');
+//   $('.item-statistics--subline.typo--teaser-body').css({'font-size': '14px', 'line-height': '24px'});
+//
+//   $('.typo--long-body').css({'font-size': '15px', 'line-height': '24px'});
+//   $('.meta-details--heading').css({'margin-top': '0', 'font-size': '14px', 'text-transform': 'none'});
+//   $('.meta-details--content').css({'margin-bottom': '15px', 'font-size': '14px'});
+//   $('.slider--avatars').css({'height': '250px'});
+//   $('.slider--avatars--item').css({'flex-basis': '180px', 'margin-right': '20px'});
+//   $('.avatar--image').css({'filter': 'none', '-webkit-filter': 'none'});
+//   $('.avatar--gradient').css({'background': 'none'});
+//
+//   $('._3gBYU').css({'filter': 'none', '-webkit-filter': 'none'});
+//
+//   $('._3WDUx').css({'background': 'none'});
+//   $('.cLbdk').css({'font-size': '13px'});
+//   $('.X76-l').css({'font-size': '13px', 'line-height': '1.4em'});
+//   $('h2').css({'font-size': '26px', 'line-height': '29px', 'letter-spacing': '0.02em'});
+//   $('.avatar--list-item--title-subline').css({'font-size': '15px'});
+//
+//   $('.typo--long-body').css({'text-align': 'justify'});
+//   $('.typo--teaser-body').css({'text-align': 'justify', 'margin-right': '20px'});
+//   $('.item-statistics--subline').css({'text-align': 'center', 'margin-right': '0'});
+//
+//   $('._1w4X-').css({'text-align': 'justify'});
+// }
 
 // ----- Improvements - Ende -----
 
 // ----- Rubrikauswahl - Anfang -----
 
 function buildAndPlaceCategorySection() {
-  var categorySection = buildNewSection();
+  let categorySection = buildNewSection();
 
-  var headlineWrapper = buildWrapperForHeadlines("Rubrikenauswahl", "Nicht ausgewählte Rubriken werden ausgeblendet.");
-  categorySection.append(headlineWrapper);
+  let headlineColumn = buildColumnForHeadlines("Rubrikenauswahl", "Nicht ausgewählte Rubriken werden ausgeblendet");
+  categorySection.append(headlineColumn);
 
-  var checkboxDiv = seriesMainPage ? buildCheckboxDivForSeriesMain() : buildCheckboxDivForSeasonMain();
+  let checkboxDiv = seriesMainPage ? buildCheckboxDivForSeriesMain() : buildCheckboxDivForSeasonMain();
   categorySection.append(checkboxDiv);
 
-  var prevSection = $('.hot-now').closest('section');
+  let prevSection = document.querySelector('.hot-now').closest('section');
   prevSection.after(categorySection);
-
-  $('#rmvDiv > div').css({'display': 'inline-block', 'width': '25%'});
-  $('#rmvDiv > div:nth-last-child(2)').css({'width': '50%'});
 }
 
 function buildNewSection() {
-  var section = document.createElement('section');
-  section.setAttribute('class', 'has-vertical-spacing');
+  let section = document.createElement('section');
+  section.classList.add('grid--row');
+  section.classList.add('has-vertical-spacing');
   return section;
 }
 
-function buildWrapperForHeadlines(headline, subline) {
-  var headlineWrapper = document.createElement('div');
-  headlineWrapper.setAttribute('class', 'h2-headline--wrapper');
+function buildColumnForHeadlines(headline, subline) {
+  let headlineColumn = document.createElement('div');
+  headlineColumn.classList.add('grid--col-sm-12');
 
-  var mainHeader = document.createElement("h2");
-  mainHeader.setAttribute('class', 'h2-headline');
-  $(mainHeader).text(headline);
-  headlineWrapper.append(mainHeader);
+  let mainWrapper = document.createElement('div');
+  mainWrapper.classList.add('h2-headline--wrapper');
+  let mainHeader = document.createElement("h2");
+  mainHeader.classList.add('h2-headline');
+  mainHeader.textContent = headline;
+  mainWrapper.append(mainHeader);
+  headlineColumn.append(mainWrapper);
 
-  var subHeader = document.createElement("h3");
-  subHeader.setAttribute('class', 'h3-headline');
-  $(subHeader).text(subline);
-  headlineWrapper.append(subHeader);
+  let subWrapper = document.createElement('div');
+  subWrapper.classList.add('h3-headline--wrapper');
+  let subHeader = document.createElement("h3");
+  subHeader.classList.add('h3-headline');
+  subHeader.textContent = subline;
+  subWrapper.append(subHeader);
+  headlineColumn.append(subWrapper);
 
-  return headlineWrapper;
+  return headlineColumn;
 }
 
 function buildCheckboxDivForSeriesMain() {
-  var checkboxDiv = document.createElement('div');
-  checkboxDiv.id = 'rmvDiv';
-  $(checkboxDiv).addClass('grid--row');
+  let checkboxDiv = document.createElement('div');
 
-  var categoryDiv = buildDivForCategory('seriesStatistik', 'Statistiken', 'h2');
+  let categoryDiv = buildDivForCategory({
+    key: 'seriesStatistik',
+    title: 'Statistiken',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Statistiken',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesStreaming', 'Schaue jetzt', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seriesStreaming',
+    title: 'Streaming/TV',
+    selector: 'div[data-hypernova-key="ConsumptionModule"]',
+    elementSelector: 'h2',
+    elementTitle: 'Schaue jetzt',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesHandlung', 'Handlung', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seriesHandlung',
+    title: 'Handlung',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Handlung',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesCast', 'Cast & Crew', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seriesCast',
+    title: 'Cast & Crew',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Cast & Crew',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesStaffel', 'Staffel', '._21ykL');
+  categoryDiv = buildDivForCategory({
+      key: 'seriesStaffel',
+      title: 'Staffeln',
+      selector: 'div[data-hypernova-key="PosterSlider"]',
+      elementSelector: 'h2',
+      elementTitle: 'Staffel',
+    });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesRecap', 'Recap', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seriesRecap',
+    title: 'Recaps',
+    selector: 'div[data-hypernova-key="ArticleSlider"]',
+    elementSelector: 'h2',
+    elementTitle: 'Recaps',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesNews', 'News', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seriesNews',
+    title: 'News',
+    selector: 'div[data-hypernova-key="ArticleSlider"]',
+    elementSelector: 'h2',
+    elementTitle: 'News',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesFreunde', 'Deine Freunde', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seriesFreunde',
+    title: 'Deine Freunde',
+    selector: 'div[data-hypernova-key="FriendsOpinionsModule"]',
+    elementSelector: 'h2',
+    elementTitle: 'Deine Freunde',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesComments', 'Kommentare', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seriesComments',
+    title: 'Kommentare',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Kommentare',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesVideos', 'Videos & Bilder', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seriesVideos',
+    title: 'Videos & Bilder',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Videos & Bilder',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesLike', 'Serien wie', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seriesLike',
+    title: 'Serien wie',
+    selector: 'div[data-hypernova-key="PosterSlider"]',
+    elementSelector: 'h2',
+    elementTitle: 'Serien wie',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesListen', 'Listen mit', 'a');
+  categoryDiv = buildDivForCategory({
+    key: 'seriesListen',
+    title: 'Listen',
+    selector: 'div[data-hypernova-key="ListSlider"]',
+    elementSelector: 'a',
+    elementTitle: 'Listen mit',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seriesInteresse', 'Das könnte dich auch interessieren', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seriesArtikel',
+    title: 'Weitere Artikel',
+    selector: 'div[data-hypernova-key="ArticleSlider"]',
+    elementSelector: 'h2',
+    elementTitle: 'Das könnte dich auch interessieren',
+  });
   checkboxDiv.append(categoryDiv);
 
-  var buttonDiv = buildDivWithSaveButton();
-  checkboxDiv.append(buttonDiv);
-
+  checkboxDiv.append(buildDivWithSaveButton());
   return checkboxDiv;
 }
 
 function buildCheckboxDivForSeasonMain() {
-  var checkboxDiv = document.createElement('div');
-  checkboxDiv.id = 'rmvDiv';
-  $(checkboxDiv).addClass('grid--row');
+  let checkboxDiv = document.createElement('div');
 
-  var categoryDiv = buildDivForCategory('seasonEpisodes', 'Episodenguide', 'h2');
+  let categoryDiv = buildDivForCategory({
+    key: 'seasonEpisodes',
+    title: 'Episodenguide',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Episodenguide',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seasonStreaming', 'Schaue jetzt', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seasonStreaming',
+    title: 'Streaming/TV',
+    selector: 'div[data-hypernova-key="ConsumptionModule"]',
+    elementSelector: 'h2',
+    elementTitle: 'Schaue jetzt',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seasonHandlung', 'Handlung', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seasonHandlung',
+    title: 'Handlung',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Handlung',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seasonStaffel', 'Staffel', '._21ykL');
+  categoryDiv = buildDivForCategory({
+      key: 'seasonStaffel',
+      title: 'Staffeln',
+      selector: 'div[data-hypernova-key="PosterSlider"]',
+      elementSelector: 'h2',
+      elementTitle: 'Staffel',
+    });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seasonRecap', 'Recap', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seasonRecap',
+    title: 'Recaps',
+    selector: 'div[data-hypernova-key="ArticleSlider"]',
+    elementSelector: 'h2',
+    elementTitle: 'Recaps',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seasonNews', 'News', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seasonNews',
+    title: 'News',
+    selector: 'div[data-hypernova-key="ArticleSlider"]',
+    elementSelector: 'h2',
+    elementTitle: 'News',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seasonFreunde', 'Deine Freunde', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seasonFreunde',
+    title: 'Deine Freunde',
+    selector: 'div[data-hypernova-key="FriendsOpinionsModule"]',
+    elementSelector: 'h2',
+    elementTitle: 'Deine Freunde',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seasonComments', 'Kommentare', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seasonComments',
+    title: 'Kommentare',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Kommentare',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seasonVideos', 'Videos & Bilder', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seasonVideos',
+    title: 'Videos & Bilder',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Videos & Bilder',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('seasonInteresse', 'Das könnte dich auch interessieren', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'seasonArtikel',
+    title: 'Weitere Artikel',
+    selector: 'div[data-hypernova-key="ArticleSlider"]',
+    elementSelector: 'h2',
+    elementTitle: 'Das könnte dich auch interessieren',
+  });
   checkboxDiv.append(categoryDiv);
 
-  var buttonDiv = buildDivWithSaveButton();
-  checkboxDiv.append(buttonDiv);
-
+  checkboxDiv.append(buildDivWithSaveButton());
   return checkboxDiv;
 }
 
-function buildDivForCategory(id, headline, childElem) {
-  var categoryDiv = document.createElement('div');
-  var checkbox = buildCheckboxForCategory(id, headline, childElem);
-  var label = buildLabelForCheckbox(checkbox);
+function buildDivForCategory(options = {}) {
+  let categoryDiv = document.createElement('div');
+  categoryDiv.classList.add('grid--col-sm-6');
+  categoryDiv.classList.add('grid--col-md-4');
+  categoryDiv.classList.add('grid--col-lg-3');
+
+  let checkbox = buildCheckboxForCategory(options);
+  let label = buildLabelForCheckbox(checkbox);
   categoryDiv.append(checkbox);
   categoryDiv.append(label);
+
   return categoryDiv;
 }
 
-function buildCheckboxForCategory(id, headline, childElem) {
-  var checkbox = document.createElement('input');
-  checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', id);
+function buildCheckboxForCategory(options = {}) {
+  let checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.id = options.key;
   checkbox.checked = true;
-  $(checkbox).attr("data-headline", headline);
-  $(checkbox).attr("data-child", childElem);
+
+  checkbox.dataset.headline = options.title;
+  checkbox.dataset.selector = options.selector;
+  checkbox.dataset.elementSelector = options.elementSelector;
+  checkbox.dataset.elementTitle = options.elementTitle;
+
   checkboxes.push(checkbox);
   return checkbox;
 }
@@ -330,32 +431,40 @@ function buildLabelForCheckbox(checkbox) {
 }
 
 function buildDivWithSaveButton() {
-  var buttonDiv = document.createElement('div');
-  var button = buildButtonWithCallback('rmvSave', 'Speichern', saveCheckboxValues);
-  buttonDiv.append(button);
+  let buttonDiv = document.createElement('div');
+  buttonDiv.classList.add('grid--col-sm-6');
+  buttonDiv.classList.add('grid--col-md-4');
+  buttonDiv.classList.add('grid--col-lg-3');
+
+  buttonDiv.append(buildButtonWithCallback('Speichern', saveCheckboxValues));
   return buttonDiv;
 }
 
-function buildButtonWithCallback(id, label, callback) {
-  var button = document.createElement('input');
+function buildButtonWithCallback(label, callback) {
+  let button = document.createElement('input');
   button.type = "button";
   button.value = label;
-  button.id = id;
-  $(button).click(callback);
+  button.classList.add('akU5C')
+  button.style.border = '2px solid black';
+  button.style.margin = '5px 5px 0';
+  button.style.padding = '5px 10px';
+  button.style.fontSize = '14px';
+
+  button.addEventListener('click', callback);
   return button;
 }
 
-function saveCheckboxValues(){
-  for(var i = 0; i < checkboxes.length; i++) {
-    var checkbox = checkboxes[i];
+function saveCheckboxValues() {
+  for (let i = 0; i < checkboxes.length; i++) {
+    let checkbox = checkboxes[i];
     localStorage.setItem(checkbox.id, checkbox.checked);
   }
   filterMainPage();
 }
 
-function loadCheckboxValues(){
-  for(var i = 0; i < checkboxes.length; i++) {
-    var checkbox = checkboxes[i];
+function loadCheckboxValues() {
+  for (let i = 0; i < checkboxes.length; i++) {
+    let checkbox = checkboxes[i];
     checkbox.checked = JSON.parse(localStorage.getItem(checkbox.id));
   }
 }
