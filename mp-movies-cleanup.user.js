@@ -71,8 +71,6 @@ function getElementForCheckbox(checkbox) {
 
   if (identifierElement) {
     return identifierElement.closest(selector)
-  } else {
-    return document.querySelector(selector)
   }
 }
 
