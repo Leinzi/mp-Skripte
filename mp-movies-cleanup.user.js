@@ -253,6 +253,12 @@ function buildButtonWithCallback(id, label, callback) {
   button.type = "button";
   button.value = label;
   button.id = id;
+  button.classList.add('akU5C')
+  button.style.border = '2px solid black';
+  button.style.margin = '5px 5px 0';
+  button.style.padding = '5px 10px';
+  button.style.fontSize = '14px';
+
   $(button).click(callback);
   return button;
 }
