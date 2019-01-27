@@ -34,6 +34,15 @@ function performCleanUp() {
   }
 }
 
+// ----- Helper - Anfang -----
+function contains(selector, text) {
+   var elements = document.querySelectorAll(selector);
+   return Array.prototype.filter.call(elements, function(element){
+      return RegExp(text).test(element.textContent);
+   });
+}
+// ----- Helper - Ende -----
+
 // ----- Filter - Anfang -----
 
 function filterMainPage() {
@@ -56,12 +65,13 @@ function hideElementByText(selection, checkbox) {
   let element = getElementByText(selection, elementSelector, elementTitle);
   let elementToHide = undefined
 
-  if (element.length > 0) {
+  if (element) {
     elementToHide = element.closest(selector)
   } else {
-    elementToHide = $(selector).first()
+    elementToHide = document.querySelector(selector)
   }
-  elementToHide.hide()
+
+  if (elementToHide) { elementToHide.style.display = 'none' }
 }
 
 function showElementByText(selection, checkbox) {
@@ -71,16 +81,17 @@ function showElementByText(selection, checkbox) {
   let element = getElementByText(selection, elementSelector, elementTitle);
   let elementToShow = undefined
 
-  if (element.length > 0) {
+  if (element) {
     elementToShow = element.closest(selector)
   } else {
-    elementToShow = $(selector).first()
+    elementToShow = document.querySelector(selector)
   }
-  elementToShow.show()
+  if (elementToShow) { elementToShow.style.display = 'block' }
 }
 
 function getElementByText(selection, descendantSelector, text) {
-  let element = $(descendantSelector + ":contains(" + text + ")").first();
+  let matches = Array.prototype.slice.call(contains(descendantSelector, text));
+  let element = matches[0];
   return element;
 }
 
