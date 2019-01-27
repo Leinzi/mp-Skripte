@@ -5,7 +5,7 @@
 // @grant               none
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-movies-cleanup.user.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             0.3.0
+// @version             0.3.1
 // ==/UserScript==
 
 // RegExps
@@ -13,7 +13,6 @@ let regMoviesMain = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)$
 
 let checkboxes = [];
 
-// Funktion, damit das Dokument erst fertig geladen wird
 if (document.readyState !== 'loading') {
   performCleanUp();
 } else {
@@ -44,12 +43,12 @@ function filterMainPage() {
     let checkbox = checkboxes[i];
     let element = getElementForCheckbox(checkbox)
 
-    if(checkbox.checked){
+    if (checkbox.checked) {
       if (element) { element.style.display = 'block' }
     } else {
       if (element) { element.style.display = 'none' }
     }
-   }
+  }
 }
 
 function getElementForCheckbox(checkbox) {
@@ -77,8 +76,8 @@ function getElementByText(selector, text) {
 function buildAndPlaceCategorySection() {
   let categorySection = buildNewSection();
 
-  let headlineWrapper = buildWrapperForHeadlines("Rubrikenauswahl", "Nicht ausgewählte Rubriken werden ausgeblendet");
-  categorySection.append(headlineWrapper);
+  let headlineColumn = buildColumnForHeadlines("Rubrikenauswahl", "Nicht ausgewählte Rubriken werden ausgeblendet");
+  categorySection.append(headlineColumn);
 
   let checkboxDiv = buildCheckboxDivForMoviesMain();
   categorySection.append(checkboxDiv);
@@ -94,7 +93,7 @@ function buildNewSection() {
   return section;
 }
 
-function buildWrapperForHeadlines(headline, subline) {
+function buildColumnForHeadlines(headline, subline) {
   let headlineColumn = document.createElement('div');
   headlineColumn.classList.add('grid--col-sm-12');
 
@@ -292,16 +291,14 @@ function buildDivWithSaveButton() {
   buttonDiv.classList.add('grid--col-md-4');
   buttonDiv.classList.add('grid--col-lg-3');
 
-  buttonDiv.append(buildButtonWithCallback('rmvSave', 'Speichern', saveCheckboxValues));
-
+  buttonDiv.append(buildButtonWithCallback('Speichern', saveCheckboxValues));
   return buttonDiv;
 }
 
-function buildButtonWithCallback(id, label, callback) {
+function buildButtonWithCallback(label, callback) {
   let button = document.createElement('input');
   button.type = "button";
   button.value = label;
-  button.id = id;
   button.classList.add('akU5C')
   button.style.border = '2px solid black';
   button.style.margin = '5px 5px 0';
@@ -312,7 +309,7 @@ function buildButtonWithCallback(id, label, callback) {
   return button;
 }
 
-function saveCheckboxValues(){
+function saveCheckboxValues() {
   for (let i = 0; i < checkboxes.length; i++) {
     let checkbox = checkboxes[i];
     localStorage.setItem(checkbox.id, checkbox.checked);
@@ -320,7 +317,7 @@ function saveCheckboxValues(){
   filterMainPage();
 }
 
-function loadCheckboxValues(){
+function loadCheckboxValues() {
   for (let i = 0; i < checkboxes.length; i++) {
     let checkbox = checkboxes[i];
     checkbox.checked = JSON.parse(localStorage.getItem(checkbox.id));
