@@ -5,7 +5,7 @@
 // @grant               none
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             3.2.1
+// @version             3.2.2
 // ==/UserScript==
 
 //RegExps
@@ -80,8 +80,6 @@ function getElementForCheckbox(checkbox) {
 
   if (identifierElement) {
     return identifierElement.closest(selector)
-  } else {
-    return document.querySelector(selector)
   }
 }
 
