@@ -5,7 +5,7 @@
 // @grant               none
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             3.2.2
+// @version             3.2.3
 // ==/UserScript==
 
 //RegExps
@@ -149,8 +149,8 @@ function buildAndPlaceCategorySection() {
   let checkboxDiv = seriesMainPage ? buildCheckboxDivForSeriesMain() : buildCheckboxDivForSeasonMain();
   categorySection.append(checkboxDiv);
 
-  let prevSection = document.querySelector('.hot-now').closest('section');
-  prevSection.after(categorySection);
+  let firstSection = document.querySelector('section');
+  firstSection.after(categorySection);
 }
 
 function buildNewSection() {

@@ -5,7 +5,7 @@
 // @grant               none
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-movies-cleanup.user.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             0.3.3
+// @version             0.3.4
 // ==/UserScript==
 
 // RegExps
@@ -92,8 +92,8 @@ function buildAndPlaceCategorySection() {
   let checkboxDiv = buildCheckboxDivForMoviesMain();
   categorySection.append(checkboxDiv);
 
-  let prevSection = document.querySelector('.hot-now').closest('section');
-  prevSection.after(categorySection);
+  let firstSection = document.querySelector('section');
+  firstSection.after(categorySection);
 }
 
 function buildNewSection() {
