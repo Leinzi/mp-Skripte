@@ -50,33 +50,37 @@ function filterMainPage() {
 }
 
 function hideElementByText(selection, checkbox) {
-  let descendantSelector = checkbox.dataset.child
-  let text = checkbox.dataset.headline
-  let selector = checkbox.dataset.selector
+  let elementSelector = checkbox.dataset.elementSelector
+  let elementTitle = checkbox.dataset.elementTitle
+  let selector = checkbox.dataset.selector || 'section'
+  let element = getElementByText(selection, elementSelector, elementTitle);
+  let elementToHide = undefined
 
-  if (selector) {
-    $(selector).hide()
+  if (element.length > 0) {
+    elementToHide = element.closest(selector)
   } else {
-    let element = getElementByText(selection, descendantSelector, text);
-    element.hide();
+    elementToHide = $(selector).first()
   }
+  elementToHide.hide()
 }
 
 function showElementByText(selection, checkbox) {
-  let descendantSelector = checkbox.dataset.child
-  let text = checkbox.dataset.headline
+  let elementSelector = checkbox.dataset.elementSelector
+  let elementTitle = checkbox.dataset.elementTitle
   let selector = checkbox.dataset.selector
+  let element = getElementByText(selection, elementSelector, elementTitle);
+  let elementToShow = undefined
 
-  if (selector) {
-    $(selector).show()
+  if (element.length > 0) {
+    elementToShow = element.closest(selector)
   } else {
-    let element = getElementByText(selection, descendantSelector, text);
-    element.show();
+    elementToShow = $(selector).first()
   }
+  elementToShow.show()
 }
 
 function getElementByText(selection, descendantSelector, text) {
-  var element = selection.filter(":has("+descendantSelector+":contains("+ text +"))");
+  let element = $(descendantSelector + ":contains(" + text + ")").first();
   return element;
 }
 
@@ -123,70 +127,133 @@ function buildWrapperForHeadlines(headline, subline) {
 function buildCheckboxDivForMoviesMain() {
   let checkboxDiv = document.createElement('div');
   checkboxDiv.id = 'rmvDiv';
-  $(checkboxDiv).addClass('grid--row');
+  checkboxDiv.classList.add('grid--row');
 
-  let categoryDiv = buildDivForCategory2({
+  let categoryDiv = buildDivForCategory({
     key: 'moviesFreunde',
     title: 'Deine Freunde',
-    selector: 'div[data-hypernova-key="FriendsOpinionsModule"]'
+    selector: 'div[data-hypernova-key="FriendsOpinionsModule"]',
+    elementSelector: 'h2',
+    elementTitle: 'Deine Freunde',
   });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory2({
+  categoryDiv = buildDivForCategory({
     key: 'moviesStreaming',
-    title: 'Kino/Streaming/TV',
-    selector: 'div[data-hypernova-key="ConsumptionModule"], div[data-hypernova-key="MovieCinemaConsumptionModule"]'
+    title: 'Streaming/TV',
+    selector: 'div[data-hypernova-key="ConsumptionModule"]',
+    elementSelector: 'h2',
+    elementTitle: 'Schaue jetzt',
   });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory2({
+  categoryDiv = buildDivForCategory({
+    key: 'moviesKino',
+    title: 'im Kino',
+    selector: 'div[data-hypernova-key="MovieCinemaConsumptionModule"]',
+    elementSelector: 'h3',
+    elementTitle: 'Aktuelle Vorstellungen',
+  });
+  checkboxDiv.append(categoryDiv);
+
+  categoryDiv = buildDivForCategory({
     key: 'moviesTrivia',
     title: 'Trivia',
-    selector: 'div[data-hypernova-key="TriviasModule"]'
+    selector: 'div[data-hypernova-key="TriviasModule"]',
+    elementSelector: 'h2',
+    elementTitle: 'Trivia',
   });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('moviesPresse', 'Pressestimmen', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'moviesPresse',
+    title: 'Pressestimmen',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Pressestimmen',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory2({
+  categoryDiv = buildDivForCategory({
+    key: 'moviesNews',
+    title: 'News',
+    selector: 'div[data-hypernova-key="ArticleSlider"]',
+    elementSelector: 'h2',
+    elementTitle: 'News',
+  });
+  checkboxDiv.append(categoryDiv);
+
+  categoryDiv = buildDivForCategory({
     key: 'moviesArtikel',
-    title: 'Artikel',
-    selector: 'div[data-hypernova-key="ArticleSlider"]'
+    title: 'Weitere Artikel',
+    selector: 'div[data-hypernova-key="ArticleSlider"]',
+    elementSelector: 'h2',
+    elementTitle: 'Das könnte dich auch interessieren',
   });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('moviesStatistik', 'Statistiken', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'moviesStatistik',
+    title: 'Statistiken',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Statistiken',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('moviesHandlung', 'Handlung', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'moviesHandlung',
+    title: 'Handlung',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Handlung',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('moviesCast', 'Cast & Crew', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'moviesCast',
+    title: 'Cast & Crew',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Cast & Crew',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('moviesComments', 'Kommentare', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'moviesComments',
+    title: 'Kommentare',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Kommentare',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory('moviesVideos', 'Videos & Bilder', 'h2');
+  categoryDiv = buildDivForCategory({
+    key: 'moviesVideos',
+    title: 'Videos & Bilder',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Videos & Bilder',
+  });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory2({
+  categoryDiv = buildDivForCategory({
     key: 'moviesLike',
     title: 'Filme wie',
-    selector: 'div[data-hypernova-key="PosterSlider"]'
+    selector: 'div[data-hypernova-key="PosterSlider"]',
+    elementSelector: 'h2',
+    elementTitle: 'Filme wie',
   });
   checkboxDiv.append(categoryDiv);
 
-  categoryDiv = buildDivForCategory2({
+  categoryDiv = buildDivForCategory({
     key: 'moviesListen',
-    title: 'Listen mit',
-    selector: 'div[data-hypernova-key="ListSlider"]'
+    title: 'Listen',
+    selector: 'div[data-hypernova-key="ListSlider"]',
+    elementSelector: 'a',
+    elementTitle: 'Listen mit',
   });
   checkboxDiv.append(categoryDiv);
-
-  // categoryDiv = buildDivForCategory('moviesInteresse', 'Das könnte dich auch interessieren', 'h2');
-  // checkboxDiv.append(categoryDiv);
 
   var buttonDiv = buildDivWithSaveButton();
   checkboxDiv.append(buttonDiv);
@@ -194,39 +261,29 @@ function buildCheckboxDivForMoviesMain() {
   return checkboxDiv;
 }
 
-function buildDivForCategory(id, headline, childElem, withinModule = false) {
+function buildDivForCategory(options = {}) {
   var categoryDiv = document.createElement('div');
   categoryDiv.classList.add('grid--col-sm-6');
   categoryDiv.classList.add('grid--col-md-4');
   categoryDiv.classList.add('grid--col-lg-3');
-  var checkbox = buildCheckboxForCategory(id, headline, childElem, null, withinModule);
+  var checkbox = buildCheckboxForCategory(options);
   var label = buildLabelForCheckbox(checkbox);
   categoryDiv.append(checkbox);
   categoryDiv.append(label);
   return categoryDiv;
 }
 
-function buildDivForCategory2(options = {}) {
-  var categoryDiv = document.createElement('div');
-  categoryDiv.classList.add('grid--col-sm-6');
-  categoryDiv.classList.add('grid--col-md-4');
-  categoryDiv.classList.add('grid--col-lg-3');
-  var checkbox = buildCheckboxForCategory(options.key, options.title, null, options.selector);
-  var label = buildLabelForCheckbox(checkbox);
-  categoryDiv.append(checkbox);
-  categoryDiv.append(label);
-  return categoryDiv;
-}
-
-function buildCheckboxForCategory(id, headline, childElem, selector, withinModule = false) {
+function buildCheckboxForCategory(options = {}) {
   var checkbox = document.createElement('input');
   checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', id);
+  checkbox.setAttribute('id', options.key);
   checkbox.checked = true;
-  $(checkbox).attr("data-headline", headline);
-  $(checkbox).attr("data-child", childElem);
-  $(checkbox).attr("data-within-module", withinModule);
-  $(checkbox).attr("data-selector", selector);
+
+  checkbox.dataset.headline = options.title;
+  checkbox.dataset.selector = options.selector;
+  checkbox.dataset.elementSelector = options.elementSelector;
+  checkbox.dataset.elementTitle = options.elementTitle;
+
   checkboxes.push(checkbox);
   return checkbox;
 }
