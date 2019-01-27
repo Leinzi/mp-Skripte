@@ -5,7 +5,7 @@
 // @grant               none
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-movies-cleanup.user.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             0.3.1
+// @version             0.3.2
 // ==/UserScript==
 
 // RegExps
@@ -25,6 +25,7 @@ function performCleanUp() {
     loadCheckboxValues();
     filterMainPage();
   }
+  bringBackTheColor();
 }
 
 // ----- Helper - Anfang -----
@@ -35,6 +36,17 @@ function contains(selector, text) {
    });
 }
 // ----- Helper - Ende -----
+
+function bringBackTheColor() {
+  let style = document.createElement('style');
+  style.type = 'text/css';
+  if (style.styleSheet) {
+    style.styleSheet.cssText = '._3gBYU { filter: none !important; }';
+  } else {
+    style.appendChild(document.createTextNode('._3gBYU { filter: none !important; }'));
+  }
+  document.getElementsByTagName('head')[0].appendChild(style);
+}
 
 // ----- Filter - Anfang -----
 
