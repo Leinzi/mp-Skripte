@@ -1,22 +1,17 @@
 // ==UserScript==
-// @name                MP-Movies-Cleanup (jQuery)
+// @name                MP-Movies-Cleanup
 // @description         Moviepilot-Filmseite bereinigen - Framework
 // @author              leinzi
 // @grant               none
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-movies-cleanup.user.js
-// @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             0.2.1
+// @version             0.3.0
 // ==/UserScript==
 
-// jQuery-Konflikte loesen
-this.$ = this.jQuery = jQuery.noConflict(true);
-
 // RegExps
-var moviesMain = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)$/;
+let regMoviesMain = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)$/;
 
-var moviesMainPage = true;
-var checkboxes = [];
+let checkboxes = [];
 
 // Funktion, damit das Dokument erst fertig geladen wird
 if (document.readyState !== 'loading') {
@@ -26,8 +21,7 @@ if (document.readyState !== 'loading') {
 }
 
 function performCleanUp() {
-  if (moviesMain.test(window.location.href)) {
-    moviesMainPage = true;
+  if (regMoviesMain.test(window.location.href)) {
     buildAndPlaceCategorySection();
     loadCheckboxValues();
     filterMainPage();
@@ -36,8 +30,8 @@ function performCleanUp() {
 
 // ----- Helper - Anfang -----
 function contains(selector, text) {
-   var elements = document.querySelectorAll(selector);
-   return Array.prototype.filter.call(elements, function(element){
+   let elements = document.querySelectorAll(selector);
+   return Array.prototype.filter.call(elements, function(element) {
       return RegExp(text).test(element.textContent);
    });
 }
@@ -46,53 +40,34 @@ function contains(selector, text) {
 // ----- Filter - Anfang -----
 
 function filterMainPage() {
-  var sections = $('section.has-vertical-spacing');
+  for (let i = 0; i < checkboxes.length; i++) {
+    let checkbox = checkboxes[i];
+    let element = getElementForCheckbox(checkbox)
 
-  for(var i = 0; i < checkboxes.length; i++) {
-    var checkbox = checkboxes[i];
     if(checkbox.checked){
-      showElementByText(sections, checkbox);
+      if (element) { element.style.display = 'block' }
     } else {
-      hideElementByText(sections, checkbox);
+      if (element) { element.style.display = 'none' }
     }
    }
 }
 
-function hideElementByText(selection, checkbox) {
+function getElementForCheckbox(checkbox) {
   let elementSelector = checkbox.dataset.elementSelector
   let elementTitle = checkbox.dataset.elementTitle
   let selector = checkbox.dataset.selector || 'section'
-  let element = getElementByText(selection, elementSelector, elementTitle);
-  let elementToHide = undefined
+  let identifierElement = getElementByText(elementSelector, elementTitle);
 
-  if (element) {
-    elementToHide = element.closest(selector)
+  if (identifierElement) {
+    return identifierElement.closest(selector)
   } else {
-    elementToHide = document.querySelector(selector)
+    return document.querySelector(selector)
   }
-
-  if (elementToHide) { elementToHide.style.display = 'none' }
 }
 
-function showElementByText(selection, checkbox) {
-  let elementSelector = checkbox.dataset.elementSelector
-  let elementTitle = checkbox.dataset.elementTitle
-  let selector = checkbox.dataset.selector
-  let element = getElementByText(selection, elementSelector, elementTitle);
-  let elementToShow = undefined
-
-  if (element) {
-    elementToShow = element.closest(selector)
-  } else {
-    elementToShow = document.querySelector(selector)
-  }
-  if (elementToShow) { elementToShow.style.display = 'block' }
-}
-
-function getElementByText(selection, descendantSelector, text) {
-  let matches = Array.prototype.slice.call(contains(descendantSelector, text));
-  let element = matches[0];
-  return element;
+function getElementByText(selector, text) {
+  let matches = Array.prototype.slice.call(contains(selector, text));
+  return matches[0];
 }
 
 // ----- Filter - Ende -----
@@ -100,45 +75,50 @@ function getElementByText(selection, descendantSelector, text) {
 // ----- Rubrikauswahl - Anfang -----
 
 function buildAndPlaceCategorySection() {
-  var categorySection = buildNewSection();
+  let categorySection = buildNewSection();
 
-  var headlineWrapper = buildWrapperForHeadlines("Rubrikenauswahl", "Nicht ausgewählte Rubriken werden ausgeblendet.");
+  let headlineWrapper = buildWrapperForHeadlines("Rubrikenauswahl", "Nicht ausgewählte Rubriken werden ausgeblendet");
   categorySection.append(headlineWrapper);
 
-  var checkboxDiv = buildCheckboxDivForMoviesMain();
+  let checkboxDiv = buildCheckboxDivForMoviesMain();
   categorySection.append(checkboxDiv);
 
-  var prevSection = $('.hot-now').closest('section');
+  let prevSection = document.querySelector('.hot-now').closest('section');
   prevSection.after(categorySection);
 }
 
 function buildNewSection() {
-  var section = document.createElement('section');
-  section.setAttribute('class', 'has-vertical-spacing');
+  let section = document.createElement('section');
+  section.classList.add('grid--row');
+  section.classList.add('has-vertical-spacing');
   return section;
 }
 
 function buildWrapperForHeadlines(headline, subline) {
-  var headlineWrapper = document.createElement('div');
-  headlineWrapper.setAttribute('class', 'h2-headline--wrapper');
+  let headlineColumn = document.createElement('div');
+  headlineColumn.classList.add('grid--col-sm-12');
 
-  var mainHeader = document.createElement("h2");
-  mainHeader.setAttribute('class', 'h2-headline');
-  $(mainHeader).text(headline);
-  headlineWrapper.append(mainHeader);
+  let mainWrapper = document.createElement('div');
+  mainWrapper.classList.add('h2-headline--wrapper');
+  let mainHeader = document.createElement("h2");
+  mainHeader.classList.add('h2-headline');
+  mainHeader.textContent = headline;
+  mainWrapper.append(mainHeader);
+  headlineColumn.append(mainWrapper);
 
-  var subHeader = document.createElement("h3");
-  subHeader.setAttribute('class', 'h3-headline');
-  $(subHeader).text(subline);
-  headlineWrapper.append(subHeader);
+  let subWrapper = document.createElement('div');
+  subWrapper.classList.add('h3-headline--wrapper');
+  let subHeader = document.createElement("h3");
+  subHeader.classList.add('h3-headline');
+  subHeader.textContent = subline;
+  subWrapper.append(subHeader);
+  headlineColumn.append(subWrapper);
 
-  return headlineWrapper;
+  return headlineColumn;
 }
 
 function buildCheckboxDivForMoviesMain() {
   let checkboxDiv = document.createElement('div');
-  checkboxDiv.id = 'rmvDiv';
-  checkboxDiv.classList.add('grid--row');
 
   let categoryDiv = buildDivForCategory({
     key: 'moviesFreunde',
@@ -266,28 +246,28 @@ function buildCheckboxDivForMoviesMain() {
   });
   checkboxDiv.append(categoryDiv);
 
-  var buttonDiv = buildDivWithSaveButton();
-  checkboxDiv.append(buttonDiv);
-
+  checkboxDiv.append(buildDivWithSaveButton());
   return checkboxDiv;
 }
 
 function buildDivForCategory(options = {}) {
-  var categoryDiv = document.createElement('div');
+  let categoryDiv = document.createElement('div');
   categoryDiv.classList.add('grid--col-sm-6');
   categoryDiv.classList.add('grid--col-md-4');
   categoryDiv.classList.add('grid--col-lg-3');
-  var checkbox = buildCheckboxForCategory(options);
-  var label = buildLabelForCheckbox(checkbox);
+
+  let checkbox = buildCheckboxForCategory(options);
+  let label = buildLabelForCheckbox(checkbox);
   categoryDiv.append(checkbox);
   categoryDiv.append(label);
+
   return categoryDiv;
 }
 
 function buildCheckboxForCategory(options = {}) {
-  var checkbox = document.createElement('input');
-  checkbox.setAttribute('type', 'checkbox');
-  checkbox.setAttribute('id', options.key);
+  let checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.id = options.key;
   checkbox.checked = true;
 
   checkbox.dataset.headline = options.title;
@@ -300,24 +280,25 @@ function buildCheckboxForCategory(options = {}) {
 }
 
 function buildLabelForCheckbox(checkbox) {
-  var label = document.createElement('label');
+  let label = document.createElement('label');
   label.htmlFor = checkbox.id;
   label.appendChild(document.createTextNode(checkbox.dataset.headline));
   return label;
 }
 
 function buildDivWithSaveButton() {
-  var buttonDiv = document.createElement('div');
+  let buttonDiv = document.createElement('div');
   buttonDiv.classList.add('grid--col-sm-6');
   buttonDiv.classList.add('grid--col-md-4');
   buttonDiv.classList.add('grid--col-lg-3');
-  var button = buildButtonWithCallback('rmvSave', 'Speichern', saveCheckboxValues);
-  buttonDiv.append(button);
+
+  buttonDiv.append(buildButtonWithCallback('rmvSave', 'Speichern', saveCheckboxValues));
+
   return buttonDiv;
 }
 
 function buildButtonWithCallback(id, label, callback) {
-  var button = document.createElement('input');
+  let button = document.createElement('input');
   button.type = "button";
   button.value = label;
   button.id = id;
@@ -327,21 +308,21 @@ function buildButtonWithCallback(id, label, callback) {
   button.style.padding = '5px 10px';
   button.style.fontSize = '14px';
 
-  $(button).click(callback);
+  button.addEventListener('click', callback);
   return button;
 }
 
 function saveCheckboxValues(){
-  for(var i = 0; i < checkboxes.length; i++) {
-    var checkbox = checkboxes[i];
+  for (let i = 0; i < checkboxes.length; i++) {
+    let checkbox = checkboxes[i];
     localStorage.setItem(checkbox.id, checkbox.checked);
   }
   filterMainPage();
 }
 
 function loadCheckboxValues(){
-  for(var i = 0; i < checkboxes.length; i++) {
-    var checkbox = checkboxes[i];
+  for (let i = 0; i < checkboxes.length; i++) {
+    let checkbox = checkboxes[i];
     checkbox.checked = JSON.parse(localStorage.getItem(checkbox.id));
   }
 }
