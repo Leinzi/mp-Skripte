@@ -5,17 +5,17 @@
 // @grant               none
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             3.2.4
+// @version             3.2.5
 // ==/UserScript==
 
 //RegExps
-var regSeriesMain = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)$/;
+let regSeriesMain = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)$/;
 let regSeriesComments = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(kritik)([^\/]*)?(\/([^\/]*))?$/;
-var regSeriesSeason = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)$/;
+let regSeriesSeason = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)$/;
 let regSeriesSeasonComments = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)\/(kritik)([^\/]*)?(\/([^\/]*))?$/;
 
-var seriesMainPage = true;
-var checkboxes = [];
+let seriesMainPage = true;
+let checkboxes = [];
 
 if (document.readyState !== 'loading') {
   performCleanUp();
@@ -34,6 +34,7 @@ function performCleanUp() {
    improveComments();
   }
 
+  removeFooterVideoplayer();
   bringBackTheColor();
   improveFonts();
 }
@@ -69,12 +70,12 @@ function filterMainPage() {
 }
 
 function hideElementByText(selection, descendantSelector, text) {
-  var element = getElementByText(selection, descendantSelector, text);
+  let element = getElementByText(selection, descendantSelector, text);
   element.hide();
 }
 
 function showElementByText(selection, descendantSelector, text) {
-  var element = getElementByText(selection, descendantSelector, text);
+  let element = getElementByText(selection, descendantSelector, text);
   element.show();
 }
 
@@ -97,6 +98,11 @@ function getElementByText(selector, text) {
 // ----- Filter - Ende -----
 
 // ----- Improvements - Anfang -----
+
+function removeFooterVideoplayer() {
+  let footerVideo = document.querySelector('.video--player--footer');
+  footerVideo.style.display = 'none';
+}
 
 function bringBackTheColor() {
   let style = document.createElement('style');
@@ -433,7 +439,7 @@ function buildCheckboxForCategory(options = {}) {
 }
 
 function buildLabelForCheckbox(checkbox) {
-  var label = document.createElement('label');
+  let label = document.createElement('label');
   label.htmlFor = checkbox.id;
   label.appendChild(document.createTextNode(checkbox.dataset.headline));
   return label;

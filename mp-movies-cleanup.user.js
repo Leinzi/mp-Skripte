@@ -5,7 +5,7 @@
 // @grant               none
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-movies-cleanup.user.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             0.3.5
+// @version             0.3.6
 // ==/UserScript==
 
 // RegExps
@@ -29,6 +29,7 @@ function performCleanUp() {
    improveComments();
   }
 
+  removeFooterVideoplayer();
   bringBackTheColor();
   improveFonts();
 }
@@ -76,6 +77,11 @@ function getElementByText(selector, text) {
 // ----- Filter - Ende -----
 
 // ----- Improvements - Anfang -----
+
+function removeFooterVideoplayer() {
+  let footerVideo = document.querySelector('.video--player--footer');
+  footerVideo.style.display = 'none';
+}
 
 function bringBackTheColor() {
   let style = document.createElement('style');
