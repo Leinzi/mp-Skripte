@@ -29,7 +29,6 @@ function performCleanUp() {
    improveComments();
   }
 
-  removeFooterVideoplayer();
   bringBackTheColor();
   improveFonts();
 }
@@ -77,11 +76,6 @@ function getElementByText(selector, text) {
 // ----- Filter - Ende -----
 
 // ----- Improvements - Anfang -----
-
-function removeFooterVideoplayer() {
-  let footerVideo = document.querySelector('.video--player--footer');
-  footerVideo.style.display = 'none';
-}
 
 function bringBackTheColor() {
   let style = document.createElement('style');
