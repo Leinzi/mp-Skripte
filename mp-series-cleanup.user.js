@@ -10,7 +10,9 @@
 
 //RegExps
 var regSeriesMain = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)$/;
+let regSeriesComments = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(kritik)([^\/]*)?(\/([^\/]*))?$/;
 var regSeriesSeason = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)$/;
+let regSeriesSeasonComments = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)\/(kritik)([^\/]*)?(\/([^\/]*))?$/;
 
 var seriesMainPage = true;
 var checkboxes = [];
@@ -28,8 +30,12 @@ function performCleanUp() {
   } else if (regSeriesSeason.test(window.location.href) ) {
     seriesMainPage = false;
     cleanUpMainPage();
+  } else if (regSeriesComments.test(window.location.href) || regSeriesSeasonComments.test(window.location.href)) {
+   improveComments();
   }
-  bringBackTheColor()
+
+  bringBackTheColor();
+  improveFonts();
 }
 
 function cleanUpMainPage(){
@@ -90,6 +96,8 @@ function getElementByText(selector, text) {
 
 // ----- Filter - Ende -----
 
+// ----- Improvements - Anfang -----
+
 function bringBackTheColor() {
   let style = document.createElement('style');
   style.type = 'text/css';
@@ -101,40 +109,31 @@ function bringBackTheColor() {
   document.getElementsByTagName('head')[0].appendChild(style);
 }
 
-// ----- Improvements - Anfang -----
+function improveComments() {
+  let commentsSection = document.querySelector('section')
+  let commentsDiv = commentsSection.querySelector('.grid--col-sm-12')
+  commentsDiv.classList.add('grid--col-md-10')
+  commentsDiv.classList.add('grid--col-lg-9')
 
-// function improveStyle() {
-//   //$('.layout--content-width').css({'max-width': '75%'});
-//   //$('._3CAHP').css({'max-width': '80%'});
-//
-//   $('.hero').css('height', '250px');
-//   $('.has-vertical-spacing').css('padding', '25px 0');
-//   $('.item-statistics').css('margin-top', '0');
-//   $('.item-statistics--area').css('margin-top', '25px');
-//   $('.item-statistics--subline.typo--teaser-body').css({'font-size': '14px', 'line-height': '24px'});
-//
-//   $('.typo--long-body').css({'font-size': '15px', 'line-height': '24px'});
-//   $('.meta-details--heading').css({'margin-top': '0', 'font-size': '14px', 'text-transform': 'none'});
-//   $('.meta-details--content').css({'margin-bottom': '15px', 'font-size': '14px'});
-//   $('.slider--avatars').css({'height': '250px'});
-//   $('.slider--avatars--item').css({'flex-basis': '180px', 'margin-right': '20px'});
-//   $('.avatar--image').css({'filter': 'none', '-webkit-filter': 'none'});
-//   $('.avatar--gradient').css({'background': 'none'});
-//
-//   $('._3gBYU').css({'filter': 'none', '-webkit-filter': 'none'});
-//
-//   $('._3WDUx').css({'background': 'none'});
-//   $('.cLbdk').css({'font-size': '13px'});
-//   $('.X76-l').css({'font-size': '13px', 'line-height': '1.4em'});
-//   $('h2').css({'font-size': '26px', 'line-height': '29px', 'letter-spacing': '0.02em'});
-//   $('.avatar--list-item--title-subline').css({'font-size': '15px'});
-//
-//   $('.typo--long-body').css({'text-align': 'justify'});
-//   $('.typo--teaser-body').css({'text-align': 'justify', 'margin-right': '20px'});
-//   $('.item-statistics--subline').css({'text-align': 'center', 'margin-right': '0'});
-//
-//   $('._1w4X-').css({'text-align': 'justify'});
-// }
+  let paddingRight = document.createElement('div')
+  paddingRight.classList.add('grid--col-md-2')
+  paddingRight.classList.add('grid--col-lg-3')
+  commentsDiv.after(paddingRight)
+}
+
+function improveFonts() {
+  let style = document.createElement('style');
+  style.type = 'text/css';
+
+  let improvements = '._3-wEn[itemprop="text"] { font-size: 16px !important; } ._3-wEn[itemprop="text"] ._1xAhf { max-height: 500px !important; } .typo--long-body { font-size: 16px !important; }'
+
+  if (style.styleSheet) {
+    style.styleSheet.cssText = improvements;
+  } else {
+    style.appendChild(document.createTextNode(improvements));
+  }
+  document.getElementsByTagName('head')[0].appendChild(style);
+}
 
 // ----- Improvements - Ende -----
 

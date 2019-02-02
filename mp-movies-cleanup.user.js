@@ -10,6 +10,7 @@
 
 // RegExps
 let regMoviesMain = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)$/;
+let regMoviesComments = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)\/(kritik)([^\/]*)?(\/([^\/]*))?$/;
 
 let checkboxes = [];
 
@@ -24,8 +25,12 @@ function performCleanUp() {
     buildAndPlaceCategorySection();
     loadCheckboxValues();
     filterMainPage();
+  } else if (regMoviesComments.test(window.location.href)) {
+   improveComments();
   }
+
   bringBackTheColor();
+  improveFonts();
 }
 
 // ----- Helper - Anfang -----
@@ -36,17 +41,6 @@ function contains(selector, text) {
    });
 }
 // ----- Helper - Ende -----
-
-function bringBackTheColor() {
-  let style = document.createElement('style');
-  style.type = 'text/css';
-  if (style.styleSheet) {
-    style.styleSheet.cssText = '._3gBYU { filter: none !important; }';
-  } else {
-    style.appendChild(document.createTextNode('._3gBYU { filter: none !important; }'));
-  }
-  document.getElementsByTagName('head')[0].appendChild(style);
-}
 
 // ----- Filter - Anfang -----
 
@@ -80,6 +74,47 @@ function getElementByText(selector, text) {
 }
 
 // ----- Filter - Ende -----
+
+// ----- Improvements - Anfang -----
+
+function bringBackTheColor() {
+  let style = document.createElement('style');
+  style.type = 'text/css';
+  if (style.styleSheet) {
+    style.styleSheet.cssText = '._3gBYU { filter: none !important; }';
+  } else {
+    style.appendChild(document.createTextNode('._3gBYU { filter: none !important; }'));
+  }
+  document.getElementsByTagName('head')[0].appendChild(style);
+}
+
+function improveComments() {
+  let commentsSection = document.querySelector('section')
+  let commentsDiv = commentsSection.querySelector('.grid--col-sm-12')
+  commentsDiv.classList.add('grid--col-md-10')
+  commentsDiv.classList.add('grid--col-lg-9')
+
+  let paddingRight = document.createElement('div')
+  paddingRight.classList.add('grid--col-md-2')
+  paddingRight.classList.add('grid--col-lg-3')
+  commentsDiv.after(paddingRight)
+}
+
+function improveFonts() {
+  let style = document.createElement('style');
+  style.type = 'text/css';
+
+  let improvements = '._3-wEn[itemprop="text"] { font-size: 16px !important; } ._3-wEn[itemprop="text"] ._1xAhf { max-height: 500px !important; } .typo--long-body { font-size: 16px !important; }'
+
+  if (style.styleSheet) {
+    style.styleSheet.cssText = improvements;
+  } else {
+    style.appendChild(document.createTextNode(improvements));
+  }
+  document.getElementsByTagName('head')[0].appendChild(style);
+}
+
+// ----- Improvements - Ende -----
 
 // ----- Rubrikauswahl - Anfang -----
 
