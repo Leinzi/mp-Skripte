@@ -5,7 +5,7 @@
 // @grant               none
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-movies-cleanup.user.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             0.3.7
+// @version             0.3.8
 // ==/UserScript==
 
 // RegExps
@@ -285,7 +285,7 @@ function buildCheckboxDivForMoviesMain() {
     key: 'moviesListen',
     title: 'Listen',
     selector: 'div[data-hypernova-key="ListSlider"]',
-    elementSelector: 'a',
+    elementSelector: 'div',
     elementTitle: 'Trending: Meist diskutierte',
   });
   checkboxDiv.append(categoryDiv);
