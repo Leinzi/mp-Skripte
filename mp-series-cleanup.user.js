@@ -5,7 +5,7 @@
 // @grant               none
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
 // @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             3.3.0
+// @version             3.3.1
 // ==/UserScript==
 
 //RegExps
@@ -101,7 +101,9 @@ function getElementByText(selector, text) {
 
 function removeFooterVideoplayer() {
   let footerVideo = document.querySelector('.video--player--footer');
-  footerVideo.style.display = 'none';
+  if footerVideo {
+    footerVideo.style.display = 'none';
+  }
 }
 
 function bringBackTheColor() {
