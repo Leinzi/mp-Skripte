@@ -101,7 +101,7 @@ function getElementByText(selector, text) {
 
 function removeFooterVideoplayer() {
   let footerVideo = document.querySelector('.video--player--footer');
-  if footerVideo {
+  if (footerVideo) {
     footerVideo.style.display = 'none';
   }
 }
