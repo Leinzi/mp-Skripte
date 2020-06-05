@@ -5,31 +5,22 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-ratings.user.js
 // @require             https://code.jquery.com/jquery-3.5.1.min.js
-// @include             /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)\/filmography$/
-// @version             0.0.1
+// @include             /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/
+// @version             0.0.2
 // ==/UserScript==
 
 // jQuery-Konflikte loesen
-this.$ = this.jQuery = jQuery.noConflict(true);
+this.$ = this.jQuery
 
 //RegExps
-var regPeople = /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)\/filmography$/;
+const regPeople = /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/;
 
 var sidebarSections = [];
 var mainSections = [];
 
 // Funktion, damit das Dokument erst fertig geladen wird
 $(document).ready(function(){
-
-  var getURL = window.location.href.replace('.html', '');
-
-  // cleanUpHeader();
-  // cleanUpFooter();
-  // restructureSidebar();
-  // cleanUpMiddleBar();
-  // cleanUpMainPage();
-
-  // justifyTextContent();
+  const getURL = window.location.href.replace('.html', '');
 
   if (regPeople.test(getURL)){
     alert('läuft');
