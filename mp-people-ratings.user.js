@@ -23,34 +23,50 @@ $(document).ready(function(){
   const getURL = window.location.href.replace('.html', '');
 
   if (regPeople.test(getURL)){
-    alert('läuft');
-    // cleanUpPeoplePage();
+    addRatingsToFilmography();
   }
 });
 
-function cleanUpPeoplePage() {
-  $('#ads-outer').remove();
-  $('.advertisement--medium-rectangle').remove();
-  jQuery('hr').hide();
+function addRatingsToFilmography() {
+  let $tables = $('table');
 
-  removeEmptyParagraphs();
-  // Übersicht
-  // Blocksatz
-  // $('.person--description').css({'text-align': 'justify'});
-  // $('.comment--replies--list').css({'text-align': 'justify'});
-  // $('.comment--body').css({'text-align': 'justify'});
+  $tables.each(function() {
+    let $table = $(this);
+    // let $headline = $table.
+    let $rows = $table.find('tr')
 
-  //Rubriken verstecken
-  // jQuery('.js--content-editor--sidebar').remove();
+    $rows.each(function() {
+      let $row = $(this)
+      let link = $row.find('.table-with-involvement a').first()
+      makeAjaxCall(link, "GET").then(appendEntry, function(reason){
+          console.log("error in processing your request", reason);
+      });
 
-  restructureSidebar();
-  $('sidebar-list hr').remove();
-  restructureMainContent();
+    })
+  });
 
-  //Videos
-  $('.trailer_play_button').hide();
-  $('.sidebar_trailer_pure, .sidebar_trailer_pure_background').css({'margin': '0', 'width': 'auto'});
+}
 
+
+function appendEntry(data) {
+  var header = $(data).find('h1.article--header--title').html();
+
+  if(/Das könnte dich auch interessieren/.test(header)) {
+    return '';
+  } else {
+    var elem = $('<div>')
+    elem.append('<span>' + header + ': </span></br>');
+    elem.append('<a href="' + this.url + '">' + this.url + '</a></br>');
+    return elem;
+  }
+}
+
+function makeAjaxCall(url, methodType, callback) {
+  return $.ajax({
+      url: url,
+      method: methodType,
+      dataType: 'html'
+  });
 }
 
 function appendSelectionTo(parent, selection){
