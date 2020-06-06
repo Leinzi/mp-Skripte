@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-ratings.user.js
 // @require             https://code.jquery.com/jquery-3.5.1.min.js
 // @include             /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/
-// @version             0.1.0
+// @version             0.1.1
 // ==/UserScript==
 
 
@@ -17,6 +17,7 @@ const regPeople = /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmogra
 jQuery(document).ready(function(){
     const baseURL = 'https://www.moviepilot.de';
     const getURL = window.location.href.replace('.html', '');
+    const reducer = (accumulator, currentValue) => accumulator + currentValue;
     const perPage = 100;
     let moviesListURL = null;
     let moviePages = 0
@@ -60,7 +61,7 @@ jQuery(document).ready(function(){
             rows.forEach(row => {
                 let fields = row.querySelectorAll('td')
                 let link = fields[0].querySelector('a').href
-                let rating = parseFloat(fields[1].innerText).toFixed(1)
+                let rating = parseFloat(fields[1].innerText)
                 let entry = { link: link, rating: rating }
                 entries.push(entry)
             })
@@ -82,7 +83,9 @@ jQuery(document).ready(function(){
         let ratings = data.flatten()
         let tables = document.querySelectorAll('table');
         tables.forEach((table) => {
+            let headline = table.previous()
             let rows = table.querySelectorAll('tr');
+            let matchedRatings = [];
             rows.forEach((row) => {
                 let link = row.querySelector('td a').href
                 let matches = ratings.filter((ratingEntry) => {
@@ -91,6 +94,8 @@ jQuery(document).ready(function(){
                 let rating = '?'
                 if (matches.length > 0) {
                     rating = matches[0].rating
+                    matchedRatings.push(rating)
+                    rating = rating.toFixed(1)
                 }
 
                 var elem = jQuery('<td>')
@@ -101,6 +106,12 @@ jQuery(document).ready(function(){
                 elem.append(innerElem);
                 row.append(elem);
             })
+            var statistics = document.createElement('div')
+            statistics.style.fontSize = '1rem'
+            statistics.style.marginBottom = '1.25rem'
+            var mean = (matchedRatings.length === 0) ? '-' : (matchedRatings.reduce(reducer, 0)/matchedRatings.length)
+            statistics.innerText = `Bewertet: ${matchedRatings.length}/${rows.length}, Durchschnitt: ${mean}`
+            headline.after(statistics)
         })
     }
     function stringToHTML(str) {
