@@ -6,60 +6,121 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-ratings.user.js
 // @require             https://code.jquery.com/jquery-3.5.1.min.js
 // @include             /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/
-// @version             0.0.3
+// @version             0.1.0
 // ==/UserScript==
 
 
 //RegExps
 const regPeople = /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/;
-const baseURL = 'https://www.moviepilot.de';
 
 // Funktion, damit das Dokument erst fertig geladen wird
 jQuery(document).ready(function(){
-  const getURL = window.location.href.replace('.html', '');
+    const baseURL = 'https://www.moviepilot.de';
+    const getURL = window.location.href.replace('.html', '');
+    const perPage = 100;
+    let moviesListURL = null;
+    let moviePages = 0
+    let seriesListURL = null;
+    let seriesPages = 0;
 
-  if (regPeople.test(getURL)){
-    addRatingsToFilmography();
-  }
+    const ratings = [];
+    let sessionURL = 'https://www.moviepilot.de/api/session';
+    makeAjaxCall(sessionURL, "GET", 'json')
+        .then(initalize)
+        .then(fetchMovieRatings)
+        .then(fetchSeriesRatings)
+        .then(addRatingsToFilmography)
+
+    function initalize(xhr) {
+        if (xhr.status == 200) {
+            let data = JSON.parse(xhr.response)
+            moviesListURL = baseURL + data.movie_ratings_path;
+            moviePages = Math.ceil(data.movie_ratings / 100)
+            seriesListURL = baseURL + data.series_ratings_path;
+            seriesPages = Math.ceil(data.series_ratings / 100)
+            return [];
+        }
+    }
+
+    function fetchMovieRatings(data) {
+        let pages = new Array(moviePages)
+        for (var i = 1; i <= moviePages; i++) {
+            pages[i-1] = makeAjaxCall(moviesListURL + "?page=" + i, "GET").then(mapEntries, function(reason){
+                console.log("error in processing your request", reason);
+            });
+        }
+        return Promise.all(pages)
+    }
+    function mapEntries(xhr) {
+        if (xhr.status == 200) {
+            let data = xhr.response
+            let dom = stringToHTML(data)
+            let rows = dom.querySelectorAll('tbody tr')
+            let entries = []
+            rows.forEach(row => {
+                let fields = row.querySelectorAll('td')
+                let link = fields[0].querySelector('a').href
+                let rating = parseFloat(fields[1].innerText).toFixed(1)
+                let entry = { link: link, rating: rating }
+                entries.push(entry)
+            })
+            return entries
+        }
+    }
+
+    function fetchSeriesRatings(data) {
+        let pages = new Array(seriesPages)
+        for (var i = 1; i <= seriesPages; i++) {
+            pages[i-1] = makeAjaxCall(seriesListURL + "?page=" + i, "GET").then(mapEntries, function(reason){
+                console.log("error in processing your request", reason);
+            });
+        }
+        return Promise.all(data.concat(pages))
+    }
+
+    function addRatingsToFilmography(data) {
+        let ratings = data.flatten()
+        let tables = document.querySelectorAll('table');
+        tables.forEach((table) => {
+            let rows = table.querySelectorAll('tr');
+            rows.forEach((row) => {
+                let link = row.querySelector('td a').href
+                let matches = ratings.filter((ratingEntry) => {
+                    return ratingEntry.link === link
+                })
+                let rating = '?'
+                if (matches.length > 0) {
+                    rating = matches[0].rating
+                }
+
+                var elem = jQuery('<td>')
+                var innerElem = jQuery('<b>')
+                elem = elem[0];
+                innerElem = innerElem[0];
+                innerElem.innerText = rating;
+                elem.append(innerElem);
+                row.append(elem);
+            })
+        })
+    }
+    function stringToHTML(str) {
+        var dom = document.createElement('div');
+        dom.innerHTML = str;
+        return dom;
+    };
+
+    function makeAjaxCall(url, methodType, dataType, callback) {
+        return new Promise(function(resolve, reject) {
+            const httpRequest = new XMLHttpRequest();
+            httpRequest.onload = function() {
+                resolve(this)
+            }
+            httpRequest.onerror = function() {
+                reject(new Error("Network error"))
+            }
+            httpRequest.open(methodType, url);
+            httpRequest.send();
+
+        })
+    }
 });
-
-function addRatingsToFilmography() {
-  let $tables = jQuery('table');
-
-  $tables.each(function() {
-    let $table = jQuery(this);
-    let $rows = $table.find('tr')
-
-    $rows.each(function() {
-      let $row = jQuery(this)
-      let link = $row.find('td a').first()
-      link = link.attr('href');
-      let promise = makeAjaxCall(baseURL + link, "GET").then(appendEntry, function(reason){
-          console.log("error in processing your request", reason);
-      });
-
-      promise.then (values => {
-          $row.append(values);
-      });
-
-    })
-  });
-
-}
-
-function appendEntry(data) {
-  var ratingCircle = jQuery(data).find('._3ncdv ._2HXwc')[0];
-  var rating = ratingCircle.innerText;
-    var elem = jQuery('<td>')
-    elem = elem[0];
-    elem.innerText = rating;
-    return elem;
-}
-
-function makeAjaxCall(url, methodType, callback) {
-  return jQuery.ajax({
-      url: url,
-      method: methodType,
-      dataType: 'html',
-  });
-}
