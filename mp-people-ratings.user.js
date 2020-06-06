@@ -109,7 +109,7 @@ jQuery(document).ready(function(){
             var statistics = document.createElement('div')
             statistics.style.fontSize = '1rem'
             statistics.style.marginBottom = '1.25rem'
-            var mean = (matchedRatings.length === 0) ? '-' : (matchedRatings.reduce(reducer, 0)/matchedRatings.length)
+            var mean = (matchedRatings.length === 0) ? '-' : (Math.round((matchedRatings.reduce(reducer, 0) / matchedRatings.length) * 10000) / 10000.0)
             statistics.innerText = `Bewertet: ${matchedRatings.length}/${rows.length}, Durchschnitt: ${mean}`
             headline.after(statistics)
         })
