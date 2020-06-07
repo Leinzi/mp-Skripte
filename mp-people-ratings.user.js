@@ -5,11 +5,11 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-ratings.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/
-// @version             0.2.0
+// @version             0.2.1
 // ==/UserScript==
 
 
-// TODO: Error Handling
+// Funktion, damit das Dokument erst fertig geladen wird
 if (document.readyState !== 'loading') {
   addRatingsToFilmography()
 } else {
@@ -17,15 +17,12 @@ if (document.readyState !== 'loading') {
 }
 
 function addRatingsToFilmography() {
-  fetchSession()
+  let sessionURL = 'https://www.moviepilot.de/api/session'
+  makeAjaxCall(sessionURL)
+    .then(processSettings)
     .then(fetchRatings)
     .then(processFilmography)
     .catch(handleErrors)
-
-  function fetchSession() {
-    let sessionURL = 'https://www.moviepilot.de/api/session'
-    return makeAjaxCall(sessionURL).then(processSettings)
-  }
 
   function processSettings(request) {
     return new Promise(function(resolve, reject) {
@@ -51,10 +48,9 @@ function addRatingsToFilmography() {
   }
 
   function fetchRatings(settings) {
-    let ratingPromises = []
-    ratingPromises.push(fetchRatingsFromList(settings.moviesListURL, settings.moviePages))
-    ratingPromises.push(fetchRatingsFromList(settings.seriesListURL, settings.seriesPages))
-    return Promise.all(ratingPromises)
+    let moviesPromise = fetchRatingsFromList(settings.moviesListURL, settings.moviePages)
+    let seriesPromise = fetchRatingsFromList(settings.seriesListURL, settings.seriesPages)
+    return Promise.all([moviesPromise, seriesPromise])
   }
 
   function fetchRatingsFromList(listURL, pageCount) {
@@ -158,6 +154,6 @@ function addRatingsToFilmography() {
   }
 
   function handleErrors(error) {
-    console.log(error.message)
+    console.error(error.message)
   }
 }
