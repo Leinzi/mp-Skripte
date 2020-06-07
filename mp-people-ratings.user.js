@@ -12,32 +12,28 @@
 
 // Funktion, damit das Dokument erst fertig geladen wird
 jQuery(document).ready(function(){
-    const baseURL = 'https://www.moviepilot.de';
 
-    const reducer = (accumulator, currentValue) => accumulator + currentValue;
-    const perPage = 100;
-    let moviesListURL = null;
-    let moviePages = 0
-    let seriesListURL = null;
-    let seriesPages = 0;
-
-    const ratings = [];
-    let sessionURL = 'https://www.moviepilot.de/api/session';
-    makeAjaxCall(sessionURL)
-        .then(initalize)
+    fetchSession()
         .then(fetchRatings)
         .then(addRatingsToFilmography)
 
-    function initalize(xhr) {
+   function fetchSession() {
+     let sessionURL = 'https://www.moviepilot.de/api/session'
+     return makeAjaxCall(sessionURL).then(getSettings, handleErrors)
+    }
+
+    function getSettings(sessionResponse) {
       return new Promise(function(resolve, reject) {
-        if (xhr.status == 200) {
-            let data = JSON.parse(xhr.response)
+        if (sessionResponse.status == 200) {
+            let data = JSON.parse(sessionResponse.response)
             if (data.type === 'RegisteredUser') {
+              const baseURL = 'https://www.moviepilot.de';
+              const perPage = 100;
               let settings = {
                 moviesListURL: baseURL + data.movie_ratings_path,
-                moviePages: Math.ceil(data.movie_ratings / 100),
+                moviePages: Math.ceil(data.movie_ratings / perPage),
                 seriesListURL: baseURL + data.series_ratings_path,
-                seriesPages: Math.ceil(data.series_ratings / 100),
+                seriesPages: Math.ceil(data.series_ratings / perPage),
               }
               resolve(settings)
             } else {
@@ -56,13 +52,10 @@ jQuery(document).ready(function(){
         return Promise.all(ratingPromises)
     }
 
-    function fetchRatingsFromList(baseURL, pageCount) {
+    function fetchRatingsFromList(listURL, pageCount) {
         let pages = []
-        for (var i = 1; i <= pageCount; i++) {
-            let page = makeAjaxCall(baseURL + "?page=" + i).then(mapEntries, function(reason){
-                console.log("error in processing your request", reason);
-            });
-            pages.push(page)
+        for (let i = 1; i <= pageCount; i++) {
+          pages.push(makeAjaxCall(listURL + "?page=" + i).then(mapEntries, handleErrors))
         }
         return Promise.all(pages)
     }
@@ -113,16 +106,23 @@ jQuery(document).ready(function(){
             var statistics = document.createElement('div')
             statistics.style.fontSize = '1rem'
             statistics.style.marginBottom = '1.25rem'
-            var mean = (matchedRatings.length === 0) ? '-' : (Math.round((matchedRatings.reduce(reducer, 0) / matchedRatings.length) * 10000) / 10000.0)
+            var mean = (matchedRatings.length === 0) ? '-' : (Math.round((sumArray(matchedRatings) / matchedRatings.length) * 10000) / 10000.0)
             statistics.innerText = `Bewertet: ${matchedRatings.length}/${rows.length}, Durchschnitt: ${mean}`
             headline.after(statistics)
         })
     }
-    function stringToHTML(str) {
-        var dom = document.createElement('div');
-        dom.innerHTML = str;
-        return dom;
-    };
+
+    // Utilities
+    function sumArray(array, initValue = 0) {
+      const reducer = (accumulator, currentValue) => accumulator + currentValue;
+      array.reduce(reducer, initValue)
+    }
+
+    function stringToHTML(string) {
+        var dom = document.createElement('div')
+        dom.innerHTML = string
+        return dom
+    }
 
     function makeAjaxCall(url) {
         return new Promise(function(resolve, reject) {
@@ -137,5 +137,9 @@ jQuery(document).ready(function(){
             httpRequest.send();
 
         })
+    }
+
+    function handleErrors(error) {
+      console.error(error.message);
     }
 });
