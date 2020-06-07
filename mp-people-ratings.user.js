@@ -10,13 +10,10 @@
 // ==/UserScript==
 
 
-//RegExps
-const regPeople = /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/;
-
 // Funktion, damit das Dokument erst fertig geladen wird
 jQuery(document).ready(function(){
     const baseURL = 'https://www.moviepilot.de';
-    const getURL = window.location.href.replace('.html', '');
+
     const reducer = (accumulator, currentValue) => accumulator + currentValue;
     const perPage = 100;
     let moviesListURL = null;
@@ -26,32 +23,50 @@ jQuery(document).ready(function(){
 
     const ratings = [];
     let sessionURL = 'https://www.moviepilot.de/api/session';
-    makeAjaxCall(sessionURL, "GET", 'json')
+    makeAjaxCall(sessionURL)
         .then(initalize)
-        .then(fetchMovieRatings)
-        .then(fetchSeriesRatings)
+        .then(fetchRatings)
         .then(addRatingsToFilmography)
 
     function initalize(xhr) {
+      return new Promise(function(resolve, reject) {
         if (xhr.status == 200) {
             let data = JSON.parse(xhr.response)
-            moviesListURL = baseURL + data.movie_ratings_path;
-            moviePages = Math.ceil(data.movie_ratings / 100)
-            seriesListURL = baseURL + data.series_ratings_path;
-            seriesPages = Math.ceil(data.series_ratings / 100)
-            return [];
+            if (data.type === 'RegisteredUser') {
+              let settings = {
+                moviesListURL: baseURL + data.movie_ratings_path,
+                moviePages: Math.ceil(data.movie_ratings / 100),
+                seriesListURL: baseURL + data.series_ratings_path,
+                seriesPages: Math.ceil(data.series_ratings / 100),
+              }
+              resolve(settings)
+            } else {
+              reject(new Error('Only works when signed in.'))
+            }
+        } else {
+          reject(new Error('There was an error in processing your request'))
         }
+      });
     }
 
-    function fetchMovieRatings(data) {
-        let pages = new Array(moviePages)
-        for (var i = 1; i <= moviePages; i++) {
-            pages[i-1] = makeAjaxCall(moviesListURL + "?page=" + i, "GET").then(mapEntries, function(reason){
+    function fetchRatings(settings) {
+        let ratingPromises = []
+        ratingPromises.push(fetchRatingsFromList(settings.moviesListURL, settings.moviePages))
+        ratingPromises.push(fetchRatingsFromList(settings.seriesListURL, settings.seriesPages))
+        return Promise.all(ratingPromises)
+    }
+
+    function fetchRatingsFromList(baseURL, pageCount) {
+        let pages = []
+        for (var i = 1; i <= pageCount; i++) {
+            let page = makeAjaxCall(baseURL + "?page=" + i).then(mapEntries, function(reason){
                 console.log("error in processing your request", reason);
             });
+            pages.push(page)
         }
         return Promise.all(pages)
     }
+
     function mapEntries(xhr) {
         if (xhr.status == 200) {
             let data = xhr.response
@@ -68,17 +83,6 @@ jQuery(document).ready(function(){
             return entries
         }
     }
-
-    function fetchSeriesRatings(data) {
-        let pages = new Array(seriesPages)
-        for (var i = 1; i <= seriesPages; i++) {
-            pages[i-1] = makeAjaxCall(seriesListURL + "?page=" + i, "GET").then(mapEntries, function(reason){
-                console.log("error in processing your request", reason);
-            });
-        }
-        return Promise.all(data.concat(pages))
-    }
-
     function addRatingsToFilmography(data) {
         let ratings = data.flatten()
         let tables = document.querySelectorAll('table');
@@ -120,7 +124,7 @@ jQuery(document).ready(function(){
         return dom;
     };
 
-    function makeAjaxCall(url, methodType, dataType, callback) {
+    function makeAjaxCall(url) {
         return new Promise(function(resolve, reject) {
             const httpRequest = new XMLHttpRequest();
             httpRequest.onload = function() {
@@ -129,7 +133,7 @@ jQuery(document).ready(function(){
             httpRequest.onerror = function() {
                 reject(new Error("Network error"))
             }
-            httpRequest.open(methodType, url);
+            httpRequest.open('GET', url);
             httpRequest.send();
 
         })
