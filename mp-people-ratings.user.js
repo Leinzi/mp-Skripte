@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-ratings.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/
-// @version             0.3.0
+// @version             0.3.1
 // ==/UserScript==
 
 
@@ -117,7 +117,7 @@ function addRatingsToFilmography() {
       let points = calculateBonus(matchedRatings)
 
       let mean = (matchedRatings.length === 0) ? '-' : roundFloat(sumArray(matchedRatings) / matchedRatings.length)
-      statisticsDiv.innerText = `Bewertet: ${matchedRatings.length}/${numberOfEntries}, Durchschnitt: ${mean}, Smoover-Rating: ${roundFloat(mean + points, 2)}`
+      statisticsDiv.innerText = `Bewertet: ${matchedRatings.length}/${numberOfEntries}, Durchschnitt: ${mean.toFixed(2)}, Smoover-Rating: ${roundFloat(mean + points).toFixed(2)}`
       return statisticsDiv
     }
 
@@ -177,7 +177,7 @@ function addRatingsToFilmography() {
     console.error(error.message)
   }
 
-  function roundFloat(number, precision = 5) {
+  function roundFloat(number, precision = 2) {
     return Math.round(number * Math.pow(10, precision)) / Math.pow(10, precision)
   }
 }
