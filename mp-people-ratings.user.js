@@ -128,15 +128,14 @@ function addRatingsToFilmography() {
          } else if (8.5 >= rating && rating >= 8) {
            return 0.15
          } else if (7.5 >= rating && rating >= 6) {
-           return 0.10
+           return ratings.length >= 10 ? 0.05 : 0.10
          } else if (5.5 >= rating && rating >= 5) {
            return 0.0
          } else {
-           return -0.1
+           return -0.10
          }
       })
-      let startValue = ratings.length >= 10 ? 0.05 : 0
-      return sumArray(points, startValue)
+      return sumArray(points, 0)
     }
 
     function createRatingElement(rating) {
