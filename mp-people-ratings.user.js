@@ -114,9 +114,29 @@ function addRatingsToFilmography() {
       statisticsDiv.style.fontSize = '1rem'
       statisticsDiv.style.marginBottom = '1.25rem'
 
-      let mean = (matchedRatings.length === 0) ? '-' : (Math.round((sumArray(matchedRatings) / matchedRatings.length) * 10000) / 10000.0)
-      statisticsDiv.innerText = `Bewertet: ${matchedRatings.length}/${numberOfEntries}, Durchschnitt: ${mean}`
+      let points = calculateBonus(matchedRatings)
+
+      let mean = (matchedRatings.length === 0) ? '-' : roundFloat(sumArray(matchedRatings) / matchedRatings.length)
+      statisticsDiv.innerText = `Bewertet: ${matchedRatings.length}/${numberOfEntries}, Durchschnitt: ${mean}, Smoover-Rating: ${roundFloat(mean + points, 2)}`
       return statisticsDiv
+    }
+
+    function calculateBonus(ratings) {
+      let points = ratings.map((rating) => {
+         if (10 >= rating && rating >= 9) {
+           return 0.20
+         } else if (8.5 >= rating && rating >= 8) {
+           return 0.15
+         } else if (7.5 >= rating && rating >= 6) {
+           return 0.10
+         } else if (5.5 >= rating && rating >= 5) {
+           return 0.0
+         } else {
+           return -0.1
+         }
+      })
+      let startValue = ratings.length >= 10 ? 0.05 : 0
+      return sumArray(points, startValue)
     }
 
     function createRatingElement(rating) {
@@ -155,5 +175,9 @@ function addRatingsToFilmography() {
 
   function handleErrors(error) {
     console.error(error.message)
+  }
+
+  function roundFloat(number, precision = 5) {
+    return Math.round(number * Math.pow(10, precision)) / Math.pow(10, precision)
   }
 }
