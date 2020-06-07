@@ -9,7 +9,7 @@
 // ==/UserScript==
 
 
-// Funktion, damit das Dokument erst fertig geladen wird
+// TODO: Error Handling
 if (document.readyState !== 'loading') {
   addRatingsToFilmography()
 } else {
