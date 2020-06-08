@@ -5,11 +5,10 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-ratings.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/
-// @version             0.5.0
+// @version             0.5.1
 // ==/UserScript==
 
 
-// Funktion, damit das Dokument erst fertig geladen wird
 if (document.readyState !== 'loading') {
   addRatingsToFilmography()
 } else {
@@ -222,8 +221,17 @@ function addRatingsToFilmography() {
       statisticsDiv.style.marginTop = '1rem'
 
       let mean = (ratingsForType.length === 0) ? '-' : roundFloat(sumArray(ratingsForType) / ratingsForType.length, 4)
-      let label = type === 'movie' ? 'Filme' : 'Serien'
+      let label = ''
+      // TODO: Refactoren!
+      if (type === 'movie') {
+        label = 'Filme'
+        moviesMean = mean
+      } else {
+        label = 'Serien'
+        seriesMean = mean
+      }
       statisticsDiv.innerText = `${label} allgemein - Bewertet: ${ratingsForType.length}, Durchschnitt: ${mean}`
+
       let bonusSettings = calculateBonusSettings(mean)
       let bonusSettingElement = createBonusSettingsElement(bonusSettings)
       statisticsDiv.appendChild(bonusSettingElement)
