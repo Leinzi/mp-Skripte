@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-ratings.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/
-// @version             0.4.1
+// @version             0.5.0
 // ==/UserScript==
 
 
@@ -109,41 +109,125 @@ function addRatingsToFilmography() {
       headline.after(createStatisticsElement(matchedRatings, rows.length, type))
     })
 
+    function calculateBonusSettings(meanValue) {
+      const maxRating = 10.0
+      const minRating = 0.0
+      let bonusSettings = []
+      let meanRating = Math.round(meanValue * 2) / 2.0
+
+      bonusSettings.push({
+        minRating: Math.min(maxRating, meanRating + 3.5),
+        maxRating: maxRating,
+        bonus: 0.20,
+        allowScaling: false,
+      })
+      bonusSettings.push({
+        minRating: Math.min(maxRating, meanRating + 2.5),
+        maxRating: Math.min(maxRating, meanRating + 3),
+        bonus: 0.15,
+        allowScaling: false,
+      })
+      bonusSettings.push({
+        minRating: Math.min(maxRating, meanRating + 1),
+        maxRating: Math.min(maxRating, meanRating + 2),
+        bonus: 0.10,
+        allowScaling: true,
+      })
+      bonusSettings.push({
+        minRating: Math.max(minRating, meanRating - 0.5),
+        maxRating: Math.min(maxRating, meanRating + 0.5),
+        bonus: 0.0,
+        allowScaling: false,
+      })
+      bonusSettings.push({
+        minRating: Math.max(minRating, meanRating - 2.5),
+        maxRating: Math.max(minRating, meanRating - 1),
+        bonus: -0.10,
+        allowScaling: true,
+      })
+      bonusSettings.push({
+        minRating: Math.max(minRating, meanRating - 5),
+        maxRating: Math.max(minRating, meanRating - 3),
+        bonus: -0.15,
+        allowScaling: false,
+      })
+      bonusSettings.push({
+        minRating: minRating,
+        maxRating: Math.max(minRating, meanRating - 5.5),
+        bonus: -0.20,
+        allowScaling: false,
+      })
+      return bonusSettings
+    }
+
+    function createBonusSettingsElement(bonusSettings) {
+      let wrapper = document.createElement('div')
+      wrapper.style.paddingTop = '0.75rem'
+      let header = document.createElement('h3')
+      header.innerText = 'Bonusberechnung'
+      header.style.marginBottom = '0.75rem'
+      wrapper.appendChild(header)
+      let bonusSettingsDiv = document.createElement('div')
+      bonusSettingsDiv.style.fontSize = '0.75rem'
+      bonusSettingsDiv.style.marginTop = '0.75rem'
+      bonusSettingsDiv.style.display = 'flex'
+      bonusSettingsDiv.style.flexWrap = 'wrap'
+
+      for (let bonusSetting of bonusSettings) {
+        let entry = document.createElement('div')
+        entry.style.width = '33%';
+        let string = parseFloat(bonusSetting.maxRating).toFixed(1)
+        string += ' >= x >= '
+        string += parseFloat(bonusSetting.minRating).toFixed(1)
+        string += ': '
+        if (bonusSetting.bonus > 0) {
+          string += '+'
+        }
+        string += parseFloat(bonusSetting.bonus).toFixed(2)
+        if (bonusSetting.allowScaling) {
+          string += '*'
+        }
+        entry.innerText = string
+        bonusSettingsDiv.appendChild(entry)
+      }
+      let entry = document.createElement('div')
+      entry.style.width = '50%';
+      entry.innerText = '*) Hälfte bei mehr als 10 Bewertungen'
+      bonusSettingsDiv.appendChild(entry)
+      wrapper.appendChild(bonusSettingsDiv)
+      return wrapper
+    }
+
     function insertGeneralStatistics(ratings) {
       let movieHeadlineElement = document.querySelector('#filmography_movie')
       if (movieHeadlineElement) {
-        let movieRatings = ratings.filter((ratingEntry) => {
-            return ratingEntry.type === 'movie'
-        })
-        movieRatings = movieRatings.map((ratingEntry) => {
-            return ratingEntry.rating
-        })
-
-        let statisticsDiv = document.createElement('div')
-        statisticsDiv.style.fontSize = '1rem'
-        statisticsDiv.style.marginTop = '1rem'
-
-        moviesMean = (movieRatings.length === 0) ? '-' : roundFloat(sumArray(movieRatings) / movieRatings.length, 4)
-        statisticsDiv.innerText = `Filme allgemein - Bewertet: ${movieRatings.length}, Durchschnitt: ${moviesMean}`
+        let statisticsDiv = createGeneralStatisticsForType(ratings, 'movie')
         movieHeadlineElement.before(statisticsDiv)
       }
       let seriesHeadlineElement = document.querySelector('#filmography_series')
       if (seriesHeadlineElement) {
-        let seriesRatings = ratings.filter((ratingEntry) => {
-            return ratingEntry.type === 'series'
-        })
-        seriesRatings = seriesRatings.map((ratingEntry) => {
-            return ratingEntry.rating
-        })
-
-        let statisticsDiv = document.createElement('div')
-        statisticsDiv.style.fontSize = '1rem'
-        statisticsDiv.style.marginTop = '1rem'
-
-        seriesMean = (seriesRatings.length === 0) ? '-' : roundFloat(sumArray(seriesRatings) / seriesRatings.length, 4)
-        statisticsDiv.innerText = `Serien allgemein - Bewertet: ${seriesRatings.length}, Durchschnitt: ${seriesMean}`
+        let statisticsDiv = createGeneralStatisticsForType(ratings, 'series')
         seriesHeadlineElement.before(statisticsDiv)
       }
+    }
+
+    function createGeneralStatisticsForType(ratings, type) {
+      let ratingsForType = ratings.filter((ratingEntry) => {
+          return ratingEntry.type === type
+      })
+      ratingsForType = ratingsForType.map(ratingEntry => ratingEntry.rating)
+
+      let statisticsDiv = document.createElement('div')
+      statisticsDiv.style.fontSize = '1rem'
+      statisticsDiv.style.marginTop = '1rem'
+
+      let mean = (ratingsForType.length === 0) ? '-' : roundFloat(sumArray(ratingsForType) / ratingsForType.length, 4)
+      let label = type === 'movie' ? 'Filme' : 'Serien'
+      statisticsDiv.innerText = `${label} allgemein - Bewertet: ${ratingsForType.length}, Durchschnitt: ${mean}`
+      let bonusSettings = calculateBonusSettings(mean)
+      let bonusSettingElement = createBonusSettingsElement(bonusSettings)
+      statisticsDiv.appendChild(bonusSettingElement)
+      return statisticsDiv
     }
 
     function determineRatingLabel(matches) {
@@ -193,24 +277,18 @@ function addRatingsToFilmography() {
 
     function calculateBonus(ratings, type) {
       let mean = type === 'movie' ? moviesMean : seriesMean
-      mean = Math.round(mean * 2) / 2.0
+      let bonusSettings = calculateBonusSettings(mean)
+
       let points = ratings.map((rating) => {
-         let diff = Math.round(rating - mean)
-         if (diff >= 4) {
-           return 0.20
-         } else if (diff >= 3) {
-           return 0.15
-         } else if (diff >= 2) {
-           return ratings.length >= 10 ? 0.05 : 0.10
-         } else if (2 > diff && diff > -2) {
-           return 0.0
-         } else if (diff > -4) {
-           return ratings.length >= 10 ? -0.05 : -0.10
-         } else if (diff > -6) {
-           return -0.15
-         } else {
-           return -0.20
-         }
+        let matches = bonusSettings.filter((bonusSetting) => {
+          return bonusSetting.minRating <= rating && rating <= bonusSetting.maxRating
+        })
+        if (matches) {
+          let match = matches[0]
+          return (match.allowScaling && ratings.length >= 10) ? match.bonus * 0.5 : match.bonus
+        } else {
+          return 0.0
+        }
       })
       return sumArray(points, 0)
     }
