@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-ratings.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/
-// @version             0.3.3
+// @version             0.4.0
 // ==/UserScript==
 
 
@@ -17,6 +17,9 @@ if (document.readyState !== 'loading') {
 }
 
 function addRatingsToFilmography() {
+  let moviesMean = 5
+  let seriesMean = 5
+
   let sessionURL = 'https://www.moviepilot.de/api/session'
   makeAjaxCall(sessionURL)
     .then(processSettings)
@@ -70,8 +73,9 @@ function addRatingsToFilmography() {
       return Array.from(rows).map(row => {
         let fields = row.querySelectorAll('td')
         let link = fields[0].querySelector('a').href
+        let type = link.match(/\/movies\//) ? 'movie' : 'series'
         let rating = parseFloat(fields[1].innerText)
-        return { link: link, rating: rating }
+        return { link: link, rating: rating, type: type }
       })
     } else {
       throw new Error('There was an error in processing your request')
@@ -80,6 +84,9 @@ function addRatingsToFilmography() {
 
   function processFilmography(data) {
     let ratings = data.flatten()
+    insertGeneralStatistics(ratings)
+
+    let type = 'movie'
     let tables = document.querySelectorAll('table')
     tables.forEach((table) => {
       let matchedRatings = []
@@ -95,11 +102,49 @@ function addRatingsToFilmography() {
           matchedRatings.push(rating)
         }
         row.appendChild(createRatingElement(ratingLabel))
+        type = link.match(/\/movies\//) ? 'movie' : 'series'
       })
 
       let headline = table.previous()
-      headline.after(createStatisticsElement(matchedRatings, rows.length))
+      headline.after(createStatisticsElement(matchedRatings, rows.length, type))
     })
+
+    function insertGeneralStatistics(ratings) {
+      let movieHeadlineElement = document.querySelector('#filmography_movie')
+      if (movieHeadlineElement) {
+        let movieRatings = ratings.filter((ratingEntry) => {
+            return ratingEntry.type === 'movie'
+        })
+        movieRatings = movieRatings.map((ratingEntry) => {
+            return ratingEntry.rating
+        })
+
+        let statisticsDiv = document.createElement('div')
+        statisticsDiv.style.fontSize = '1rem'
+        statisticsDiv.style.marginTop = '1rem'
+
+        moviesMean = (movieRatings.length === 0) ? '-' : roundFloat(sumArray(movieRatings) / movieRatings.length, 4)
+        statisticsDiv.innerText = `Filme allgemein - Bewertet: ${movieRatings.length}, Durchschnitt: ${moviesMean}`
+        movieHeadlineElement.before(statisticsDiv)
+      }
+      let seriesHeadlineElement = document.querySelector('#filmography_series')
+      if (seriesHeadlineElement) {
+        let seriesRatings = ratings.filter((ratingEntry) => {
+            return ratingEntry.type === 'series'
+        })
+        seriesRatings = seriesRatings.map((ratingEntry) => {
+            return ratingEntry.rating
+        })
+
+        let statisticsDiv = document.createElement('div')
+        statisticsDiv.style.fontSize = '1rem'
+        statisticsDiv.style.marginTop = '1rem'
+
+        seriesMean = (seriesRatings.length === 0) ? '-' : roundFloat(sumArray(seriesRatings) / seriesRatings.length, 4)
+        statisticsDiv.innerText = `Serien allgemein - Bewertet: ${seriesRatings.length}, Durchschnitt: ${seriesMean}`
+        seriesHeadlineElement.before(statisticsDiv)
+      }
+    }
 
     function determineRatingLabel(matches) {
       if (matches.length > 0) {
@@ -109,30 +154,56 @@ function addRatingsToFilmography() {
       }
     }
 
-    function createStatisticsElement(matchedRatings, numberOfEntries) {
+    function createStatisticsElement(matchedRatings, numberOfEntries, type) {
       let statisticsDiv = document.createElement('div')
       statisticsDiv.style.fontSize = '1rem'
       statisticsDiv.style.marginBottom = '1.25rem'
 
-      let points = calculateBonus(matchedRatings)
+      let points = calculateBonus(matchedRatings, type)
 
       let mean = (matchedRatings.length === 0) ? '-' : roundFloat(sumArray(matchedRatings) / matchedRatings.length)
-      statisticsDiv.innerText = `Bewertet: ${matchedRatings.length}/${numberOfEntries}, Durchschnitt: ${mean}, Smoover-Rating: ${roundFloat(mean + points)}`
+      statisticsDiv.innerText = `Bewertet: ${matchedRatings.length}/${numberOfEntries}, Durchschnitt: ${mean}, Punkte: ${roundFloat(mean + points)}`
+
+      let overview = document.createElement('div')
+      overview.style.fontSize = '0.75rem'
+      overview.style.marginTop = '0.75rem'
+      overview.style.display = 'flex'
+      overview.style.flexWrap = 'wrap'
+      for (let i = 100; i >= 0; i = i - 5) {
+        let entry = document.createElement('div')
+        entry.style.width = '10%';
+        let rating = i / 10.0
+        let ratings = matchedRatings.filter((ratingEntry) => {
+          return ratingEntry === rating
+        })
+        entry.innerText = `${parseFloat(rating).toFixed(1)}: ${ratings.length}x`
+        if (ratings.length > 0) {
+         overview.appendChild(entry)
+        }
+      }
+      statisticsDiv.appendChild(overview)
       return statisticsDiv
     }
 
-    function calculateBonus(ratings) {
+    function calculateBonus(ratings, type) {
+      let mean = type === 'movie' ? moviesMean : seriesMean
+      mean = Math.round(mean * 2) / 2.0
       let points = ratings.map((rating) => {
-         if (10 >= rating && rating >= 9) {
+         let diff = Math.round(rating - mean)
+         if (diff >= 4) {
            return 0.20
-         } else if (8.5 >= rating && rating >= 8) {
+         } else if (diff >= 3) {
            return 0.15
-         } else if (7.5 >= rating && rating >= 6) {
+         } else if (diff >= 2) {
            return ratings.length >= 10 ? 0.05 : 0.10
-         } else if (5.5 >= rating && rating >= 5) {
+         } else if (2 > diff && diff > -2) {
            return 0.0
+         } else if (diff > -4) {
+           return ratings.length >= 10 ? -0.05 : -0.10
+         } else if (diff > -6) {
+           return -0.15
          } else {
-           return -0.10
+           return -0.20
          }
       })
       return sumArray(points, 0)
