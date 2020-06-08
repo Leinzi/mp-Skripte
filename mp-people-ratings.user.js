@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-ratings.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/
-// @version             0.4.0
+// @version             0.4.1
 // ==/UserScript==
 
 
@@ -164,6 +164,13 @@ function addRatingsToFilmography() {
       let mean = (matchedRatings.length === 0) ? '-' : roundFloat(sumArray(matchedRatings) / matchedRatings.length)
       statisticsDiv.innerText = `Bewertet: ${matchedRatings.length}/${numberOfEntries}, Durchschnitt: ${mean}, Punkte: ${roundFloat(mean + points)}`
 
+      if (matchedRatings.length > 0) {
+        statisticsDiv.appendChild(createOverviewFor(matchedRatings))
+      }
+      return statisticsDiv
+    }
+
+    function createOverviewFor(matchedRatings) {
       let overview = document.createElement('div')
       overview.style.fontSize = '0.75rem'
       overview.style.marginTop = '0.75rem'
@@ -181,8 +188,7 @@ function addRatingsToFilmography() {
          overview.appendChild(entry)
         }
       }
-      statisticsDiv.appendChild(overview)
-      return statisticsDiv
+      return overview
     }
 
     function calculateBonus(ratings, type) {
