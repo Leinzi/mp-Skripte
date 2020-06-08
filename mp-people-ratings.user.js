@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name                MP-People-Ratings (jQuery)
+// @name                MP-People-Ratings (native Javascript)
 // @description         Filmbewertungen auf Filmographien anzeigen
 // @author              leinzi
 // @grant               none
