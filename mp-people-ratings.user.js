@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-ratings.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/
-// @version             0.5.1
+// @version             0.6.0
 // ==/UserScript==
 
 
@@ -16,6 +16,7 @@ if (document.readyState !== 'loading') {
 }
 
 function addRatingsToFilmography() {
+  let signedInUser = undefined
   let moviesMean = 5
   let seriesMean = 5
 
@@ -33,13 +34,10 @@ function addRatingsToFilmography() {
         if (data.type === 'RegisteredUser') {
           const baseURL = 'https://www.moviepilot.de'
           const perPage = 100
-          let settings = {
-            moviesListURL: baseURL + data.movie_ratings_path,
-            moviePages: Math.ceil(data.movie_ratings / perPage),
-            seriesListURL: baseURL + data.series_ratings_path,
-            seriesPages: Math.ceil(data.series_ratings / perPage),
-          }
-          resolve(settings)
+          signedInUser = new User()
+          signedInUser.setSessionInformationForType('movies', Math.ceil(data.movie_ratings / perPage), baseURL + data.movie_ratings_path)
+          signedInUser.setSessionInformationForType('series', Math.ceil(data.series_ratings / perPage), baseURL + data.series_ratings_path)
+          resolve(signedInUser)
         } else {
           reject(new Error('Only works when signed in.'))
         }
@@ -49,16 +47,18 @@ function addRatingsToFilmography() {
     })
   }
 
-  function fetchRatings(settings) {
-    let moviesPromise = fetchRatingsFromList(settings.moviesListURL, settings.moviePages)
-    let seriesPromise = fetchRatingsFromList(settings.seriesListURL, settings.seriesPages)
+  function fetchRatings() {
+    let moviesPromise = fetchRatingsFromList(signedInUser.movies)
+      .then((data) => signedInUser.setRatingEntriesForType('movies', data.flatten()))
+    let seriesPromise = fetchRatingsFromList(signedInUser.series)
+      .then((data) => signedInUser.setRatingEntriesForType('series', data.flatten()))
     return Promise.all([moviesPromise, seriesPromise])
   }
 
-  function fetchRatingsFromList(listURL, pageCount) {
+  function fetchRatingsFromList(ratingAttributes) {
     let pages = []
-    for (let i = 1; i <= pageCount; i++) {
-      pages.push(makeAjaxCall(listURL + "?page=" + i).then(processEntries))
+    for (let i = 1; i <= ratingAttributes.pages; i++) {
+      pages.push(makeAjaxCall(ratingAttributes.listURL + "?page=" + i).then(processEntries))
     }
     return Promise.all(pages)
   }
@@ -80,9 +80,8 @@ function addRatingsToFilmography() {
     }
   }
 
-  function processFilmography(data) {
-    let ratings = data.flatten()
-    insertGeneralStatistics(ratings)
+  function processFilmography() {
+    insertGeneralStatistics()
 
     let type = 'movies'
     let tables = document.querySelectorAll('table')
@@ -91,6 +90,8 @@ function addRatingsToFilmography() {
       let rows = table.querySelectorAll('tr')
       rows.forEach((row) => {
         let link = row.querySelector('td a').href
+        type = link.match(/\/movies\//) ? 'movies' : 'series'
+        let ratings = signedInUser.getRatingEntriesForType(type)
         let matches = ratings.filter((ratingEntry) => {
           return ratingEntry.matchesLink(link)
         })
@@ -100,63 +101,11 @@ function addRatingsToFilmography() {
           matchedRatings.push(rating)
         }
         row.appendChild(createRatingElement(ratingLabel))
-        type = link.match(/\/movies\//) ? 'movies' : 'serie'
       })
 
       let headline = table.previous()
       headline.after(createStatisticsElement(matchedRatings, rows.length, type))
     })
-
-    function calculateBonusSettings(meanValue) {
-      const maxRating = 10.0
-      const minRating = 0.0
-      let bonusSettings = []
-      let meanRating = Math.round(meanValue * 2) / 2.0
-
-      bonusSettings.push({
-        minRating: Math.min(maxRating, meanRating + 3.5),
-        maxRating: maxRating,
-        bonus: 0.20,
-        allowScaling: false,
-      })
-      bonusSettings.push({
-        minRating: Math.min(maxRating, meanRating + 2.5),
-        maxRating: Math.min(maxRating, meanRating + 3),
-        bonus: 0.15,
-        allowScaling: false,
-      })
-      bonusSettings.push({
-        minRating: Math.min(maxRating, meanRating + 1),
-        maxRating: Math.min(maxRating, meanRating + 2),
-        bonus: 0.10,
-        allowScaling: true,
-      })
-      bonusSettings.push({
-        minRating: Math.max(minRating, meanRating - 0.5),
-        maxRating: Math.min(maxRating, meanRating + 0.5),
-        bonus: 0.0,
-        allowScaling: false,
-      })
-      bonusSettings.push({
-        minRating: Math.max(minRating, meanRating - 2.5),
-        maxRating: Math.max(minRating, meanRating - 1),
-        bonus: -0.10,
-        allowScaling: true,
-      })
-      bonusSettings.push({
-        minRating: Math.max(minRating, meanRating - 5),
-        maxRating: Math.max(minRating, meanRating - 3),
-        bonus: -0.15,
-        allowScaling: false,
-      })
-      bonusSettings.push({
-        minRating: minRating,
-        maxRating: Math.max(minRating, meanRating - 5.5),
-        bonus: -0.20,
-        allowScaling: false,
-      })
-      return bonusSettings
-    }
 
     function createBonusSettingsElement(bonusSettings) {
       let wrapper = document.createElement('div')
@@ -174,18 +123,7 @@ function addRatingsToFilmography() {
       for (let bonusSetting of bonusSettings) {
         let entry = document.createElement('div')
         entry.style.width = '33%';
-        let string = parseFloat(bonusSetting.maxRating).toFixed(1)
-        string += ' >= x >= '
-        string += parseFloat(bonusSetting.minRating).toFixed(1)
-        string += ': '
-        if (bonusSetting.bonus > 0) {
-          string += '+'
-        }
-        string += parseFloat(bonusSetting.bonus).toFixed(2)
-        if (bonusSetting.allowScaling) {
-          string += '*'
-        }
-        entry.innerText = string
+        entry.innerText = bonusSetting.toString()
         bonusSettingsDiv.appendChild(entry)
       }
       let entry = document.createElement('div')
@@ -196,44 +134,28 @@ function addRatingsToFilmography() {
       return wrapper
     }
 
-    function insertGeneralStatistics(ratings) {
+    function insertGeneralStatistics() {
       let movieHeadlineElement = document.querySelector('#filmography_movie')
       if (movieHeadlineElement) {
-        let statisticsDiv = createGeneralStatisticsForType(ratings, 'movies')
+        let statisticsDiv = createGeneralStatisticsFor(signedInUser.getAttributesForType('movies'))
         movieHeadlineElement.before(statisticsDiv)
       }
       let seriesHeadlineElement = document.querySelector('#filmography_series')
       if (seriesHeadlineElement) {
-        let statisticsDiv = createGeneralStatisticsForType(ratings, 'serie')
+        let statisticsDiv = createGeneralStatisticsFor(signedInUser.getAttributesForType('series'))
         seriesHeadlineElement.before(statisticsDiv)
       }
     }
 
-    function createGeneralStatisticsForType(ratings, type) {
-      let ratingsForType = ratings.filter((ratingEntry) => {
-          return ratingEntry.matchesType(type)
-      })
-      debugger
-      ratingsForType = ratingsForType.map(ratingEntry => ratingEntry.rating)
-
+    function createGeneralStatisticsFor(ratingAttributes) {
       let statisticsDiv = document.createElement('div')
       statisticsDiv.style.fontSize = '1rem'
       statisticsDiv.style.marginTop = '1rem'
 
-      let mean = (ratingsForType.length === 0) ? '-' : roundFloat(sumArray(ratingsForType) / ratingsForType.length, 4)
-      let label = ''
-      // TODO: Refactoren!
-      if (type === 'movies') {
-        label = 'Filme'
-        moviesMean = mean
-      } else {
-        label = 'Serien'
-        seriesMean = mean
-      }
-      statisticsDiv.innerText = `${label} allgemein - Bewertet: ${ratingsForType.length}, Durchschnitt: ${mean}`
+      let mean = (ratingAttributes.mean) ? roundFloat(ratingAttributes.mean, 4) : '-'
+      statisticsDiv.innerText = `${ratingAttributes.label} allgemein - Bewertet: ${ratingAttributes.numberOfEntries}, Durchschnitt: ${mean}`
 
-      let bonusSettings = calculateBonusSettings(mean)
-      let bonusSettingElement = createBonusSettingsElement(bonusSettings)
+      let bonusSettingElement = createBonusSettingsElement(ratingAttributes.bonusSettings)
       statisticsDiv.appendChild(bonusSettingElement)
       return statisticsDiv
     }
@@ -284,13 +206,10 @@ function addRatingsToFilmography() {
     }
 
     function calculateBonus(ratings, type) {
-      let mean = type === 'movies' ? moviesMean : seriesMean
-      let bonusSettings = calculateBonusSettings(mean)
+      let bonusSettings = signedInUser.getBonusSettingsForType(type)
 
       let points = ratings.map((rating) => {
-        let matches = bonusSettings.filter((bonusSetting) => {
-          return bonusSetting.minRating <= rating && rating <= bonusSetting.maxRating
-        })
+        let matches = bonusSettings.filter(bonusSetting => bonusSetting.matchesRating(rating))
         if (matches) {
           let match = matches[0]
           return (match.allowScaling && ratings.length >= 10) ? match.bonus * 0.5 : match.bonus
@@ -308,40 +227,40 @@ function addRatingsToFilmography() {
       return ratingElement
     }
   }
+}
 
-  // Utilities
-  function sumArray(array, initValue = 0) {
-    const reducer = (accumulator, currentValue) => accumulator + currentValue
-    return array.reduce(reducer, initValue)
-  }
+// Utilities
+function sumArray(array, initValue = 0) {
+  const reducer = (accumulator, currentValue) => accumulator + currentValue
+  return array.reduce(reducer, initValue)
+}
 
-  function stringToHTML(string) {
-    let dom = document.createElement('div')
-    dom.innerHTML = string
-    return dom
-  }
+function stringToHTML(string) {
+  let dom = document.createElement('div')
+  dom.innerHTML = string
+  return dom
+}
 
-  function makeAjaxCall(url) {
-    return new Promise(function(resolve, reject) {
-      const httpRequest = new XMLHttpRequest()
-      httpRequest.onload = function() {
-        resolve(this)
-      }
-      httpRequest.onerror = function() {
-        reject(new Error("Network error"))
-      }
-      httpRequest.open('GET', url)
-      httpRequest.send()
-    })
-  }
+function makeAjaxCall(url) {
+  return new Promise(function(resolve, reject) {
+    const httpRequest = new XMLHttpRequest()
+    httpRequest.onload = function() {
+      resolve(this)
+    }
+    httpRequest.onerror = function() {
+      reject(new Error("Network error"))
+    }
+    httpRequest.open('GET', url)
+    httpRequest.send()
+  })
+}
 
-  function handleErrors(error) {
-    console.error(error.message)
-  }
+function handleErrors(error) {
+  console.error(error.message)
+}
 
-  function roundFloat(number, precision = 2) {
-    return Math.round(number * Math.pow(10, precision)) / Math.pow(10, precision)
-  }
+function roundFloat(number, precision = 2) {
+  return Math.round(number * Math.pow(10, precision)) / Math.pow(10, precision)
 }
 
 class RatingEntry {
@@ -361,5 +280,117 @@ class RatingEntry {
 
   matchesType(type) {
     return this.type === type
+  }
+}
+
+class User {
+  constructor() {
+    this.movies = new RatingAttributes('Filme')
+    this.series = new RatingAttributes('Serien')
+  }
+
+  getAttributesForType(type) {
+    switch(type) {
+      case 'movies': return this.movies
+      case 'series': return this.series
+      default: throw new Error('undefined type: ' + type)
+    }
+  }
+
+  setSessionInformationForType(type, pages, listURL) {
+    let ratingAttributes = this.getAttributesForType(type)
+    ratingAttributes.pages = pages
+    ratingAttributes.listURL = listURL
+  }
+
+  setRatingEntriesForType(type, ratingEntries) {
+    let ratingAttributes = this.getAttributesForType(type)
+    ratingAttributes.setRatingEntries(ratingEntries)
+  }
+
+  getRatingEntriesForType(type) {
+    let ratingAttributes = this.getAttributesForType(type)
+    return ratingAttributes.ratingEntries
+  }
+
+  getBonusSettingsForType(type) {
+    let ratingAttributes = this.getAttributesForType(type)
+    return ratingAttributes.bonusSettings
+  }
+}
+
+class RatingAttributes {
+  constructor(label) {
+    this.label = label
+    this.mean = null
+    this.pages = 1
+    this.listURL = null
+    this.setRatingEntries([])
+    this.setBonusSettings([])
+  }
+
+  get numberOfEntries() {
+    return this.ratingEntries.length
+  }
+
+  setRatingEntries(newRatingEntries) {
+    this.ratingEntries = newRatingEntries
+    this.calculateMean()
+    this.calculateBonusSettings()
+  }
+
+  setBonusSettings(newBonusSettings) {
+    this.bonusSettings = newBonusSettings
+  }
+
+  calculateMean() {
+    let ratings = this.ratingEntries.map(ratingEntry => ratingEntry.rating)
+    this.mean = (ratings.length === 0) ? null : sumArray(ratings) / ratings.length
+  }
+
+  calculateBonusSettings() {
+    if (this.mean) {
+      const maxRating = 10.0
+      const minRating = 0.0
+      const meanRating = Math.round(this.mean * 2) / 2.0
+
+      let bonusSettings = []
+      bonusSettings.push(new BonusSetting(Math.min(maxRating, meanRating + 3.5), maxRating, 0.20))
+      bonusSettings.push(new BonusSetting(Math.min(maxRating, meanRating + 2.5), Math.min(maxRating, meanRating + 3), 0.15))
+      bonusSettings.push(new BonusSetting(Math.min(maxRating, meanRating + 1), Math.min(maxRating, meanRating + 2), 0.10, true))
+      bonusSettings.push(new BonusSetting(Math.max(minRating, meanRating - 0.5), Math.min(maxRating, meanRating + 0.5), 0.0))
+      bonusSettings.push(new BonusSetting(Math.max(minRating, meanRating - 2.5), Math.max(minRating, meanRating - 1), -0.10, true))
+      bonusSettings.push(new BonusSetting(Math.max(minRating, meanRating - 5), Math.max(minRating, meanRating - 3), -0.15))
+      bonusSettings.push(new BonusSetting(minRating, Math.max(minRating, meanRating - 5.5), -0.20))
+      this.setBonusSettings(bonusSettings)
+    }
+  }
+}
+
+class BonusSetting {
+  constructor(minRating, maxRating, bonus, allowScaling = false) {
+    this.minRating = minRating
+    this.maxRating = maxRating
+    this.bonus = bonus
+    this.allowScaling = allowScaling
+  }
+
+  matchesRating(rating) {
+    return this.minRating <= rating && rating <= this.maxRating
+  }
+
+  toString() {
+    let string = parseFloat(this.maxRating).toFixed(1)
+    string += ' >= x >= '
+    string += parseFloat(this.minRating).toFixed(1)
+    string += ': '
+    if (this.bonus > 0) {
+      string += '+'
+    }
+    string += parseFloat(this.bonus).toFixed(2)
+    if (this.allowScaling) {
+      string += '*'
+    }
+    return string
   }
 }
