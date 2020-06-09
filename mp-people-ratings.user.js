@@ -10,42 +10,42 @@
 
 
 if (document.readyState !== 'loading') {
-  addRatingsToFilmography()
+  filmographyRatingExtension()
 } else {
-  document.addEventListener('DOMContentLoaded', addRatingsToFilmography)
+  document.addEventListener('DOMContentLoaded', filmographyRatingExtension)
 }
 
-function addRatingsToFilmography() {
-  let signedInUser = undefined
-  let moviesMean = 5
-  let seriesMean = 5
-
+function filmographyRatingExtension() {
   let sessionURL = 'https://www.moviepilot.de/api/session'
   makeAjaxCall(sessionURL)
-    .then(processSettings)
-    .then(fetchRatings)
-    .then(processFilmography)
+    .then(createUserFromSession)
+    .then(addRatingsToFilmography)
     .catch(handleErrors)
+}
 
-  function processSettings(request) {
-    return new Promise(function(resolve, reject) {
-      if (request.status == 200) {
-        let data = JSON.parse(request.response)
-        if (data.type === 'RegisteredUser') {
-          const baseURL = 'https://www.moviepilot.de'
-          const perPage = 100
-          signedInUser = new User()
-          signedInUser.setSessionInformationForType('movies', Math.ceil(data.movie_ratings / perPage), baseURL + data.movie_ratings_path)
-          signedInUser.setSessionInformationForType('series', Math.ceil(data.series_ratings / perPage), baseURL + data.series_ratings_path)
-          resolve(signedInUser)
-        } else {
-          reject(new Error('Only works when signed in.'))
-        }
+function createUserFromSession(sessionRequest) {
+  return new Promise(function(resolve, reject) {
+    if (sessionRequest.status == 200) {
+      let data = JSON.parse(sessionRequest.response)
+      if (data.type === 'RegisteredUser') {
+        const baseURL = 'https://www.moviepilot.de'
+        const perPage = 100
+        let signedInUser = new User()
+        signedInUser.setSessionInformationForType('movies', Math.ceil(data.movie_ratings / perPage), baseURL + data.movie_ratings_path)
+        signedInUser.setSessionInformationForType('series', Math.ceil(data.series_ratings / perPage), baseURL + data.series_ratings_path)
+        resolve(signedInUser)
       } else {
-        reject(new Error('There was an error in processing your request'))
+      reject(new Error('Only works when signed in.'))
       }
-    })
-  }
+    } else {
+      reject(new Error('There was an error in processing your request'))
+    }
+  })
+}
+
+function addRatingsToFilmography(signedInUser) {
+  fetchRatings()
+    .then(processFilmography)
 
   function fetchRatings() {
     let moviesPromise = fetchRatingsFromList(signedInUser.movies)
