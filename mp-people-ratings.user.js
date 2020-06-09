@@ -49,9 +49,9 @@ function addRatingsToFilmography(signedInUser) {
 
   function fetchRatings() {
     let moviesPromise = fetchRatingsFromList(signedInUser.movies)
-      .then(ratingEntriesPerPage => signedInUser.setRatingEntriesForType('movies', ratingEntriesPerPage.flatten()))
+      .then(ratingEntriesPerPage => signedInUser.setRatingEntriesForType('movies', ratingEntriesPerPage.flat()))
     let seriesPromise = fetchRatingsFromList(signedInUser.series)
-      .then(ratingEntriesPerPage => signedInUser.setRatingEntriesForType('serie', ratingEntriesPerPage.flatten()))
+      .then(ratingEntriesPerPage => signedInUser.setRatingEntriesForType('serie', ratingEntriesPerPage.flat()))
     return Promise.all([moviesPromise, seriesPromise])
   }
 
