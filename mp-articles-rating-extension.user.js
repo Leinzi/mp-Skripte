@@ -3,7 +3,7 @@
 // @description         Das Skript hängt die eigene Bewertunge an Film- und Serien-Links in Artikeln
 // @author              leinzi
 // @grant               none
-// @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-ratings.user.js
+// @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-articles-rating-extension.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\/news\/([^\/\#]*?)$/
 // @version             0.0.1
 // ==/UserScript==
