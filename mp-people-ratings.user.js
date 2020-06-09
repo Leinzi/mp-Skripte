@@ -72,9 +72,8 @@ function addRatingsToFilmography() {
       return Array.from(rows).map(row => {
         let fields = row.querySelectorAll('td')
         let link = fields[0].querySelector('a').href
-        let type = link.match(/\/movies\//) ? 'movie' : 'series'
         let rating = parseFloat(fields[1].innerText)
-        return { link: link, rating: rating, type: type }
+        return new RatingEntry(link, rating)
       })
     } else {
       throw new Error('There was an error in processing your request')
@@ -85,7 +84,7 @@ function addRatingsToFilmography() {
     let ratings = data.flatten()
     insertGeneralStatistics(ratings)
 
-    let type = 'movie'
+    let type = 'movies'
     let tables = document.querySelectorAll('table')
     tables.forEach((table) => {
       let matchedRatings = []
@@ -93,7 +92,7 @@ function addRatingsToFilmography() {
       rows.forEach((row) => {
         let link = row.querySelector('td a').href
         let matches = ratings.filter((ratingEntry) => {
-          return ratingEntry.link === link
+          return ratingEntry.matchesLink(link)
         })
         let ratingLabel = determineRatingLabel(matches)
         let rating = parseFloat(ratingLabel)
@@ -101,7 +100,7 @@ function addRatingsToFilmography() {
           matchedRatings.push(rating)
         }
         row.appendChild(createRatingElement(ratingLabel))
-        type = link.match(/\/movies\//) ? 'movie' : 'series'
+        type = link.match(/\/movies\//) ? 'movies' : 'serie'
       })
 
       let headline = table.previous()
@@ -200,20 +199,21 @@ function addRatingsToFilmography() {
     function insertGeneralStatistics(ratings) {
       let movieHeadlineElement = document.querySelector('#filmography_movie')
       if (movieHeadlineElement) {
-        let statisticsDiv = createGeneralStatisticsForType(ratings, 'movie')
+        let statisticsDiv = createGeneralStatisticsForType(ratings, 'movies')
         movieHeadlineElement.before(statisticsDiv)
       }
       let seriesHeadlineElement = document.querySelector('#filmography_series')
       if (seriesHeadlineElement) {
-        let statisticsDiv = createGeneralStatisticsForType(ratings, 'series')
+        let statisticsDiv = createGeneralStatisticsForType(ratings, 'serie')
         seriesHeadlineElement.before(statisticsDiv)
       }
     }
 
     function createGeneralStatisticsForType(ratings, type) {
       let ratingsForType = ratings.filter((ratingEntry) => {
-          return ratingEntry.type === type
+          return ratingEntry.matchesType(type)
       })
+      debugger
       ratingsForType = ratingsForType.map(ratingEntry => ratingEntry.rating)
 
       let statisticsDiv = document.createElement('div')
@@ -223,7 +223,7 @@ function addRatingsToFilmography() {
       let mean = (ratingsForType.length === 0) ? '-' : roundFloat(sumArray(ratingsForType) / ratingsForType.length, 4)
       let label = ''
       // TODO: Refactoren!
-      if (type === 'movie') {
+      if (type === 'movies') {
         label = 'Filme'
         moviesMean = mean
       } else {
@@ -284,7 +284,7 @@ function addRatingsToFilmography() {
     }
 
     function calculateBonus(ratings, type) {
-      let mean = type === 'movie' ? moviesMean : seriesMean
+      let mean = type === 'movies' ? moviesMean : seriesMean
       let bonusSettings = calculateBonusSettings(mean)
 
       let points = ratings.map((rating) => {
@@ -341,5 +341,25 @@ function addRatingsToFilmography() {
 
   function roundFloat(number, precision = 2) {
     return Math.round(number * Math.pow(10, precision)) / Math.pow(10, precision)
+  }
+}
+
+class RatingEntry {
+  constructor(link, rating) {
+    this.rating = rating
+    if (link) {
+      let tokens = link.split('/')
+      this.type = tokens.slice(-2)[0]
+      this.slug = tokens.slice(-1)[0]
+    }
+  }
+
+  matchesLink(link) {
+    let tokens = link.split('/')
+    return this.matchesType(tokens.slice(-2)[0]) && this.slug === tokens.slice(-1)[0]
+  }
+
+  matchesType(type) {
+    return this.type === type
   }
 }
