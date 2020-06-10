@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-ratings.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/
-// @version             0.6.0
+// @version             0.6.1
 // ==/UserScript==
 
 
@@ -90,7 +90,7 @@ function addRatingsToFilmography(signedInUser) {
 
       let mean = (ratingAttributes.mean) ? roundFloat(ratingAttributes.mean, 4) : '-'
       statisticsDiv.innerText = `${ratingAttributes.label} allgemein - Bewertet: ${ratingAttributes.numberOfEntries}, Durchschnitt: ${mean}`
-      statisticsDiv.appendChild(BonusSetting.arrayToHTML(ratingAttributes.bonusSettings))
+      statisticsDiv.append(BonusSetting.arrayToHTML(ratingAttributes.bonusSettings))
       return statisticsDiv
     }
   }
@@ -266,21 +266,21 @@ class BonusSetting {
     let header = document.createElement('h3')
     header.innerText = 'Bonusberechnung'
     header.style.marginBottom = '0.75rem'
-    wrapper.appendChild(header)
+    wrapper.append(header)
 
     let bonusSettingsDiv = document.createElement('div')
     bonusSettingsDiv.style.fontSize = '0.75rem'
     bonusSettingsDiv.style.marginTop = '0.75rem'
     bonusSettingsDiv.style.display = 'flex'
     bonusSettingsDiv.style.flexWrap = 'wrap'
-    bonusSettings.forEach(bonusSetting => bonusSettingsDiv.appendChild(bonusSetting.toHTML()))
+    bonusSettings.forEach(bonusSetting => bonusSettingsDiv.append(bonusSetting.toHTML()))
 
     let descriptionEntry = document.createElement('div')
     descriptionEntry.style.width = '50%';
     descriptionEntry.innerText = '*) Hälfte bei mehr als 10 Bewertungen'
-    bonusSettingsDiv.appendChild(descriptionEntry)
+    bonusSettingsDiv.append(descriptionEntry)
 
-    wrapper.appendChild(bonusSettingsDiv)
+    wrapper.append(bonusSettingsDiv)
     return wrapper
   }
 
@@ -363,8 +363,10 @@ class TableProcessor {
     let rows = this.table.querySelectorAll('tr')
     this.ratingEntries = Array.from(rows).map(row => new RowProcessor(this.user, row).runAndReturnRating())
 
-    let headline = this.table.previous()
-    headline.after(this.createStatisticsElement())
+    let headline = this.table.previousElementSibling
+    if (headline) {
+      headline.after(this.createStatisticsElement())
+    }
   }
 
   createStatisticsElement() {
@@ -380,7 +382,7 @@ class TableProcessor {
       let mean = roundFloat(sumArray(matchedRatings.map(ratingEntry => ratingEntry.rating)) / matchedRatings.length)
       let points = roundFloat(mean + this.calculateBonus())
       statisticsDiv.innerText = `Bewertet: ${ratedString}, Durchschnitt: ${mean}, Punkte: ${points}`
-      statisticsDiv.appendChild(new Overview(matchedRatings).toHTML())
+      statisticsDiv.append(new Overview(matchedRatings).toHTML())
     } else {
       statisticsDiv.innerText = `Bewertet: ${ratedString}, Durchschnitt: -, Punkte: -`
     }
@@ -417,7 +419,7 @@ class RowProcessor {
   runAndReturnRating() {
     let match = this.user.findRatingEntry(this.type, this.slug)
     let ratingLabel = (match) ? match.rating.toFixed(1) : '?'
-    this.row.appendChild(this.createRatingElement(ratingLabel))
+    this.row.append(this.createRatingElement(ratingLabel))
     return match
   }
 
@@ -448,7 +450,7 @@ class Overview {
       let ratings = this.ratingEntries.filter(ratingEntry => ratingEntry.rating === rating)
       if (ratings.length > 0) {
        overviewEntry.innerText = `${parseFloat(rating).toFixed(1)}: ${ratings.length}x`
-       overview.appendChild(overviewEntry)
+       overview.append(overviewEntry)
       }
     }
     return overview
