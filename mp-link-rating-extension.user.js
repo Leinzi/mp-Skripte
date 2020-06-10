@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-link-rating-extension.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\//
-// @version             0.0.5
+// @version             0.0.6
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
@@ -44,7 +44,7 @@ function createUserFromSession(sessionRequest) {
 
 function addRatingsToLinks(signedInUser) {
   fetchRatings()
-    .then(promise => processArticle(document))
+    .then(processPage)
     .then(addObserverToXHR)
 
   function fetchRatings() {
@@ -69,29 +69,32 @@ function addObserverToXHR() {
   let originalOpen = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function(method, url) {
     this.addEventListener('load', function() {
-      processArticle()
+      processPage()
     })
     originalOpen.apply(this, arguments)
   }
 }
 
-function processArticle() {
-    let anchorElements = Array.from(document.querySelectorAll('a'))
-    let linkElements = anchorElements.map(element => new LinkElement(element))
-    linkElements = linkElements.filter(element => element.isMediaLink())
+function processPage() {
+    let content = document.querySelector('main, #main, #content')
+    if (content) {
+      let anchorElements = Array.from(content.querySelectorAll('a'))
+      let linkElements = anchorElements.map(element => new LinkElement(element))
+      linkElements = linkElements.filter(element => element.isMediaLink())
 
-    linkElements.forEach((linkElement) => {
-      let match = signedInUser.findRatingEntry(linkElement.type, linkElement.slug)
-      let rating = match ? parseFloat(match.rating).toFixed(1) : 'keine'
-      let title = linkElement.element.title
-      if (title.match(/( \(Deine Bewertung: .*\))/)) {
-        title = title.replace(RegExp.lastMatch, ` (Deine Bewertung: ${rating})`)
-      } else {
-        title += ` (Deine Bewertung: ${rating})`
-      }
-      linkElement.element.title = title
-      linkElement.element.style.color = (match) ? '#37996b' : '#f4645a'
-    })
+      linkElements.forEach((linkElement) => {
+        let match = signedInUser.findRatingEntry(linkElement.type, linkElement.slug)
+        let rating = match ? parseFloat(match.rating).toFixed(1) : 'keine'
+        let title = linkElement.element.title
+        if (title.match(/( \(Deine Bewertung: .*\))/)) {
+          title = title.replace(RegExp.lastMatch, ` (Deine Bewertung: ${rating})`)
+        } else {
+          title += ` (Deine Bewertung: ${rating})`
+        }
+        linkElement.element.title = title
+        linkElement.element.style.color = (match) ? '#37996b' : '#f4645a'
+      })
+    }
   }
 }
 
@@ -195,6 +198,10 @@ class LinkElement {
 
   isMoviepilotLink() {
     return this.link && this.link.startsWith('https://www.moviepilot.de/')
+  }
+
+  isNavigationLink() {
+    return this.element.innerText === 'Übersicht'
   }
 
   isMediaLink() {
