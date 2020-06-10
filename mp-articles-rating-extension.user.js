@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-articles-rating-extension.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\/news\/([^\/\#]*?)$/
-// @version             0.0.2
+// @version             0.0.3
 // ==/UserScript==
 
 
@@ -72,7 +72,7 @@ function addRatingsToLinks(signedInUser) {
 
     linkElements.forEach((linkElement) => {
       let match = signedInUser.findRatingEntry(linkElement.type, linkElement.slug)
-      let rating = match ? parseFloat(match.rating) : 'keine'
+      let rating = match ? parseFloat(match.rating).toFixed(1) : 'keine'
       linkElement.element.text += ` (Deine Bewertung: ${rating})`
     })
   }
