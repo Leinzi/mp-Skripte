@@ -1,21 +1,20 @@
 // ==UserScript==
-// @name                MP-Articles-Ratings-Extension
-// @description         Das Skript hängt die eigene Bewertunge an Film- und Serien-Links in Artikeln
+// @name                MP-Link-Rating-Extension (experimentell)
+// @description         Das Skript hängt die eigene Bewertung als Tooltip an Film- und Serien-Links und färbt diese
 // @author              leinzi
 // @grant               none
-// @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-articles-rating-extension.user.js
-// @include             /^https?:\/\/www\.moviepilot.de\/news\/([^\/\#]*?)$/
-// @version             0.0.3
+// @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-link-rating-extension.user.js
+// @include             /^https?:\/\/www\.moviepilot.de\//
+// @version             0.0.4
 // ==/UserScript==
 
-
 if (document.readyState !== 'loading') {
-  newsRatingExtension()
+  linkRatingExtension()
 } else {
-  document.addEventListener('DOMContentLoaded', newsRatingExtension)
+  document.addEventListener('DOMContentLoaded', linkRatingExtension)
 }
 
-function newsRatingExtension() {
+function linkRatingExtension() {
   let sessionURL = 'https://www.moviepilot.de/api/session'
   makeAjaxRequest(sessionURL)
     .then(createUserFromSession)
@@ -45,7 +44,8 @@ function createUserFromSession(sessionRequest) {
 
 function addRatingsToLinks(signedInUser) {
   fetchRatings()
-    .then(processArticle)
+    .then(promise => processArticle(document))
+    .then(addObserverToXHR)
 
   function fetchRatings() {
     let moviesPromise = fetchRatingsFromList(signedInUser.movies)
@@ -65,15 +65,32 @@ function addRatingsToLinks(signedInUser) {
     return Promise.all(pages)
   }
 
-  function processArticle() {
-    let anchorElements = Array.from(document.querySelectorAll('article a'))
+function addObserverToXHR() {
+  let originalOpen = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function(method, url) {
+    this.addEventListener('load', function() {
+      processArticle()
+    })
+    originalOpen.apply(this, arguments)
+  }
+}
+
+function processArticle() {
+    let anchorElements = Array.from(document.querySelectorAll('a'))
     let linkElements = anchorElements.map(element => new LinkElement(element))
     linkElements = linkElements.filter(element => element.isMediaLink())
 
     linkElements.forEach((linkElement) => {
       let match = signedInUser.findRatingEntry(linkElement.type, linkElement.slug)
       let rating = match ? parseFloat(match.rating).toFixed(1) : 'keine'
-      linkElement.element.text += ` (Deine Bewertung: ${rating})`
+      let title = linkElement.element.title
+      if (title.match(/( \(Deine Bewertung: .*\))/)) {
+        title = title.replace(RegExp.lastMatch, ` (Deine Bewertung: ${rating})`)
+      } else {
+        title += ` (Deine Bewertung: ${rating})`
+      }
+      linkElement.element.title = title
+      linkElement.element.style.color = (match) ? '#37996b' : '#f4645a'
     })
   }
 }
