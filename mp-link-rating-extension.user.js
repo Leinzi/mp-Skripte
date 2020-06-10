@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-link-rating-extension.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\//
-// @version             0.0.4
+// @version             0.0.5
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
@@ -198,7 +198,7 @@ class LinkElement {
   }
 
   isMediaLink() {
-    return this.isMoviepilotLink() && ['movies', 'serie'].includes(this.type)
+    return this.isMoviepilotLink() && ['movies', 'serie'].includes(this.type) && !this.slug.includes('#')
   }
 }
 
