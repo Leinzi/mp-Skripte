@@ -12,8 +12,6 @@
 let regMoviesMain = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)$/;
 let regMoviesComments = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)\/(kritik)([^\/]*)?(\/([^\/]*))?$/;
 
-let checkboxes = [];
-
 if (document.readyState !== 'loading') {
   performCleanUp();
 } else {
@@ -22,9 +20,9 @@ if (document.readyState !== 'loading') {
 
 function performCleanUp() {
   if (regMoviesMain.test(window.location.href)) {
-    buildAndPlaceCategorySection();
-    loadCheckboxValues();
-    filterMainPage();
+    buildAndPlaceCategorySection()
+    .then(loadCheckboxValues)
+    .then(filterMainPage)
   } else if (regMoviesComments.test(window.location.href)) {
    improveComments();
   }
@@ -45,10 +43,10 @@ function contains(selector, text) {
 // ----- Filter - Anfang -----
 
 function filterMainPage() {
-  for (let i = 0; i < checkboxes.length; i++) {
-    let checkbox = checkboxes[i];
+  let categorySection = document.querySelector('.mp-cleanup-category-switcher')
+  let checkboxes = categorySection.querySelectorAll('input[type="checkbox"]')
+  for (let checkbox of checkboxes) {
     let element = getElementForCheckbox(checkbox)
-
     if (checkbox.checked) {
       if (element) { element.style.display = 'block' }
     } else {
@@ -120,6 +118,7 @@ function improveFonts() {
 
 function buildAndPlaceCategorySection() {
   let categorySection = buildNewSection();
+  categorySection.classList.add('mp-cleanup-category-switcher')
 
   let headlineColumn = buildColumnForHeadlines("Rubrikenauswahl", "Nicht ausgewählte Rubriken werden ausgeblendet");
   categorySection.append(headlineColumn);
@@ -128,7 +127,7 @@ function buildAndPlaceCategorySection() {
   categorySection.append(checkboxDiv);
 
   let firstSection = document.querySelector('section');
-  firstSection.after(categorySection);
+  return Promise.resolve(firstSection.after(categorySection))
 }
 
 function buildNewSection() {
@@ -165,7 +164,7 @@ function buildCheckboxDivForMoviesMain() {
   let checkboxDiv = document.createElement('div');
 
   let categoryDiv = buildDivForCategory({
-    key: 'moviesFreunde',
+    key: 'friends',
     title: 'Deine Freunde',
     selector: 'div[data-hypernova-key="FriendsOpinionsModule"]',
     elementSelector: 'h2',
@@ -174,7 +173,7 @@ function buildCheckboxDivForMoviesMain() {
   checkboxDiv.append(categoryDiv);
 
   categoryDiv = buildDivForCategory({
-    key: 'moviesStreaming',
+    key: 'stream',
     title: 'Streaming/TV',
     selector: 'div[data-hypernova-key="ConsumptionModule"]',
     elementSelector: 'h2',
@@ -183,7 +182,7 @@ function buildCheckboxDivForMoviesMain() {
   checkboxDiv.append(categoryDiv);
 
   categoryDiv = buildDivForCategory({
-    key: 'moviesKino',
+    key: 'cinema',
     title: 'im Kino',
     selector: 'div[data-hypernova-key="MovieCinemaConsumptionModule"]',
     elementSelector: 'h3',
@@ -192,61 +191,7 @@ function buildCheckboxDivForMoviesMain() {
   checkboxDiv.append(categoryDiv);
 
   categoryDiv = buildDivForCategory({
-    key: 'moviesTrivia',
-    title: 'Trivia',
-    selector: 'div[data-hypernova-key="TriviasModule"]',
-    elementSelector: 'h2',
-    elementTitle: 'Trivia',
-  });
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory({
-    key: 'moviesPresse',
-    title: 'Pressestimmen',
-    selector: 'section',
-    elementSelector: 'h2',
-    elementTitle: 'Pressestimmen',
-  });
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory({
-    key: 'moviesNews',
-    title: 'News',
-    selector: 'div[data-hypernova-key="ArticleSlider"]',
-    elementSelector: 'h2',
-    elementTitle: 'News',
-  });
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory({
-    key: 'moviesArtikel',
-    title: 'Weitere Artikel',
-    selector: 'div[data-hypernova-key="ArticleSlider"]',
-    elementSelector: 'h2',
-    elementTitle: 'Das könnte dich auch interessieren',
-  });
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory({
-    key: 'moviesStatistik',
-    title: 'Statistiken',
-    selector: 'section',
-    elementSelector: 'h2',
-    elementTitle: 'Statistiken',
-  });
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory({
-    key: 'moviesHandlung',
-    title: 'Handlung',
-    selector: 'section',
-    elementSelector: 'h2',
-    elementTitle: 'Handlung',
-  });
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory({
-    key: 'moviesCast',
+    key: 'cast',
     title: 'Cast & Crew',
     selector: 'section',
     elementSelector: 'h2',
@@ -255,16 +200,7 @@ function buildCheckboxDivForMoviesMain() {
   checkboxDiv.append(categoryDiv);
 
   categoryDiv = buildDivForCategory({
-    key: 'moviesComments',
-    title: 'Kommentare',
-    selector: 'section',
-    elementSelector: 'h2',
-    elementTitle: 'Kommentare',
-  });
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory({
-    key: 'moviesVideos',
+    key: 'videos',
     title: 'Videos & Bilder',
     selector: 'section',
     elementSelector: 'h2',
@@ -273,7 +209,43 @@ function buildCheckboxDivForMoviesMain() {
   checkboxDiv.append(categoryDiv);
 
   categoryDiv = buildDivForCategory({
-    key: 'moviesLike',
+    key: 'news',
+    title: 'News',
+    selector: 'div[data-hypernova-key="ArticleSlider"]',
+    elementSelector: 'h2',
+    elementTitle: 'News',
+  });
+  checkboxDiv.append(categoryDiv);
+
+  categoryDiv = buildDivForCategory({
+    key: 'press',
+    title: 'Pressestimmen',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Pressestimmen',
+  });
+  checkboxDiv.append(categoryDiv);
+
+  categoryDiv = buildDivForCategory({
+    key: 'statistics',
+    title: 'Statistiken',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Statistiken',
+  });
+  checkboxDiv.append(categoryDiv);
+
+  categoryDiv = buildDivForCategory({
+    key: 'comments',
+    title: 'Kommentare',
+    selector: 'section',
+    elementSelector: 'h2',
+    elementTitle: 'Kommentare',
+  });
+  checkboxDiv.append(categoryDiv);
+
+  categoryDiv = buildDivForCategory({
+    key: 'similar',
     title: 'Filme wie',
     selector: 'div[data-hypernova-key="PosterSlider"]',
     elementSelector: 'h2',
@@ -282,11 +254,20 @@ function buildCheckboxDivForMoviesMain() {
   checkboxDiv.append(categoryDiv);
 
   categoryDiv = buildDivForCategory({
-    key: 'moviesListen',
+    key: 'lists',
     title: 'Listen',
     selector: 'div[data-hypernova-key="ListSlider"]',
     elementSelector: 'div.Jt--G',
     elementTitle: 'Trending: Meist diskutierte',
+  });
+  checkboxDiv.append(categoryDiv);
+
+  categoryDiv = buildDivForCategory({
+    key: 'moreNews',
+    title: 'Weitere Artikel',
+    selector: 'div[data-hypernova-key="ArticleSlider"]',
+    elementSelector: 'h2',
+    elementTitle: 'Das könnte dich auch interessieren',
   });
   checkboxDiv.append(categoryDiv);
 
@@ -318,8 +299,6 @@ function buildCheckboxForCategory(options = {}) {
   checkbox.dataset.selector = options.selector;
   checkbox.dataset.elementSelector = options.elementSelector;
   checkbox.dataset.elementTitle = options.elementTitle;
-
-  checkboxes.push(checkbox);
   return checkbox;
 }
 
@@ -355,18 +334,75 @@ function buildButtonWithCallback(label, callback) {
 }
 
 function saveCheckboxValues() {
-  for (let i = 0; i < checkboxes.length; i++) {
-    let checkbox = checkboxes[i];
-    localStorage.setItem(checkbox.id, checkbox.checked);
+  let categorySection = document.querySelector('.mp-cleanup-category-switcher')
+  let checkboxes = categorySection.querySelectorAll('input[type="checkbox"]')
+  for (let checkbox of checkboxes) {
+    MPCleanupStorage.storeItem(checkbox.id, checkbox.checked);
   }
   filterMainPage();
 }
 
 function loadCheckboxValues() {
-  for (let i = 0; i < checkboxes.length; i++) {
-    let checkbox = checkboxes[i];
-    checkbox.checked = JSON.parse(localStorage.getItem(checkbox.id));
+  let categorySection = document.querySelector('.mp-cleanup-category-switcher')
+  let checkboxes = categorySection.querySelectorAll('input[type="checkbox"]')
+  for (let checkbox of checkboxes) {
+    checkbox.checked = MPCleanupStorage.getItem(checkbox.id)
   }
+  return Promise.resolve(MPCleanupStorage.getStorage())
 }
 
 // ----- Rubrikauswahl - Ende -----
+
+class MPCleanupStorage {
+  static storageKey() {
+    return 'mpCleanupStorage'
+  }
+
+  static categoryKey() {
+    return 'movies'
+  }
+
+  static getStorage() {
+    let storage = localStorage.getItem(MPCleanupStorage.storageKey())
+    if (storage) {
+      return JSON.parse(storage)
+    } else {
+     return {}
+    }
+  }
+
+  static setStorage(newStorage) {
+   localStorage.setItem(MPCleanupStorage.storageKey(), JSON.stringify(newStorage))
+  }
+
+  static clearStorage() {
+   localStorage.removeItem(MPCleanupStorage.storageKey())
+  }
+
+  static getItem(key) {
+    let storage = MPCleanupStorage.getStorage()
+    let categorySettings = storage[MPCleanupStorage.categoryKey()]
+    if (categorySettings) {
+      return categorySettings[key]
+    } else {
+      return undefined
+    }
+  }
+
+  static removeItem(key) {
+    let storage = MPCleanupStorage.getStorage()
+    let categorySettings = storage[MPCleanupStorage.categoryKey()]
+    if (categorySettings) {
+      delete categorySettings[key]
+      MPCleanupStorage.setStorage(storage)
+    }
+  }
+
+  static storeItem(key, item) {
+    let storage = MPCleanupStorage.getStorage()
+    let categorySettings = storage[MPCleanupStorage.categoryKey()] || {}
+    categorySettings[key] = item
+    storage[MPCleanupStorage.categoryKey()] = categorySettings
+    MPCleanupStorage.setStorage(storage)
+  }
+}
