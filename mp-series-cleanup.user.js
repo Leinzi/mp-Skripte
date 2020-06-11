@@ -4,15 +4,15 @@
 // @author              mitcharts, leinzi
 // @grant               none
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
-// @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             3.4.0
+// @include             /^https?:\/\/www\.moviepilot.de\/serie\/([^\/]*)((\/[^\/]*)*)$/
+// @version             3.4.1
 // ==/UserScript==
 
 //RegExps
-let regSeriesMain = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)$/;
-let regSeriesComments = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(kritik)([^\/]*)?(\/([^\/]*))?$/;
-let regSeriesSeason = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)$/;
-let regSeriesSeasonComments = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(serie)\/([^\/]*)\/(staffel)\/([1-9][0-9]*)\/(kritik)([^\/]*)?(\/([^\/]*))?$/;
+let regSeriesMain = /^https?:\/\/www\.moviepilot.de\/serie\/([^\/]*)$/;
+let regSeriesComments = /^https?:\/\/www\.moviepilot.de\/serie\/([^\/]*)\/kritik([^\/]*)?(\/([^\/]*))?$/;
+let regSeriesSeason = /^https?:\/\/www\.moviepilot.de\/serie\/([^\/]*)\/staffel\/([1-9][0-9]*)$/;
+let regSeriesSeasonComments = /^https?:\/\/www\.moviepilot.de\/serie\/([^\/]*)\/staffel\/([1-9][0-9]*)\/kritik([^\/]*)?(\/([^\/]*))?$/;
 
 let seriesMainPage = true;
 

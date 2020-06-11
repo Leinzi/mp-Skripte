@@ -4,13 +4,13 @@
 // @author              leinzi
 // @grant               none
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-movies-cleanup.user.js
-// @include             /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)((\/[^\/]*)*)$/
-// @version             0.5.0
+// @include             /^https?:\/\/www\.moviepilot.de\/movies\/([^\/]*)((\/[^\/]*)*)$/
+// @version             0.5.1
 // ==/UserScript==
 
 // RegExps
-let regMoviesMain = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)$/;
-let regMoviesComments = /^(https?):\/\/(www\.)?(moviepilot\.de)\/(movies)\/([^\/]*)\/(kritik)([^\/]*)?(\/([^\/]*))?$/;
+let regMoviesMain = /^https?:\/\/www\.moviepilot.de\/movies\/([^\/]*)$/;
+let regMoviesComments = /^https?:\/\/www\.moviepilot.de\/movies\/([^\/]*)\/kritik([^\/]*)?(\/([^\/]*))?$/;
 
 if (document.readyState !== 'loading') {
   performCleanUp();
