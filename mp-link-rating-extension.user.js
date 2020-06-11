@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-link-rating-extension.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\//
-// @version             0.0.6
+// @version             0.1.0
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
@@ -58,8 +58,11 @@ function addRatingsToLinks(signedInUser) {
   function fetchRatingsFromList(ratingAttributes) {
     let pages = []
     for (let i = 1; i <= ratingAttributes.pages; i++) {
-      let promise = makeAjaxRequest(ratingAttributes.listURL + "?page=" + i)
-        .then(request => (new RatingListProcessor(request).run()))
+      let url = ratingAttributes.listURL + "?page=" + i
+      let ratingListProcessor = new RatingListProcessor(url)
+      let promise = ratingListProcessor.fetchRatingList()
+        .then(response => response.text())
+        .then(ratingList => ratingListProcessor.processList(ratingList))
       pages.push(promise)
     }
     return Promise.all(pages)
@@ -125,6 +128,17 @@ function handleErrors(error) {
 
 function roundFloat(number, precision = 2) {
   return Math.round(number * Math.pow(10, precision)) / Math.pow(10, precision)
+}
+
+function hashString(string) {
+  let hash = 0
+  if (string.length == 0) return hash
+  for (let i = 0; i < string.length; i++) {
+    let char = string.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32bit integer
+  }
+  return hash
 }
 
 class RatingEntry {
@@ -226,27 +240,104 @@ class RatingAttributes {
 }
 
 class RatingListProcessor {
-  constructor(request) {
-    this.request = request
+  constructor(url) {
+    this.url = url
   }
 
-  run() {
-    if (this.status() === 200) {
-      let dom = stringToHTML(this.response())
-      let rows = dom.querySelectorAll('tbody tr')
-      return Array.from(rows).map(row => this.buildRatingEntryFromRow(row))
+  fetchRatingList() {
+    let expiry = 10 * 60 // 10 min default
+    // Use the URL as the cache key to sessionStorage
+    let cacheKey = hashString(this.url)
+    let cached = MPRatingStorage.getItem(cacheKey)
+    let whenCached = MPRatingStorage.getItem(cacheKey + ':ts')
+    if (cached !== null && whenCached !== null) {
+      // it was in sessionStorage! Yay!
+      // Even though 'whenCached' is a string, this operation
+      // works because the minus sign converts the
+      // string to an integer and it will work.
+      let age = (Date.now() - whenCached) / 1000
+      if (age < expiry) {
+        let response = new Response(new Blob([cached]))
+        return Promise.resolve(response)
+      } else {
+        // We need to clean up this old key
+        MPRatingStorage.removeItem(cacheKey)
+        MPRatingStorage.removeItem(cacheKey + ':ts')
+      }
+    }
+    return fetch(this.url).then(response => {
+      if (response.status === 200) {
+        let ct = response.headers.get('Content-Type')
+        if (ct && (ct.match(/application\/json/i) || ct.match(/text\//i))) {
+          response.clone().text().then(content => {
+            let dom = stringToHTML(content)
+            let ratingList = dom.querySelector('table')
+            MPRatingStorage.storeItem(cacheKey, ratingList.outerHTML)
+            MPRatingStorage.storeItem(cacheKey + ':ts', Date.now())
+          })
+        }
+        return Promise.resolve(response)
+      } else {
+        return Promise.reject(new Error('There was an error in processing your request'))
+      }
+    })
+  }
+
+  processList(ratingList) {
+    let dom = stringToHTML(ratingList)
+    ratingList = dom.querySelector('table')
+    let rows = ratingList.querySelectorAll('tbody tr')
+    if (rows) {
+      return Promise.resolve(Array.from(rows).map(row => this.buildRatingEntryFromRow(row)))
     } else {
-      throw new Error('There was an error in processing your request')
+      return Promise.reject(new Error('There was an error in processing your request'))
     }
   }
-
-  status() { return this.request.status }
-  response() { return this.request.response }
 
   buildRatingEntryFromRow(row) {
     let dataFields = row.querySelectorAll('td')
     let link = dataFields[0].querySelector('a').href
     let rating = parseFloat(dataFields[1].innerText)
     return new RatingEntry(link, rating)
+  }
+}
+
+class MPRatingStorage {
+  static storageKey() {
+    return 'mpRatingStorage'
+  }
+
+  static getStorage() {
+    let storage = localStorage.getItem(MPRatingStorage.storageKey())
+    if (storage) {
+      return JSON.parse(storage)
+    } else {
+     return {}
+    }
+  }
+
+  static setStorage(newStorage) {
+   localStorage.setItem(MPRatingStorage.storageKey(), JSON.stringify(newStorage))
+  }
+
+  static clearStorage() {
+   localStorage.removeItem(MPRatingStorage.storageKey())
+  }
+
+  static getItem(key) {
+    let item = MPRatingStorage.getStorage()[key]
+    return item
+  }
+
+  static removeItem(key) {
+    let storage = MPRatingStorage.getStorage()
+    delete storage[key]
+    MPRatingStorage.setStorage(storage)
+  }
+
+  static storeItem(key, item) {
+    let storage = MPRatingStorage.getStorage()
+    storage[key] = item
+    MPRatingStorage.setStorage(storage)
   }
 }
