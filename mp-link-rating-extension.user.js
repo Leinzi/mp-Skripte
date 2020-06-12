@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-link-rating-extension.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\//
-// @version             0.1.0
+// @version             0.1.1
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
@@ -19,6 +19,7 @@ function linkRatingExtension() {
   makeAjaxRequest(sessionURL)
     .then(createUserFromSession)
     .then(addRatingsToLinks)
+    .then(addStylesheetToHead)
     .catch(handleErrors)
 }
 
@@ -41,6 +42,21 @@ function createUserFromSession(sessionRequest) {
     }
   })
 }
+
+function addStylesheetToHead() {
+  let style = document.createElement('style')
+  style.type = 'text/css'
+  style.append(document.createTextNode('.media-link.-seen { color: rgb(55, 153, 107) }'))
+  style.append(document.createTextNode('.media-link.-seen:hover { color: rgba(55, 153, 107, .75) }'))
+  style.append(document.createTextNode('.media-link.-unseen{ color: rgb(244, 100, 90) }'))
+  style.append(document.createTextNode('.media-link.-unseen:hover { color: rgba(244, 100, 90, .75) }'))
+  style.append(document.createTextNode('.regular-link { color: rgb(28, 44, 133) !important }'))
+  style.append(document.createTextNode('.regular-link:hover { color: rgba(28, 44, 133, .75) !important }'))
+
+  document.getElementsByTagName('head')[0].append(style);
+  return Promise.resolve(true)
+}
+
 
 function addRatingsToLinks(signedInUser) {
   fetchRatings()
@@ -83,6 +99,10 @@ function processPage() {
     if (content) {
       let anchorElements = Array.from(content.querySelectorAll('a'))
       let linkElements = anchorElements.map(element => new LinkElement(element))
+      if (window.location.href.match('https://www.moviepilot.de/people')) {
+        linkElements.filter(element => !element.isMediaLink())
+          .forEach(linkElement => linkElement.element.classList.add('regular-link'))
+      }
       linkElements = linkElements.filter(element => element.isMediaLink())
 
       linkElements.forEach((linkElement) => {
@@ -95,7 +115,9 @@ function processPage() {
           title += ` (Deine Bewertung: ${rating})`
         }
         linkElement.element.title = title
-        linkElement.element.style.color = (match) ? '#37996b' : '#f4645a'
+        linkElement.element.classList.add('media-link')
+        linkElement.element.classList.toggle('-seen', match)
+        linkElement.element.classList.toggle('-unseen', !match)
       })
     }
   }
