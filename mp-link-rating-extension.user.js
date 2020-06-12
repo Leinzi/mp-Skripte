@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-link-rating-extension.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\//
-// @version             0.1.1
+// @version             0.1.2
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
@@ -50,8 +50,8 @@ function addStylesheetToHead() {
   style.append(document.createTextNode('.media-link.-seen:hover { color: rgba(55, 153, 107, .75) }'))
   style.append(document.createTextNode('.media-link.-unseen{ color: rgb(244, 100, 90) }'))
   style.append(document.createTextNode('.media-link.-unseen:hover { color: rgba(244, 100, 90, .75) }'))
-  style.append(document.createTextNode('.regular-link { color: rgb(28, 44, 133) !important }'))
-  style.append(document.createTextNode('.regular-link:hover { color: rgba(28, 44, 133, .75) !important }'))
+  style.append(document.createTextNode('.person--details .regular-link { color: rgb(28, 44, 133) !important }'))
+  style.append(document.createTextNode('.person--details .regular-link:hover { color: rgba(28, 44, 133, .75) !important }'))
 
   document.getElementsByTagName('head')[0].append(style);
   return Promise.resolve(true)
