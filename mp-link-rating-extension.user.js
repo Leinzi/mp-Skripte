@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-link-rating-extension.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\//
-// @version             0.1.2
+// @version             0.1.3
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
@@ -116,8 +116,13 @@ function processPage() {
         }
         linkElement.element.title = title
         linkElement.element.classList.add('media-link')
-        linkElement.element.classList.toggle('-seen', match)
-        linkElement.element.classList.toggle('-unseen', !match)
+        if (match) {
+          linkElement.element.classList.add('-seen')
+          linkElement.element.classList.remove('-unseen')
+        } else {
+          linkElement.element.classList.add('-unseen')
+          linkElement.element.classList.remove('-seen')
+        }
       })
     }
   }
