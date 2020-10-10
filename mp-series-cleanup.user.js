@@ -5,7 +5,7 @@
 // @grant               none
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\/serie\/([^\/]*)((\/[^\/]*)*)$/
-// @version             3.4.1
+// @version             3.5.0
 // ==/UserScript==
 
 //RegExps
@@ -33,6 +33,7 @@ function performCleanUp() {
    improveComments();
   }
 
+  removeAds();
   removeFooterVideoplayer();
   bringBackTheColor();
   improveFonts();
@@ -100,9 +101,22 @@ function getElementByText(selector, text) {
 // ----- Improvements - Anfang -----
 
 function removeFooterVideoplayer() {
-  let footerVideo = document.querySelector('.video--player--footer');
+  let footerVideo = document.querySelector('div[data-hypernova-key="PlayerFooter"]');
   if (footerVideo) {
-    footerVideo.style.display = 'none';
+    footerVideo.after(document.createElement('hr'))
+    footerVideo.remove();
+  }
+}
+
+function removeAds() {
+  document.querySelectorAll('.has-vertical-spacing:empty').forEach(element => element.remove())
+  document.querySelectorAll('*[data-google-query-id]').forEach(element => element.remove())
+  document.querySelectorAll('#dfp-header').forEach(element => element.remove())
+
+  let outbrainElement = getElementByText('h2', 'Das könnte dich auch interessieren');
+  if (outbrainElement) {
+    let surroundingSection = outbrainElement.closest('section')
+    surroundingSection.remove()
   }
 }
 
@@ -296,9 +310,9 @@ function buildCheckboxDivForSeriesMain() {
   categoryDiv = buildDivForCategory({
     key: 'moreNews',
     title: 'Weitere Artikel',
-    selector: 'div[data-hypernova-key="ArticleSlider"]',
+    selector: 'section',
     elementSelector: 'h2',
-    elementTitle: 'Das könnte dich auch interessieren',
+    elementTitle: 'Weitere Serien-News',
   });
   checkboxDiv.append(categoryDiv);
 
