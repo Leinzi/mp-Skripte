@@ -4,13 +4,20 @@
 // @author              leinzi
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-ratings.user.js
-// @include             /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/
-// @version             1.0.0
+// @include             /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography/
+// @version             1.0.1
 // ==/UserScript==
 
-// MP do not use human-readable class names.
+const FILMOGRAPHY_REGEXP = /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography/
+// MP does not use human-readable class names.
 // I think this selector identify a category on the new filmography views
 const CATEGORY_SELECTOR = '.sc-131fd76-0.fDbMqd'
+const FILMOGRAPHY_ENTRIES_CONTAINER_SELECTOR = '.sc-131fd76-7.elhhpM'
+const FILMOGRAPHY_ENTRY_SELECTOR = '.rn7qs5-0.lgUEEA'
+// This is the selector for a filmography entry description
+const DESCRIPTION_ELEMENT_SELECTOR = '.rn7qs5-1.jSRoyZ'
+
+const BONUS_CALCULATION_ACTIVE = false
 
 if (document.readyState !== 'loading') {
   filmographyRatingExtension()
@@ -19,11 +26,14 @@ if (document.readyState !== 'loading') {
 }
 
 function filmographyRatingExtension() {
-  let sessionURL = 'https://www.moviepilot.de/api/session'
-  makeAjaxRequest(sessionURL)
-    .then(createUserFromSession)
-    .then(addRatingsToFilmography)
-    .catch(handleErrors)
+  if (FILMOGRAPHY_REGEXP.test(window.location.href)) {
+    console.log('[MP-People-Ratings] Start extension...')
+    let sessionURL = 'https://www.moviepilot.de/api/session'
+    makeAjaxRequest(sessionURL)
+      .then(createUserFromSession)
+      .then(addRatingsToFilmography)
+      .catch(handleErrors)
+  }
 }
 
 function createUserFromSession(sessionRequest) {
@@ -78,7 +88,7 @@ function addRatingsToFilmography(signedInUser) {
     new FilmographyProcessor(signedInUser, categories).run()
 
     function insertGeneralStatistics() {
-      let firstFilmographyCategory = document.querySelector('.sc-131fd76-0.fDbMqd')
+      let firstFilmographyCategory = document.querySelector(CATEGORY_SELECTOR)
       if (firstFilmographyCategory) {
         firstFilmographyCategory.before(createGeneralStatisticsFor('movies'))
         firstFilmographyCategory.before(createGeneralStatisticsFor('serie'))
@@ -90,11 +100,14 @@ function addRatingsToFilmography(signedInUser) {
 
       let statisticsDiv = document.createElement('div')
       statisticsDiv.style.fontSize = '1rem'
-      statisticsDiv.style.marginTop = '1rem'
 
       let mean = (ratingAttributes.mean) ? roundFloat(ratingAttributes.mean, 4) : '-'
-      statisticsDiv.innerText = `${ratingAttributes.label} allgemein - Bewertet: ${ratingAttributes.numberOfEntries}, Durchschnitt: ${mean}`
-      statisticsDiv.append(BonusSetting.arrayToHTML(ratingAttributes.bonusSettings))
+      statisticsDiv.innerText = `${ratingAttributes.label} - Bewertet: ${ratingAttributes.numberOfEntries}, Durchschnitt: ${mean}`
+
+      if (BONUS_CALCULATION_ACTIVE) {
+        statisticsDiv.append(BonusSetting.arrayToHTML(ratingAttributes.bonusSettings))
+      }
+
       return statisticsDiv
     }
   }
@@ -231,7 +244,9 @@ class RatingAttributes {
   setRatingEntries(newRatingEntries) {
     this.ratingEntries = newRatingEntries
     this.calculateMean()
-    this.calculateBonusSettings()
+    if (BONUS_CALCULATION_ACTIVE) {
+      this.calculateBonusSettings()
+    }
   }
 
   setBonusSettings(newBonusSettings) {
@@ -396,7 +411,9 @@ class FilmographyProcessor {
   }
 
   run() {
+    console.log('[MP-People-Ratings] Process filmography...')
     this.categories.forEach(category => new CategoryProcessor(this.user, category).run())
+    console.log('[MP-People-Ratings] Processed filmography.')
   }
 }
 
@@ -412,16 +429,19 @@ class CategoryProcessor {
   }
 
   run() {
-    let filmographyEntrySelector = '.rn7qs5-0.lgUEEA'
-    let filmographyEntries = this.category.querySelectorAll(filmographyEntrySelector)
+    let categoryTitle = this.category.children[1].innerText
+    console.log(`[MP-People-Ratings] Process ${categoryTitle}...`)
+
+    let filmographyEntries = this.category.querySelectorAll(FILMOGRAPHY_ENTRY_SELECTOR)
     this.ratingEntries = Array.from(filmographyEntries).map(
       filmographyEntry => new FilmographyEntryProcessor(this.user, filmographyEntry).runAndReturnRating()
     )
 
-    let filmographyEntriesContainer = this.category.querySelector('.sc-131fd76-7.elhhpM')
+    let filmographyEntriesContainer = this.category.querySelector(FILMOGRAPHY_ENTRIES_CONTAINER_SELECTOR)
     if (filmographyEntriesContainer) {
       filmographyEntriesContainer.before(this.createStatisticsElement())
     }
+    console.log(`[MP-People-Ratings] Finished ${categoryTitle}.`)
   }
 
   createStatisticsElement() {
@@ -435,11 +455,16 @@ class CategoryProcessor {
     if (matchedRatings.length > 0) {
       let type = matchedRatings[0].type
       let mean = roundFloat(sumArray(matchedRatings.map(ratingEntry => ratingEntry.rating)) / matchedRatings.length)
-      let points = roundFloat(mean + this.calculateBonus())
-      statisticsDiv.innerText = `Bewertet: ${ratedString}, Durchschnitt: ${mean}, Punkte: ${points}`
+      let text = statisticsDiv.innerText = `Bewertet: ${ratedString}, Durchschnitt: ${mean}`
+
+      if (BONUS_CALCULATION_ACTIVE) {
+        let points = roundFloat(mean + this.calculateBonus())
+        text += `, Punkte: ${points}`
+      }
+      statisticsDiv.innerText = text
       statisticsDiv.append(new Overview(matchedRatings).toHTML())
     } else {
-      statisticsDiv.innerText = `Bewertet: ${ratedString}, Durchschnitt: -, Punkte: -`
+      statisticsDiv.innerText = `Bewertet: ${ratedString}, Durchschnitt: -`
     }
     return statisticsDiv
   }
@@ -463,7 +488,7 @@ class FilmographyEntryProcessor {
   constructor(user, filmographyEntry) {
     this.user = user
     this.filmographyEntry = filmographyEntry
-    let link = filmographyEntry.querySelector('.rn7qs5-1.jSRoyZ a').href
+    let link = filmographyEntry.querySelector(`${DESCRIPTION_ELEMENT_SELECTOR} a`).href
     if (link) {
       let tokens = link.split('/')
       this.type = tokens.slice(-2)[0]
@@ -474,7 +499,7 @@ class FilmographyEntryProcessor {
   runAndReturnRating() {
     let match = this.user.findRatingEntry(this.type, this.slug)
     let ratingLabel = (match) ? match.rating.toFixed(1) : '?'
-    let descriptionElement = this.filmographyEntry.querySelector('.rn7qs5-1.jSRoyZ')
+    let descriptionElement = this.filmographyEntry.querySelector(DESCRIPTION_ELEMENT_SELECTOR)
     descriptionElement.append(this.createRatingElement(ratingLabel))
     return match
   }
