@@ -5,9 +5,12 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-ratings.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\/people\/([^\/\#]*?)\/filmography$/
-// @version             0.7.0
+// @version             1.0.0
 // ==/UserScript==
 
+// MP do not use human-readable class names.
+// I think this selector identify a category on the new filmography views
+const CATEGORY_SELECTOR = '.sc-131fd76-0.fDbMqd'
 
 if (document.readyState !== 'loading') {
   filmographyRatingExtension()
@@ -70,17 +73,15 @@ function addRatingsToFilmography(signedInUser) {
 
   function processFilmography() {
     insertGeneralStatistics()
-    let tables = document.querySelectorAll('table')
-    new FilmographyProcessor(signedInUser, tables).run()
+    // for example "Als Schauspieler/in", "Als Produzent/in"
+    let categories = document.querySelectorAll(CATEGORY_SELECTOR)
+    new FilmographyProcessor(signedInUser, categories).run()
 
     function insertGeneralStatistics() {
-      let movieHeadlineElement = document.querySelector('#filmography_movie')
-      if (movieHeadlineElement) {
-        movieHeadlineElement.before(createGeneralStatisticsFor('movies'))
-      }
-      let seriesHeadlineElement = document.querySelector('#filmography_series')
-      if (seriesHeadlineElement) {
-        seriesHeadlineElement.before(createGeneralStatisticsFor('serie'))
+      let firstFilmographyCategory = document.querySelector('.sc-131fd76-0.fDbMqd')
+      if (firstFilmographyCategory) {
+        firstFilmographyCategory.before(createGeneralStatisticsFor('movies'))
+        firstFilmographyCategory.before(createGeneralStatisticsFor('serie'))
       }
     }
 
@@ -275,7 +276,7 @@ class BonusSetting {
 
   static arrayToHTML(bonusSettings) {
     let wrapper = document.createElement('div')
-    wrapper.style.paddingTop = '0.75rem'
+    //wrapper.style.paddingTop = '0.75rem'
 
     let header = document.createElement('h3')
     header.innerText = 'Bonusberechnung'
@@ -283,7 +284,7 @@ class BonusSetting {
     wrapper.append(header)
 
     let bonusSettingsDiv = document.createElement('div')
-    bonusSettingsDiv.style.fontSize = '0.75rem'
+    bonusSettingsDiv.style.fontSize = '14px'
     bonusSettingsDiv.style.marginTop = '0.75rem'
     bonusSettingsDiv.style.display = 'flex'
     bonusSettingsDiv.style.flexWrap = 'wrap'
@@ -389,20 +390,20 @@ class RatingListProcessor {
 }
 
 class FilmographyProcessor {
-  constructor(user, tables) {
+  constructor(user, categories) {
     this.user = user
-    this.tables = tables
+    this.categories = categories
   }
 
   run() {
-    this.tables.forEach(table => new TableProcessor(this.user, table).run())
+    this.categories.forEach(category => new CategoryProcessor(this.user, category).run())
   }
 }
 
-class TableProcessor {
-  constructor(user, table) {
+class CategoryProcessor {
+  constructor(user, category) {
     this.user = user
-    this.table = table
+    this.category = category
     this.ratingEntries = []
   }
 
@@ -411,12 +412,15 @@ class TableProcessor {
   }
 
   run() {
-    let rows = this.table.querySelectorAll('tr')
-    this.ratingEntries = Array.from(rows).map(row => new RowProcessor(this.user, row).runAndReturnRating())
+    let filmographyEntrySelector = '.rn7qs5-0.lgUEEA'
+    let filmographyEntries = this.category.querySelectorAll(filmographyEntrySelector)
+    this.ratingEntries = Array.from(filmographyEntries).map(
+      filmographyEntry => new FilmographyEntryProcessor(this.user, filmographyEntry).runAndReturnRating()
+    )
 
-    let headline = this.table.previousElementSibling
-    if (headline) {
-      headline.after(this.createStatisticsElement())
+    let filmographyEntriesContainer = this.category.querySelector('.sc-131fd76-7.elhhpM')
+    if (filmographyEntriesContainer) {
+      filmographyEntriesContainer.before(this.createStatisticsElement())
     }
   }
 
@@ -455,11 +459,11 @@ class TableProcessor {
   }
 }
 
-class RowProcessor {
-  constructor(user, row) {
+class FilmographyEntryProcessor {
+  constructor(user, filmographyEntry) {
     this.user = user
-    this.row = row
-    let link = row.querySelector('td a').href
+    this.filmographyEntry = filmographyEntry
+    let link = filmographyEntry.querySelector('.rn7qs5-1.jSRoyZ a').href
     if (link) {
       let tokens = link.split('/')
       this.type = tokens.slice(-2)[0]
@@ -470,14 +474,16 @@ class RowProcessor {
   runAndReturnRating() {
     let match = this.user.findRatingEntry(this.type, this.slug)
     let ratingLabel = (match) ? match.rating.toFixed(1) : '?'
-    this.row.append(this.createRatingElement(ratingLabel))
+    let descriptionElement = this.filmographyEntry.querySelector('.rn7qs5-1.jSRoyZ')
+    descriptionElement.append(this.createRatingElement(ratingLabel))
     return match
   }
 
   createRatingElement(label) {
-    let ratingElement = document.createElement('td')
+    let ratingElement = document.createElement('div')
+    ratingElement.classList.add('gkLHIj')
     ratingElement.style.fontWeight = 'bold'
-    ratingElement.innerText = label
+    ratingElement.innerText = `Deine Bewertung: ${label}`
     return ratingElement
   }
 }
@@ -489,7 +495,7 @@ class Overview {
 
   toHTML() {
     let overview = document.createElement('div')
-    overview.style.fontSize = '0.75rem'
+    overview.style.fontSize = '14px'
     overview.style.marginTop = '0.75rem'
     overview.style.display = 'flex'
     overview.style.flexWrap = 'wrap'
