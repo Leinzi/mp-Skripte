@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-cleanup.user.js
 // @include             /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
-// @version             1.0.0
+// @version             1.0.1
 // ==/UserScript==
 
 // RegExps
@@ -14,7 +14,7 @@ let regexpPeople = /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
 if (document.readyState !== 'loading') {
   performCleanUp();
 } else {
-  document.addEventListener('DOMContentLoaded', performCleanUp);
+  document.addEventListener('load', performCleanUp);
 }
 
 function performCleanUp() {
@@ -22,10 +22,10 @@ function performCleanUp() {
     buildAndPlaceCategorySection()
     .then(loadCheckboxValues)
     .then(filterMainPage)
-  }
 
-  removeAds();
-  removeFooterVideoplayer();
+    removeAds();
+    removeFooterVideoplayer();
+  }
 }
 
 // ----- Helper - Anfang -----
