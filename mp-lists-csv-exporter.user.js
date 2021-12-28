@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-lists-csv-exporter.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\/liste\/([^\/\#]*?)
-// @version             0.1.0
+// @version             0.1.1
 // ==/UserScript==
 
 const LIST_REGEXP = /^https?:\/\/www\.moviepilot.de\/liste\/([^\/\#]+)/
@@ -29,13 +29,16 @@ if (document.readyState !== 'loading') {
 function listExporter() {
   let match = LIST_REGEXP.exec(window.location.href)
   if (match) {
-    filename = match[1]
-    addExportLink()
+    let hasEntries = document.querySelector(LIST_ENTRY_SELECTOR)
+    if (hasEntries) {
+      filename = match[1]
+      addExportLink()
+    }
   }
 }
 
 function addExportLink() {
-  let link = document.createElement('div')
+  let link = document.createElement('button')
   link.classList.add('sc-1emzowo-1')
   link.classList.add('eBvZom')
   link.textContent = 'Export as CSV'
