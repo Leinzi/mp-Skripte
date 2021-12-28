@@ -10,7 +10,7 @@
 
 const LIST_REGEXP = /^https?:\/\/www\.moviepilot.de\/liste\/([^\/\#]+)/
 // MP does not use human-readable class names.
-const INFO_CONTAINER_SELECTOR = '.sc-1emzowo-2.fTqPpj'
+const INFO_CONTAINER_SELECTOR = '.sc-gsTCUz.czc4w4-0.coCsbI.eODaHT'
 
 const LIST_ENTRY_SELECTOR = 'li.sc-1vkm4r8-0, li.sc-1ioy8ev-0'
 const LIST_ENTRY_TYPE_SELECTOR = '[itemprop="item"]'
@@ -39,13 +39,11 @@ function listExporter() {
 
 function addExportLink() {
   let link = document.createElement('button')
-  link.classList.add('sc-1emzowo-1')
-  link.classList.add('eBvZom')
   link.textContent = 'Export as CSV'
   link.addEventListener('click', clickLink)
 
   let infoContainer = document.querySelector(INFO_CONTAINER_SELECTOR)
-  infoContainer.appendChild(link)
+  infoContainer.after(link)
 }
 
 function clickLink() {
