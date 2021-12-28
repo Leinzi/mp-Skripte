@@ -5,18 +5,20 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-lists-csv-exporter.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\/liste\/([^\/\#]*?)
-// @version             0.0.1
+// @version             0.0.2
 // ==/UserScript==
 
-const LIST_REGEXP = /^https?:\/\/www\.moviepilot.de\/liste\/([^\/\#]*?)/
+const LIST_REGEXP = /^https?:\/\/www\.moviepilot.de\/liste\/([^\/\#]+)/
 // MP does not use human-readable class names.
-const INFO_CONTAINER_SELECTOR = '.sc-3xa03o-0'
+const INFO_CONTAINER_SELECTOR = '.sc-1emzowo-2.fTqPpj'
 
-const LIST_ENTRY_SELECTOR = 'li[itemprop="itemListElement"]'
+const LIST_ENTRY_SELECTOR = 'li.sc-1vkm4r8-0, li.sc-1ioy8ev-0'
 const LIST_ENTRY_TYPE_SELECTOR = '[itemprop="item"]'
 const LIST_ENTRY_TITLE_SELECTOR = '.sc-19p2d3f-4'
 const LIST_ENTRY_YEAR_SELECTOR = '[itemprop="copyrightYear"]'
 const LIST_ENTRY_COMMENT_SELECTOR = '.sc-1yx9cu0-7'
+
+let filename = 'my_data'
 
 if (document.readyState !== 'loading') {
   listExporter()
@@ -25,7 +27,9 @@ if (document.readyState !== 'loading') {
 }
 
 function listExporter() {
-  if (LIST_REGEXP.test(window.location.href)) {
+  let match = LIST_REGEXP.exec(window.location.href)
+  if (match) {
+    filename = match[1]
     addExportLink()
   }
 }
@@ -36,33 +40,32 @@ function collectListEntries() {
 }
 
 function addExportLink() {
-  let link = document.createElement('a')
-  link.classList.add('sc-1vogpeu-0')
-  link.classList.add('dxHqXO')
+  let link = document.createElement('div')
+  link.classList.add('sc-1emzowo-1')
+  link.classList.add('eBvZom')
   link.textContent = 'Export as CSV'
   link.addEventListener('click', clickLink)
 
   let infoContainer = document.querySelector(INFO_CONTAINER_SELECTOR)
-  let linkContainer = document.createElement("div")
-  linkContainer.classList.add('sc-3xa03o-1')
-  linkContainer.classList.add('iEMWUQ')
-  linkContainer.appendChild(link)
-  infoContainer.appendChild(linkContainer)
+  infoContainer.appendChild(link)
 }
 
 function clickLink() {
   let listEntries = collectListEntries()
   listEntries = listEntries.filter(entry => entry.type.includes('Movie'))
 
-  let csvContent = "data:text/csv;charset=utf-8,"
-  csvContent += "Title,Year,Review\n"
-  csvContent += listEntries.map(e => e.toCSV()).join("\n")
+  const csvOutput = "Title,Year,Review\n" + listEntries.map(e => e.toCSV()).join("\n")
+  const csvBlob = new Blob([csvOutput], { type: 'text/csv' })
+  const blobURL = URL.createObjectURL(csvBlob)
 
-  let encodedUri = encodeURI(csvContent)
   let link = document.createElement("a")
-  link.setAttribute("href", encodedUri)
-  link.setAttribute("download", "my_data.csv")
+  link.href = blobURL
+  link.download = `${filename}.csv`
   link.click()
+
+  setTimeout(() => {
+    URL.revokeObjectORL(blobURL)
+  }, 500)
 }
 
 // Utilities
