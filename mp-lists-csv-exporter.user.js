@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-lists-csv-exporter.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\/liste\/([^\/\#]*?)
-// @version             0.0.2
+// @version             0.1.0
 // ==/UserScript==
 
 const LIST_REGEXP = /^https?:\/\/www\.moviepilot.de\/liste\/([^\/\#]+)/
@@ -34,11 +34,6 @@ function listExporter() {
   }
 }
 
-function collectListEntries() {
-  let listEntries = document.querySelectorAll(LIST_ENTRY_SELECTOR)
-  return Array.from(listEntries).map(entry => new ListEntry(entry))
-}
-
 function addExportLink() {
   let link = document.createElement('div')
   link.classList.add('sc-1emzowo-1')
@@ -52,9 +47,9 @@ function addExportLink() {
 
 function clickLink() {
   let listEntries = collectListEntries()
-  listEntries = listEntries.filter(entry => entry.type.includes('Movie'))
+  listEntries = listEntries.filter(listEntry => listEntry.type.includes('Movie'))
 
-  const csvOutput = "Title,Year,Review\n" + listEntries.map(e => e.toCSV()).join("\n")
+  const csvOutput = "Title,Year,Review\n" + listEntries.map(listEntry => listEntry.toCSV()).join("\n")
   const csvBlob = new Blob([csvOutput], { type: 'text/csv' })
   const blobURL = URL.createObjectURL(csvBlob)
 
@@ -63,24 +58,20 @@ function clickLink() {
   link.download = `${filename}.csv`
   link.click()
 
-  setTimeout(() => {
-    URL.revokeObjectORL(blobURL)
-  }, 500)
+  setTimeout(() => { URL.revokeObjectORL(blobURL) }, 500)
 }
 
-// Utilities
-function stringToHTML(string) {
-  let dom = document.createElement('div')
-  dom.innerHTML = string
-  return dom
+function collectListEntries() {
+  const listEntryElements = document.querySelectorAll(LIST_ENTRY_SELECTOR)
+  return Array.from(listEntryElements).map(listEntryElement => new ListEntry(listEntryElement))
 }
 
 class ListEntry {
-  constructor(listEntry) {
-    let typeElement = listEntry.querySelector(LIST_ENTRY_TYPE_SELECTOR)
-    let titleElement = listEntry.querySelector(LIST_ENTRY_TITLE_SELECTOR)
-    let yearElement = listEntry.querySelector(LIST_ENTRY_YEAR_SELECTOR)
-    let commentElement = listEntry.querySelector(LIST_ENTRY_COMMENT_SELECTOR)
+  constructor(listEntryElement) {
+    let typeElement = listEntryElement.querySelector(LIST_ENTRY_TYPE_SELECTOR)
+    let titleElement = listEntryElement.querySelector(LIST_ENTRY_TITLE_SELECTOR)
+    let yearElement = listEntryElement.querySelector(LIST_ENTRY_YEAR_SELECTOR)
+    let commentElement = listEntryElement.querySelector(LIST_ENTRY_COMMENT_SELECTOR)
 
     this.type = typeElement ? typeElement.getAttribute('itemtype') : ''
     this.title = titleElement ? titleElement.textContent : ''
