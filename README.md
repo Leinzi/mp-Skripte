@@ -1,3 +1,19 @@
+# Generell
+
+Diese Skripte wurden aus eigenem Antrieb erstellt, um mir das Surfen auf https://www.moviepilot.de/ zu erleichtern. Es handelt sich lediglich um ein paar kleine Helferlein, die ich entweder selbst entwickelt oder von anderen Usern übernommen haben.
+
+Legendär ist das Klickstreckenskript, das ein Inhaltsverzeichnis von mehrseitigen Artikeln erzeugt hat. Mittlerweile ist dies obsolet, weil Moviepilot keine Klickstrecken mehr verwendet.
+
+Um diese Skripte zu nutzen, benötigt man eine Browsererweiterung, die Skripte ausführen kann. Ich benutze dafür "Tampermonkey".
+
+Chrome:
+https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=de
+
+Firefox:
+https://addons.mozilla.org/de/firefox/addon/tampermonkey/
+
+Einige der Skripte sind bereits veraltet und funktionieren möglicherweise nicht mehr, da sich Moviepilot in der Zwischenzeit verändert hat.
+
 ## mp-avoid-clickgal
 (ursprünglicher Autor: [mitcharts](https://github.com/mitcharts), überarbeitet von: [leinzi](https://github.com/Leinzi))
 
