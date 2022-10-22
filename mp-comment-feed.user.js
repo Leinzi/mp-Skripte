@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.2.0
+// @version             0.2.1
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
@@ -238,7 +238,7 @@ function buildCommentAuthorDiv(comment) {
   commentAuthorAvatar.append(userAvatar)
   commentAuthor.append(commentAuthorAvatar)
   commentAuthor.append(commentAuthorNameAndTimestamp)
-  if (comment.rating) {
+  if (comment.hasOwnProperty('rating')) {
     let commentAuthorRating = buildRating(comment.rating)
     commentAuthor.append(commentAuthorRating)
   }
