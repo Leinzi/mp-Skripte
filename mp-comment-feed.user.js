@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.1.0
+// @version             0.2.0
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
@@ -45,6 +45,8 @@ function addStylesheetToHead() {
   style.append(document.createTextNode('.comments--comment { margin-bottom: 20px }'))
 
   style.append(document.createTextNode('.comment { padding: 18px 12px; transition: opacity 0.5s ease-in 0s; background-color: rgb(255, 255, 255); box-shadow: rgb(20 20 20 / 18%) 0px 0px 7px 0px; }'))
+  style.append(document.createTextNode('.comment--replies { margin-left: auto; width: 90%; margin-top: 10px; }'))
+  style.append(document.createTextNode('.comment--replies .comment + .comment { margin-top: 10px; }'))
 
   style.append(document.createTextNode('.comment--author { display: flex; flex-wrap: nowrap; align-items: flex-start; }'))
   style.append(document.createTextNode('.comment--author-avatar { display: block; -webkit-box-flex: 0; flex-grow: 0; flex-shrink: 0; width: 40px; height: 40px; }'))
@@ -158,6 +160,18 @@ function buildCommentContainer(comment, title) {
 
   let commentDiv = buildCommentDiv(comment)
   commentContainer.append(commentDiv)
+
+  if (comment.replies.length > 0) {
+    let repliesDiv = document.createElement('div')
+    repliesDiv.classList.add('comment--replies')
+
+    for(let reply of comment.replies) {
+      let replyDiv = buildCommentDiv(reply)
+      repliesDiv.append(replyDiv)
+    }
+    commentContainer.append(repliesDiv)
+  }
+
   return commentContainer
 }
 
