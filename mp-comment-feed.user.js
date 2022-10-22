@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.0.1
+// @version             0.0.2
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
@@ -15,7 +15,7 @@ if (document.readyState !== 'loading') {
 }
 
 function buildCommentFeed() {
-  let commentFeedURL = 'https://www.moviepilot.de/api/comments?per_page=10'
+  let commentFeedURL = 'https://www.moviepilot.de/api/comments?per_page=20'
   makeAjaxRequest(commentFeedURL)
     .then(createCommentsFromFeed)
     .then(buildCommentStream)
