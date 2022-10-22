@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.0.2
+// @version             0.1.0
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
@@ -107,35 +107,60 @@ function buildCommentStream(comments) {
   let commentsContainer = document.createElement('div')
   commentsContainer.classList.add('comments')
 
+  let titles = []
+
   for (let comment of comments) {
-    let commentContainer = document.createElement('div')
-    commentContainer.classList.add('comments--comment')
-
-    let commentedItem = document.createElement('div')
-
-    let commentedItemTitle = document.createElement('h3')
-    commentedItemTitle.style = "font-family: 'Oswald', sans-serif; font-weight: 600; line-height: 29px; text-transform: uppercase;"
-
-    let commentedItemLink = document.createElement('a')
-    commentedItemLink.setAttribute('href', comment.commentable_url)
-    commentedItemLink.innerText = comment.commentable_title
-    commentedItemLink.style = 'text-decoration: none;'
-
-    commentContainer.append(commentedItem)
-    commentedItem.append(commentedItemTitle)
-    commentedItemTitle.append(commentedItemLink)
-
-    let commentDiv = buildCommentDiv(comment)
-    commentContainer.append(commentDiv)
-    commentsContainer.append(commentContainer)
+    let commentableURL = comment.commentable_url
+    titles.push(makeAjaxRequest(commentableURL).then(fetchPageTitle))
   }
 
-  section.append(commentsContainer)
+  Promise.all(titles).then(values => {
+    for (let i = 0; i < values.length; i++) {
+      let commentContainer = buildCommentContainer(comments[i], values[i])
+      commentsContainer.append(commentContainer)
+    }
+    section.append(commentsContainer)
+    firstSection.after(section)
+  })
+}
 
-  return Promise.resolve(firstSection.after(section))
+function fetchPageTitle(request) {
+  return new Promise(function(resolve, reject) {
+    if (request.status == 200) {
+      let dom = stringToHTML(request.response)
+      let title = dom.querySelector('title').textContent
+      title = title.replace(' | Moviepilot.de', '')
+      resolve(title)
+    } else {
+      reject(new Error('There was an error in processing your request'))
+    }
+  })
 }
 
 // Helper
+function buildCommentContainer(comment, title) {
+  let commentContainer = document.createElement('div')
+  commentContainer.classList.add('comments--comment')
+
+  let commentedItem = document.createElement('div')
+
+  let commentedItemTitle = document.createElement('h3')
+  commentedItemTitle.style = "font-family: 'Oswald', sans-serif; font-weight: 600; line-height: 29px; text-transform: uppercase;"
+
+  let commentedItemLink = document.createElement('a')
+  commentedItemLink.setAttribute('href', comment.commentable_url)
+  commentedItemLink.innerText = title
+  commentedItemLink.style = 'text-decoration: none;'
+
+  commentContainer.append(commentedItem)
+  commentedItem.append(commentedItemTitle)
+  commentedItemTitle.append(commentedItemLink)
+
+  let commentDiv = buildCommentDiv(comment)
+  commentContainer.append(commentDiv)
+  return commentContainer
+}
+
 function buildCommentDiv(comment) {
   let commentDiv = document.createElement('div')
   commentDiv.classList.add('comment')
