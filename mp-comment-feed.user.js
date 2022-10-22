@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.2.1
+// @version             0.2.2
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
@@ -254,7 +254,7 @@ function buildRating(rating) {
   commentAuthorRatingWord.innerText = rating.verbalization
   commentAuthorRating.append(commentAuthorRatingWord)
 
-  if (rating.value) {
+  if (rating.hasOwnProperty('value')) {
     let commentAuthorRatingCircle = document.createElement('div')
     commentAuthorRatingCircle.style = "position: relative; border-radius: 50%; overflow: hidden; width: 40px; height: 40px; border: 3px solid #dcdcdc;"
 
