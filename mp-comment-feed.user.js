@@ -5,7 +5,7 @@
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.2.2
+// @version             0.3.0
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
