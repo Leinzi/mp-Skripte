@@ -4,17 +4,18 @@
 // @author              leinzi
 // @grant               none
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-cleanup.user.js
-// @include             /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
-// @version             1.0.1
+// @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-people-cleanup.user.js
+// @match               https://www.moviepilot.de/people/*
+// @version             4.0.0
 // ==/UserScript==
 
 // RegExps
 let regexpPeople = /^(https?:\/\/www\.moviepilot.de\/people\/)([^\/\#]*?)$/
 
 if (document.readyState !== 'loading') {
-  performCleanUp();
+  performCleanUp()
 } else {
-  document.addEventListener('load', performCleanUp);
+  document.addEventListener('DOMContentLoaded', performCleanUp)
 }
 
 function performCleanUp() {
@@ -23,26 +24,23 @@ function performCleanUp() {
     .then(loadCheckboxValues)
     .then(filterMainPage)
 
-    removeAds();
-    removeFooterVideoplayer();
+    removeAds()
   }
 }
 
 // ----- Helper - Anfang -----
 function contains(selector, text) {
-   let elements = document.querySelectorAll(selector);
+   let elements = document.querySelectorAll(selector)
    return Array.prototype.filter.call(elements, function(element) {
-      return RegExp(text).test(element.textContent);
-   });
+      return RegExp(text).test(element.textContent)
+   })
 }
 // ----- Helper - Ende -----
 
 // ----- Filter - Anfang -----
 
 function filterMainPage() {
-  let categorySection = document.querySelector('.mp-cleanup-category-switcher')
-  let checkboxes = categorySection.querySelectorAll('input[type="checkbox"]')
-  for (let checkbox of checkboxes) {
+  for (let checkbox of categoryCheckboxes()) {
     let element = getElementForCheckbox(checkbox)
     if (checkbox.checked) {
       if (element) { element.style.display = 'block' }
@@ -56,7 +54,7 @@ function getElementForCheckbox(checkbox) {
   let elementSelector = checkbox.dataset.elementSelector
   let elementTitle = checkbox.dataset.elementTitle
   let selector = checkbox.dataset.selector || 'section'
-  let identifierElement = getElementByText(elementSelector, elementTitle);
+  let identifierElement = getElementByText(elementSelector, elementTitle)
 
   if (identifierElement) {
     return identifierElement.closest(selector)
@@ -64,35 +62,15 @@ function getElementForCheckbox(checkbox) {
 }
 
 function getElementByText(selector, text) {
-  let matches = Array.prototype.slice.call(contains(selector, text));
-  return matches[0];
+  let matches = Array.prototype.slice.call(contains(selector, text))
+  return matches[0]
 }
 
 // ----- Filter - Ende -----
 
 // ----- Improvements - Anfang -----
-
-function removeFooterVideoplayer() {
-  let footerVideo = document.querySelector('.l0tnxs-0.eLUaXV');
-  if (footerVideo) {
-    footerVideo.after(document.createElement('hr'))
-    footerVideo.remove();
-  }
-}
-
 function removeAds() {
   document.querySelectorAll('.sc-gsTCUz.czc4w4-0.coCsbI.kUbppy').forEach(element => element.remove())
-}
-
-function bringBackTheColor() {
-  let style = document.createElement('style');
-  style.type = 'text/css';
-  if (style.styleSheet) {
-    style.styleSheet.cssText = '._3gBYU { filter: none !important; }';
-  } else {
-    style.appendChild(document.createTextNode('._3gBYU { filter: none !important; }'));
-  }
-  document.getElementsByTagName('head')[0].appendChild(style);
 }
 
 // ----- Improvements - Ende -----
@@ -100,37 +78,25 @@ function bringBackTheColor() {
 // ----- Rubrikauswahl - Anfang -----
 
 function buildAndPlaceCategorySection() {
-  let categorySection = buildNewSection();
-  categorySection.classList.add('mp-cleanup-category-switcher')
+  let firstSection = document.querySelector('.sc-gsDKAQ.sc-czc4w4-0.fPGaEA.bfkWBo')
 
-  let mainWrapper = document.createElement('div');
-  mainWrapper.classList.add('sc-1v39bmu-1');
-  mainWrapper.classList.add('fgRjYT');
+  let categorySection = createElementFromHTML(categorySectionHTML())
+  categorySection.append(buildCheckboxDiv())
 
-  let mainHeader = document.createElement('h2');
-  mainHeader.classList.add('sc-1v39bmu-0');
-  mainHeader.classList.add('drzpja');
-  mainHeader.textContent = 'Rubrikenauswahl';
-  mainWrapper.append(mainHeader);
-  categorySection.append(mainWrapper);
-
-  let subHeader = document.createElement("h3");
-  subHeader.classList.add('sc-1iqgfnr-0');
-  subHeader.classList.add('gcLzgF');
-  subHeader.textContent = 'Nicht ausgewählte Rubriken werden ausgeblendet';
-  categorySection.append(subHeader);
-
-  let checkboxDiv = buildCheckboxDiv();
-  categorySection.append(checkboxDiv);
-
-  let firstSection = document.querySelector('.sc-gsTCUz.czc4w4-0.coCsbI.kUbEFm');
   return Promise.resolve(firstSection.after(categorySection))
 }
 
-function buildNewSection() {
-  let section = document.createElement('div');
-  section.style.margin = '2.5rem 0';
-  return section;
+function categorySectionHTML() {
+  return `
+    <div class="sc-gsDKAQ sc-czc4w4-0 fPGaEA bflxVs" mp-cleanup-category-switcher>
+      <div class="sc-dkPtRN xjahx">
+        <div class="sc-1v39bmu-1 ibANOf">
+          <h2 class="sc-1v39bmu-0 cDGjuc">Rubrikenauswahl</h2>
+        </div>
+        <h3 class="sc-1iqgfnr-0 fajBNI">Nicht ausgewählte Rubriken werden ausgeblendet</h3>
+      </div>
+    </section>
+  `
 }
 
 function buildCheckboxDiv() {
@@ -138,136 +104,120 @@ function buildCheckboxDiv() {
   checkboxDiv.style.display = 'flex'
   checkboxDiv.style.flexWrap = 'wrap'
 
-  let categoryDiv = buildDivForCategory({
-    key: 'friends',
-    title: 'Deine Freunde',
-    selector: '.sc-gsTCUz.czc4w4-0.coCsbI.eODaHT',
-    elementSelector: 'h2',
-    elementTitle: 'Deine Freunde',
-  });
-  checkboxDiv.append(categoryDiv);
+  for (let category of categories()) {
+    checkboxDiv.append(buildDivForCategory(category))
+  }
 
-  categoryDiv = buildDivForCategory({
-    key: 'filmography',
-    title: 'Filmographie',
-    selector: '.sc-gsTCUz.czc4w4-0.coCsbI.kUaNVu',
-    elementSelector: 'h2',
-    elementTitle: 'Bekannt für',
-  });
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory({
-    key: 'workedWith',
-    title: 'Zusammenarbeiten',
-    selector: '.sc-gsTCUz.czc4w4-0.coCsbI.kUaNVu',
-    elementSelector: 'h2',
-    elementTitle: 'Zusammengearbeitet mit',
-  });
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory({
-    key: 'shopping',
-    title: 'Shopping',
-    selector: '.sc-gsTCUz.czc4w4-0.coCsbI.kUbEFm',
-    elementSelector: 'h3',
-    elementTitle: 'Kaufe auf DVD & Blu-Ray',
-  });
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory({
-    key: 'videos',
-    title: 'Videos & Bilder',
-    selector: '.sc-gsTCUz.czc4w4-0.coCsbI.kUaNVu',
-    elementSelector: 'h2',
-    elementTitle: 'Videos & Bilder',
-  });
-  checkboxDiv.append(categoryDiv);
-
-  categoryDiv = buildDivForCategory({
-    key: 'news',
-    title: 'News',
-    selector: '.sc-gsTCUz.czc4w4-0.coCsbI.kUaNVu',
-    elementSelector: 'h2',
-    elementTitle: 'News',
-  });
-  checkboxDiv.append(categoryDiv);
-
-  checkboxDiv.append(buildDivWithSaveButton());
-  return checkboxDiv;
+  checkboxDiv.append(buildDivWithSaveButton())
+  return checkboxDiv
 }
 
 function buildDivForCategory(options = {}) {
-  let categoryDiv = document.createElement('div');
-  categoryDiv.style.flex = '0 0 33%'
-
-  let checkbox = buildCheckboxForCategory(options);
-  let label = buildLabelForCheckbox(checkbox);
-  categoryDiv.append(checkbox);
-  categoryDiv.append(label);
-
-  return categoryDiv;
-}
-
-function buildCheckboxForCategory(options = {}) {
-  let checkbox = document.createElement('input');
-  checkbox.type = 'checkbox';
-  checkbox.id = options.key;
-  checkbox.checked = true;
-
-  checkbox.dataset.headline = options.title;
-  checkbox.dataset.selector = options.selector;
-  checkbox.dataset.elementSelector = options.elementSelector;
-  checkbox.dataset.elementTitle = options.elementTitle;
-  return checkbox;
-}
-
-function buildLabelForCheckbox(checkbox) {
-  let label = document.createElement('label');
-  label.htmlFor = checkbox.id;
-  label.appendChild(document.createTextNode(checkbox.dataset.headline));
-  return label;
+  let htmlString = `
+    <div style="flex: 0 0 33%">
+      <input type="checkbox" id="${options.key}" checked data-headline="${options.title}" data-selector="${options.selector}" data-element-selector="${options.elementSelector}" data-element-title="${options.elementTitle}">
+      <label for="${options.key}">${options.title}</label>
+    </div>
+  `
+  return createElementFromHTML(htmlString)
 }
 
 function buildDivWithSaveButton() {
-  let buttonDiv = document.createElement('div');
-  buttonDiv.classList.add('sc-1bpjhwu-0');
-  buttonDiv.classList.add('fyqsOW');
-
-  buttonDiv.append(buildButtonWithCallback('Speichern', saveCheckboxValues));
-  return buttonDiv;
+  let htmlString = `
+    <div style="flex: 0 0 33%">
+    </div>
+  `
+  let buttonDiv = createElementFromHTML(htmlString)
+  buttonDiv.append(buildButtonWithCallback('Speichern', saveCheckboxValues))
+  return buttonDiv
 }
 
 function buildButtonWithCallback(label, callback) {
-  let button = document.createElement('input');
-  button.type = "button";
-  button.value = label;
-  button.classList.add('sc-1bpjhwu-1');
-  button.classList.add('cidguH');
-  button.style.border = '2px solid black';
-  button.style.margin = '5px 5px 0';
-  button.style.padding = '5px 10px';
-  button.style.fontSize = '14px';
+  let htmlString = `
+    <input type="button" value="${label}" class="sc-1bpjhwu-1 QKNgR" style="border: 2px solid black; margin: 5px 5px 0px; padding: 5px 10px; font-size: 14px;">
+  `
 
-  button.addEventListener('click', callback);
-  return button;
+  let button = createElementFromHTML(htmlString)
+  button.addEventListener('click', callback)
+  return button
 }
 
 function saveCheckboxValues() {
-  let categorySection = document.querySelector('.mp-cleanup-category-switcher')
-  let checkboxes = categorySection.querySelectorAll('input[type="checkbox"]')
-  for (let checkbox of checkboxes) {
-    MPCleanupStorage.storeItem(checkbox.id, checkbox.checked);
+  for (let checkbox of categoryCheckboxes()) {
+    MPCleanupStorage.storeItem(checkbox.id, checkbox.checked)
   }
   filterMainPage();
 }
 
 function loadCheckboxValues() {
-  let categorySection = document.querySelector('.mp-cleanup-category-switcher')
-  let checkboxes = categorySection.querySelectorAll('input[type="checkbox"]')
-  for (let checkbox of checkboxes) {
+  for (let checkbox of categoryCheckboxes()) {
     checkbox.checked = MPCleanupStorage.getItem(checkbox.id)
   }
   return Promise.resolve(MPCleanupStorage.getStorage())
+}
+
+function categoryCheckboxes() {
+  let categorySection = document.querySelector('[mp-cleanup-category-switcher]')
+  return categorySection.querySelectorAll('input[type="checkbox"]')
+}
+
+function categories() {
+  let defaultSelector = '.sc-gsDKAQ.sc-czc4w4-0'
+  return [
+    {
+      key: 'friends',
+      title: 'Deine Freunde',
+      selector: defaultSelector,
+      elementSelector: 'h2',
+      elementTitle: 'Deine Freunde',
+    },
+    {
+      key: 'filmography',
+      title: 'Filmographie',
+      selector: defaultSelector,
+      elementSelector: 'h2',
+      elementTitle: 'Bekannt für',
+    },
+    {
+      key: 'workedWith',
+      title: 'Zusammenarbeiten',
+      selector: defaultSelector,
+      elementSelector: 'h2',
+      elementTitle: 'Zusammengearbeitet mit',
+    },
+    {
+      key: 'shopping',
+      title: 'Shopping',
+      selector: defaultSelector,
+      elementSelector: 'h3',
+      elementTitle: 'Kaufe auf DVD & Blu-Ray',
+    },
+    {
+      key: 'videos',
+      title: 'Videos & Bilder',
+      selector: defaultSelector,
+      elementSelector: 'h2',
+      elementTitle: 'Videos & Bilder',
+    },
+    {
+      key: 'news',
+      title: 'News',
+      selector: defaultSelector,
+      elementSelector: 'h2',
+      elementTitle: 'News',
+    }
+  ]
+}
+
+// Utilities
+function stringToHTML(string) {
+  const dom = document.createElement('div')
+  dom.innerHTML = string
+  return dom
+}
+
+function createElementFromHTML(htmlString) {
+  return stringToHTML(htmlString).children[0]
 }
 
 // ----- Rubrikauswahl - Ende -----
