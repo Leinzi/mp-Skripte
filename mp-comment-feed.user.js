@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.4.0
+// @version             0.4.1
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
@@ -140,13 +140,31 @@ function commentsCommentHTML(comment, title) {
 function commentedItemHTML(comment, title) {
   return `
     <div class="comment-meta">
-      <img class="comment-meta--image" alt="${comment.commentable_title}" src="${comment.commentable_poster_url}" width="110" height="154">
+      ${commentedItemPosterHTML(comment)}
       <h3 class="comment-meta--title"">
         <a href="${comment.commentable_url}">
           ${title}
         </a>
     </div>
   `
+}
+
+function commentedItemPosterHTML(comment) {
+  if (comment.commentable_poster_url) {
+    return `
+      <img class="comment-meta--image" alt="${comment.commentable_title}" src="${comment.commentable_poster_url}" width="110" height="154">
+    `
+  } else {
+    return `
+      <div class="comment-meta--image -placeholder">
+        <div class="comment-meta--image-placeholder-wrapper">
+          <svg class="comment-meta--image-placeholder" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14.8 59.2c-.6-2.6-.9-5.3-.9-8.1C13.9 31.7 29.6 16 49 16s35 15.7 35 35.1-15.7 35.1-35 35.1c-15.5 0-28.6-10-33.3-23.9-.5.3-1.1.5-1.7.8-10.1 4.6-9.1 7.1-1.2 12.1 2 1.2 9.7 5 11.3 6.3 2.8 2.3 2 7.1-2.4 14.5H15c7.4-6.2 10.4-10.2 9.1-11.9-2.4-3-11.8-5.6-15.5-8.7-3.1-2.6-2.8-3.7-2.7-6.3.1-2.1 3.1-5.4 8.9-9.9zm14.8-9.6c5.2 0 9.4-4.2 9.4-9.4s-4.2-9.4-9.4-9.4-9.4 4.2-9.4 9.4 4.2 9.4 9.4 9.4zM50 54.7c2.6 0 4.7-2.1 4.7-4.7s-2.1-4.7-4.7-4.7-4.7 2.1-4.7 4.7 2.1 4.7 4.7 4.7zM52.6 38c5.2 0 9.4-4.2 9.4-9.4s-4.2-9.4-9.4-9.4-9.4 4.2-9.4 9.4 4.2 9.4 9.4 9.4zm18.9 18.9c5.2 0 9.4-4.2 9.4-9.4S76.7 38 71.5 38 62 42.3 62 47.5s4.3 9.4 9.5 9.4zm-13.6 23c5.2 0 9.4-4.2 9.4-9.4s-4.2-9.4-9.4-9.4-9.4 4.2-9.4 9.4 4.1 9.4 9.4 9.4zm-24.1-5.2c5.2 0 9.4-4.2 9.4-9.4s-4.2-9.4-9.4-9.4-9.4 4.2-9.4 9.4 4.2 9.4 9.4 9.4z" style="fill:#c2c2c2;"></path>
+          </svg>
+        </div>
+      </div>
+    `
+  }
 }
 
 function commentHTML(comment) {
@@ -276,6 +294,28 @@ function stylesheetCSS() {
       width: 55px;
       height: 77px;
       margin-right: 8px;
+    }
+    .comment-meta--image.-placeholder {
+      position: relative;
+    }
+    .comment-meta--image-placeholder-wrapper {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      position: absolute;
+      -webkit-box-align: center;
+      -ms-flex-align: center;
+      align-items: center;
+      -webkit-box-pack: center;
+      -ms-flex-pack: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      background-color: #eceded;
+    }
+    .comment-meta--image-placeholder {
+      width: 70%;
+      height: auto;
     }
     .comment-meta--title {
       font-family: 'Oswald', sans-serif;
