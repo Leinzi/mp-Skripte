@@ -6,8 +6,13 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.4.2
+// @version             0.5.0
 // ==/UserScript==
+
+const PER_PAGE = 20
+const MAX_PAGES = 10
+
+let currentPage = 1
 
 if (document.readyState !== 'loading') {
   fetchAndBuildCommentFeed()
@@ -16,10 +21,7 @@ if (document.readyState !== 'loading') {
 }
 
 function fetchAndBuildCommentFeed() {
-  const commentFeedURL = 'https://www.moviepilot.de/api/comments?per_page=20'
-  makeAjaxRequest(commentFeedURL)
-    .then(handleCommentsFeedRequest)
-    .then(addCommentStreamToPage)
+  addCommentStreamToPage()
     .then(addStylesheetToHead)
     .catch(handleErrors)
 }
@@ -39,37 +41,84 @@ function handleCommentsFeedRequest(request) {
   })
 }
 
-function addCommentStreamToPage(comments) {
+function addCommentStreamToPage() {
   const dashboardSection = getElementByText('.sc-gsDKAQ', 'Dashboard')
   const commentStreamSection = createElementFromHTML(commentStreamSectionHTML())
   const commentsContainer = createElementFromHTML(commentsContainerHTML())
 
-  let titles = []
+  dashboardSection.after(commentStreamSection)
 
-  for (let comment of comments) {
-    titles.push(makeAjaxRequest(comment.commentable_url).then(fetchPageTitle))
+  return Promise.resolve(fetchComments())
+
+  function fetchComments() {
+    let pages = []
+    for (let i = 1; i <= MAX_PAGES; i++) {
+      let commentFeedURL = `https://www.moviepilot.de/api/comments?per_page=${PER_PAGE}&page=${i}`
+      pages.push(makeAjaxRequest(commentFeedURL).then(handleCommentsFeedRequest))
+    }
+    Promise.all(pages).then(commentFeed)
   }
 
-  Promise.all(titles).then(values => {
-    for (let i = 0; i < values.length; i++) {
-      commentsContainer.append(commentContainerElement(comments[i], values[i]))
-    }
-    commentStreamSection.append(commentsContainer)
-    dashboardSection.after(commentStreamSection)
-  })
-}
+  function commentFeed(pages) {
+    addCommentsToSection(pages[0])
+      .then(addButton)
 
-function fetchPageTitle(request) {
-  return new Promise(function(resolve, reject) {
-    if (request.status == 200) {
-      const dom = stringToHTML(request.response)
-      const title = dom.querySelector('title').textContent.replace(' | Moviepilot.de', '')
+    function addButton() {
+      let buttonDiv = createElementFromHTML(`
+        <div class="comments--button-more-wrapper"></div>
+      `)
+      let button = createElementFromHTML(`
+        <button comments--button-more role="button" type="button">Weitere Kommentare laden</button>
+      `)
+      button.addEventListener('click', onClick)
+      buttonDiv.append(button)
 
-      resolve(title)
-    } else {
-      reject(new Error('There was an error in processing your request'))
+      Promise.resolve(commentStreamSection.append(buttonDiv))
     }
-  })
+
+    function onClick(event) {
+      let button = event.currentTarget
+      currentPage = currentPage + 1
+
+      addCommentsToSection(pages[currentPage - 1])
+        .then(() => {
+          console.log(currentPage)
+          console.log(pages)
+          if (currentPage < MAX_PAGES) {
+            addButton()
+          }
+          button.parentElement.remove()
+        })
+    }
+  }
+
+  function addCommentsToSection(comments) {
+    let titles = []
+
+    for (let comment of comments) {
+      titles.push(makeAjaxRequest(comment.commentable_url).then(fetchPageTitle))
+    }
+
+    return Promise.all(titles).then(values => {
+      for (let i = 0; i < values.length; i++) {
+        commentsContainer.append(commentContainerElement(comments[i], values[i]))
+      }
+      commentStreamSection.append(commentsContainer)
+    })
+  }
+
+  function fetchPageTitle(request) {
+    return new Promise(function(resolve, reject) {
+      if (request.status == 200) {
+        const dom = stringToHTML(request.response)
+        const title = dom.querySelector('title').textContent.replace(' | Moviepilot.de', '')
+
+        resolve(title)
+      } else {
+        reject(new Error('There was an error in processing your request'))
+      }
+    })
+  }
 }
 
 function addStylesheetToHead() {
@@ -282,13 +331,13 @@ function stylesheetCSS() {
       margin: 16px 0;
     }
     .comments--comment {
-      margin-bottom: 20px;
+      margin-bottom: 2rem;
     }
 
     .comment-meta {
       display: flex;
       align-items: center;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
     }
     .comment-meta--image {
       width: 55px;
@@ -328,6 +377,10 @@ function stylesheetCSS() {
       text-decoration: none;
     }
 
+    .comment-meta--title > a:hover {
+      color: rgb(244, 100, 90);
+    }
+
     .comment {
       padding: 18px 12px;
       transition: opacity 0.5s ease-in 0s;
@@ -358,8 +411,6 @@ function stylesheetCSS() {
     .comment--author-name-and-timestamp {
       display: flex;
       flex-direction: column;
-      -webkit-box-flex: 1;
-      flex-grow: 1;
       padding-left: 9px;
       line-height: 1.25;
     }
@@ -369,6 +420,9 @@ function stylesheetCSS() {
       font-stretch: normal;
       font-weight: 500;
       letter-spacing: 0.01875em;
+    }
+    .comment--author-name:hover {
+      color: rgb(244, 100, 90);
     }
     .comment--author-timestamp {
       font-family: Oswald, sans-serif;
@@ -431,7 +485,7 @@ function stylesheetCSS() {
       flex-wrap: nowrap;
       -webkit-box-align: center;
       align-items: center;
-      margin-top: 4px;
+      margin-left: auto;
     }
     .rating--verbalization {
       display: block;
@@ -462,6 +516,46 @@ function stylesheetCSS() {
       text-align: center;
       white-space: nowrap;
       font-size: 20px;
+    }
+
+    [comments--button-more] {
+      margin: 0px;
+      overflow: visible;
+      background: transparent;
+      font-style: inherit;
+      font-variant: inherit;
+      -webkit-font-smoothing: inherit;
+      appearance: none;
+      font-family: Oswald, sans-serif;
+      font-stretch: normal;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      display: inline-block;
+      outline: 0px;
+      font-size: 15px;
+      line-height: 1.67;
+      text-align: center;
+      text-decoration: none;
+      text-transform: uppercase;
+      cursor: pointer;
+      width: 264px;
+      padding: 7px 11px;
+      border: 0px;
+      color: rgb(255, 255, 255);
+      user-select: none;
+      background-color: rgb(244, 100, 90);
+    }
+
+    [comments--button-more]:hover {
+      background-color: rgb(247, 142, 135);
+      color: rgb(255, 255, 255);
+    }
+
+    .comments--button-more-wrapper {
+      display: flex;
+      -webkit-box-pack: center;
+      justify-content: center;
+      width: 100%;
     }
 	`
 }
