@@ -3,9 +3,10 @@
 // @description         Das Skript stellt den alten Kommentarfeed wieder her
 // @author              leinzi
 // @grant               none
-// @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-comment-feed.user.js
+// @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
+// @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.3.0
+// @version             0.4.0
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
@@ -138,9 +139,10 @@ function commentsCommentHTML(comment, title) {
 
 function commentedItemHTML(comment, title) {
   return `
-    <div>
-      <h3 style="font-family: 'Oswald', sans-serif; font-weight: 600; line-height: 29px; text-transform: uppercase;">
-        <a href="${comment.commentable_url}" style="text-decoration: none;">
+    <div class="comment-meta">
+      <img class="comment-meta--image" alt="${comment.commentable_title}" src="${comment.commentable_poster_url}" width="110" height="154">
+      <h3 class="comment-meta--title"">
+        <a href="${comment.commentable_url}">
           ${title}
         </a>
     </div>
@@ -265,6 +267,27 @@ function stylesheetCSS() {
       margin-bottom: 20px;
     }
 
+    .comment-meta {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .comment-meta--image {
+      width: 55px;
+      height: 77px;
+      margin-right: 8px;
+    }
+    .comment-meta--title {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 600;
+      line-height: 29px;
+      text-transform: uppercase;
+    }
+
+    .comment-meta--title > a {
+      text-decoration: none;
+    }
+
     .comment {
       padding: 18px 12px;
       transition: opacity 0.5s ease-in 0s;
@@ -275,10 +298,9 @@ function stylesheetCSS() {
       margin-left: auto;
       width: 90%;
       margin-top: 10px;
-
-      .comment + .comment {
-        margin-top: 10px;
-      }
+    }
+    .comment--replies .comment + .comment {
+      margin-top: 10px;
     }
     .comment--author {
       display: flex;
