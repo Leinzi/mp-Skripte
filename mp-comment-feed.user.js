@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.4.1
+// @version             0.4.2
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
@@ -40,7 +40,7 @@ function handleCommentsFeedRequest(request) {
 }
 
 function addCommentStreamToPage(comments) {
-  const newsSection = document.querySelector('.sc-gsDKAQ.sc-czc4w4-0.fPGaEA.fSrRRt')
+  const dashboardSection = getElementByText('.sc-gsDKAQ', 'Dashboard')
   const commentStreamSection = createElementFromHTML(commentStreamSectionHTML())
   const commentsContainer = createElementFromHTML(commentsContainerHTML())
 
@@ -55,7 +55,7 @@ function addCommentStreamToPage(comments) {
       commentsContainer.append(commentContainerElement(comments[i], values[i]))
     }
     commentStreamSection.append(commentsContainer)
-    newsSection.after(commentStreamSection)
+    dashboardSection.after(commentStreamSection)
   })
 }
 
@@ -493,4 +493,16 @@ function createElementFromHTML(htmlString) {
 
 function handleErrors(error) {
   console.error(error.message)
+}
+
+function getElementByText(selector, text) {
+  let matches = Array.prototype.slice.call(contains(selector, text))
+  return matches[0]
+}
+
+function contains(selector, text) {
+   let elements = document.querySelectorAll(selector)
+   return Array.prototype.filter.call(elements, function(element) {
+      return RegExp(text).test(element.textContent)
+   })
 }
