@@ -82,8 +82,6 @@ function addCommentStreamToPage() {
 
       addCommentsToSection(pages[currentPage - 1])
         .then(() => {
-          console.log(currentPage)
-          console.log(pages)
           if (currentPage < MAX_PAGES) {
             addButton()
           }
