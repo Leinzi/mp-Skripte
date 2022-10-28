@@ -14,6 +14,39 @@ https://addons.mozilla.org/de/firefox/addon/tampermonkey/
 
 Einige der Skripte sind bereits veraltet und funktionieren möglicherweise nicht mehr, da sich Moviepilot in der Zwischenzeit verändert hat.
 
+# Installation eines Skriptes - eine nicht-technische Erklärung
+
+### Schritt 1
+Nach Installation der Browsererweiterung wird diese oben rechts (Chrome) angezeigt.
+![01_kontextmenue](https://user-images.githubusercontent.com/7453781/198718153-3758db8b-32ad-4d13-9ecf-e240e5bd976d.png)
+
+### Schritt 2
+In der Übersicht werden die installierten Skripte angezeigt.
+![02_uebersicht](https://user-images.githubusercontent.com/7453781/198718158-23288de0-55fd-40b8-998a-ff2af719b592.png)
+
+### Schritt 3
+Um ein Skript zu installieren, muss dieses aus der Dateiliste hier in GitHub ausgewählt werden und anschließend auf den Button "Raw" geklickt werden.
+![03_github](https://user-images.githubusercontent.com/7453781/198718160-7a6aced9-2a6d-44f0-a478-fa23581e7af9.png)
+
+### Schritt 4
+Dann öffnet sich ein Tab, in welchem man zur Installation des Skripts aufgefordert wird.
+![04_installation](https://user-images.githubusercontent.com/7453781/198718162-2d0c4e73-4fd0-40a8-a2b7-47fb719ce9e1.png)
+
+### Schritt 5
+Nach Installation des Skripts taucht dieses in der Übersicht auf.
+![05_ubersicht](https://user-images.githubusercontent.com/7453781/198718164-ad6847b2-752e-4552-8943-8de7752d1a45.png)
+
+### Schritt 6
+Die Zahl unter dem Icon zeigt an, wie viele Skripte auf der aktuellen URL ausgeführt werden.
+![06_moviepilot](https://user-images.githubusercontent.com/7453781/198718168-7bb24a02-682e-4df0-8cad-62a4bbd02e7f.png)
+
+## MP-Kommentarfeed (mp-comment-feed)
+
+Der Kommentarfeed wird unterhalb der Dashboard-Sektion eingefügt. Im Moment werden dort die 20 neuesten Kommentare angezeigt. Eine Interaktion (Liken, Melden, Antworten) mit den Kommentaren ist technisch leider nicht nachstellbar. Der Feed dient als reine Übersicht, um neue Kommentare lesen zu können.
+
+![07_kommentarfeed](https://user-images.githubusercontent.com/7453781/198718171-1049cc1f-4bf2-4e34-af1d-dda6722c12fc.png)
+
+
 ## mp-avoid-clickgal
 (ursprünglicher Autor: [mitcharts](https://github.com/mitcharts), überarbeitet von: [leinzi](https://github.com/Leinzi))
 
