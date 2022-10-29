@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.5.2
+// @version             0.5.3
 // ==/UserScript==
 
 const PER_PAGE = 20
@@ -15,14 +15,21 @@ const MAX_PAGES = 10
 let currentPage = 1
 
 if (document.readyState !== 'loading') {
-  fetchAndBuildCommentFeed()
+  commentFeedExtension()
 } else {
-  document.addEventListener('DOMContentLoaded', fetchAndBuildCommentFeed)
+  document.addEventListener('DOMContentLoaded', commentFeedExtension)
+}
+
+function commentFeedExtension() {
+  addStylesheetToHead()
+    .then(fetchAndBuildCommentFeed)
 }
 
 function fetchAndBuildCommentFeed() {
-  addCommentStreamToPage()
-    .then(addStylesheetToHead)
+  const commentFeedURL = `https://www.moviepilot.de/api/comments?per_page=${PER_PAGE}&page=${currentPage}`
+  makeAjaxRequest(commentFeedURL)
+    .then(handleCommentsFeedRequest)
+    .then(addCommentStreamToPage)
     .catch(handleErrors)
 }
 
@@ -41,82 +48,72 @@ function handleCommentsFeedRequest(request) {
   })
 }
 
-function addCommentStreamToPage() {
-  const dashboardSection = getElementByText('.sc-gsDKAQ', 'Beliebteste News')
-  const commentStreamSection = createElementFromHTML(commentStreamSectionHTML())
-  const commentsContainer = createElementFromHTML(commentsContainerHTML())
+function addCommentStreamToPage(comments) {
+  const dashboardSection = getElementByText('.sc-gsDKAQ', 'Dashboard')
 
-  dashboardSection.after(commentStreamSection)
+  let commentStreamSection = document.querySelector('.commentfeed')
+  let commentsContainer
 
-  return Promise.resolve(fetchComments())
-
-  function fetchComments() {
-    let pages = []
-    for (let i = 1; i <= MAX_PAGES; i++) {
-      let commentFeedURL = `https://www.moviepilot.de/api/comments?per_page=${PER_PAGE}&page=${i}`
-      pages.push(makeAjaxRequest(commentFeedURL).then(handleCommentsFeedRequest))
-    }
-    Promise.all(pages).then(commentFeed)
+  if (commentStreamSection) {
+    commentsContainer = commentStreamSection.querySelector('.comments')
+    commentsContainer.remove()
+    commentStreamSection.scrollIntoView({ behavior: 'smooth', block: 'center'});
+  } else {
+    commentStreamSection = createElementFromHTML(commentStreamSectionHTML())
+    dashboardSection.after(commentStreamSection)
   }
 
-  function commentFeed(pages) {
-    addCommentsToSection(pages[0])
-      .then(addButton)
+  commentsContainer = createElementFromHTML(commentsContainerHTML())
 
-    function addButton() {
-      let buttonDiv = createElementFromHTML(`
-        <div class="comments--button-more-wrapper"></div>
-      `)
-      let button = createElementFromHTML(`
-        <button comments--button-more role="button" type="button">Weitere Kommentare laden</button>
-      `)
-      button.addEventListener('click', onClick)
-      buttonDiv.append(button)
+  let titles = []
 
-      Promise.resolve(commentStreamSection.append(buttonDiv))
-    }
-
-    function onClick(event) {
-      let button = event.currentTarget
-      currentPage = currentPage + 1
-
-      addCommentsToSection(pages[currentPage - 1])
-        .then(() => {
-          if (currentPage < MAX_PAGES) {
-            addButton()
-          }
-          button.parentElement.remove()
-        })
-    }
+  for (let comment of comments) {
+    titles.push(makeAjaxRequest(comment.commentable_url).then(fetchPageTitle))
   }
 
-  function addCommentsToSection(comments) {
-    let titles = []
-
-    for (let comment of comments) {
-      titles.push(makeAjaxRequest(comment.commentable_url).then(fetchPageTitle))
+  Promise.all(titles).then(values => {
+    for (let i = 0; i < values.length; i++) {
+      commentsContainer.append(commentContainerElement(comments[i], values[i]))
     }
+    commentStreamSection.append(commentsContainer)
+    if (currentPage < MAX_PAGES) {
+      addButton(commentStreamSection)
+    }
+  })
+}
 
-    return Promise.all(titles).then(values => {
-      for (let i = 0; i < values.length; i++) {
-        commentsContainer.append(commentContainerElement(comments[i], values[i]))
-      }
-      commentStreamSection.append(commentsContainer)
-    })
-  }
+function addButton(commentStreamSection) {
+  let buttonDiv = createElementFromHTML(`
+    <div class="comments--button-more-wrapper"></div>
+  `)
+  let button = createElementFromHTML(`
+    <button comments--button-more role="button" type="button">Weitere Kommentare laden</button>
+  `)
+  button.addEventListener('click', onClick)
+  buttonDiv.append(button)
 
-  function fetchPageTitle(request) {
-    return new Promise(function(resolve, reject) {
-      if (request.status == 200) {
-        const dom = stringToHTML(request.response)
-        const title = dom.querySelector('title').textContent.replace(' | Moviepilot.de', '')
+  Promise.resolve(commentStreamSection.append(buttonDiv))
+}
 
-        resolve(title)
-      } else {
-        reject(new Error('There was an error in processing your request'))
-      }
-    })
-  }
+function onClick(event) {
+  let button = event.currentTarget
+  currentPage = currentPage + 1
+
+  fetchAndBuildCommentFeed()
+  button.parentElement.remove()
+}
+
+function fetchPageTitle(request) {
+  return new Promise(function(resolve, reject) {
+    if (request.status == 200) {
+      const dom = stringToHTML(request.response)
+      const title = dom.querySelector('title').textContent.replace(' | Moviepilot.de', '')
+
+      resolve(title)
+    } else {
+      reject(new Error('There was an error in processing your request'))
+    }
+  })
 }
 
 function addStylesheetToHead() {
