@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.5.0
+// @version             0.5.1
 // ==/UserScript==
 
 const PER_PAGE = 20
@@ -94,24 +94,46 @@ function addCommentStreamToPage() {
     let titles = []
 
     for (let comment of comments) {
-      titles.push(makeAjaxRequest(comment.commentable_url).then(fetchPageTitle))
+      const commentableURL = `https://www.moviepilot.de/api/${getCommentableTypeForAPI(comment)}/${comment.commentable_id}`
+      titles.push(makeAjaxRequest(commentableURL).then(fetchPageTitle))
     }
 
-    return Promise.all(titles).then(values => {
-      for (let i = 0; i < values.length; i++) {
-        commentsContainer.append(commentContainerElement(comments[i], values[i]))
+    return Promise.all(titles).then(titles => {
+      for (let i = 0; i < titles.length; i++) {
+        let title = { title: titles[i], type: getCommentableType(comments[i]) }
+        commentsContainer.append(commentContainerElement(comments[i], title))
       }
       commentStreamSection.append(commentsContainer)
     })
   }
 
+  function getCommentableTypeForAPI(comment) {
+    let type = comment.commentable_type
+    if (type == 'Season') {
+      return 'seasons'
+    } else if (type == 'Series') {
+      return 'series'
+    } else {
+      return 'movies'
+    }
+  }
+
+  function getCommentableType(comment) {
+    let type = comment.commentable_type
+    if (type == 'Season') {
+      return 'Staffel'
+    } else if (type == 'Series') {
+      return 'Serie'
+    } else {
+      return 'Film'
+    }
+  }
+
   function fetchPageTitle(request) {
     return new Promise(function(resolve, reject) {
       if (request.status == 200) {
-        const dom = stringToHTML(request.response)
-        const title = dom.querySelector('title').textContent.replace(' | Moviepilot.de', '')
-
-        resolve(title)
+        const data = JSON.parse(request.response)
+        resolve(data.title)
       } else {
         reject(new Error('There was an error in processing your request'))
       }
@@ -190,7 +212,7 @@ function commentedItemHTML(comment, title) {
       ${commentedItemPosterHTML(comment)}
       <h3 class="comment-meta--title"">
         <a href="${comment.commentable_url}">
-          ${title}
+          ${title.title} | ${title.type}
         </a>
     </div>
   `
@@ -584,7 +606,7 @@ function createElementFromHTML(htmlString) {
 }
 
 function handleErrors(error) {
-  console.error(error.message)
+  console.error(`[MP-Kommentarfeed]: ${error.message}`)
 }
 
 function getElementByText(selector, text) {
