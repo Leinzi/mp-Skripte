@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.5.1
+// @version             0.5.2
 // ==/UserScript==
 
 const PER_PAGE = 20
@@ -42,7 +42,7 @@ function handleCommentsFeedRequest(request) {
 }
 
 function addCommentStreamToPage() {
-  const dashboardSection = getElementByText('.sc-gsDKAQ', 'Dashboard')
+  const dashboardSection = getElementByText('.sc-gsDKAQ', 'Beliebteste News')
   const commentStreamSection = createElementFromHTML(commentStreamSectionHTML())
   const commentsContainer = createElementFromHTML(commentsContainerHTML())
 
@@ -94,46 +94,24 @@ function addCommentStreamToPage() {
     let titles = []
 
     for (let comment of comments) {
-      const commentableURL = `https://www.moviepilot.de/api/${getCommentableTypeForAPI(comment)}/${comment.commentable_id}`
-      titles.push(makeAjaxRequest(commentableURL).then(fetchPageTitle))
+      titles.push(makeAjaxRequest(comment.commentable_url).then(fetchPageTitle))
     }
 
-    return Promise.all(titles).then(titles => {
-      for (let i = 0; i < titles.length; i++) {
-        let title = { title: titles[i], type: getCommentableType(comments[i]) }
-        commentsContainer.append(commentContainerElement(comments[i], title))
+    return Promise.all(titles).then(values => {
+      for (let i = 0; i < values.length; i++) {
+        commentsContainer.append(commentContainerElement(comments[i], values[i]))
       }
       commentStreamSection.append(commentsContainer)
     })
   }
 
-  function getCommentableTypeForAPI(comment) {
-    let type = comment.commentable_type
-    if (type == 'Season') {
-      return 'seasons'
-    } else if (type == 'Series') {
-      return 'series'
-    } else {
-      return 'movies'
-    }
-  }
-
-  function getCommentableType(comment) {
-    let type = comment.commentable_type
-    if (type == 'Season') {
-      return 'Staffel'
-    } else if (type == 'Series') {
-      return 'Serie'
-    } else {
-      return 'Film'
-    }
-  }
-
   function fetchPageTitle(request) {
     return new Promise(function(resolve, reject) {
       if (request.status == 200) {
-        const data = JSON.parse(request.response)
-        resolve(data.title)
+        const dom = stringToHTML(request.response)
+        const title = dom.querySelector('title').textContent.replace(' | Moviepilot.de', '')
+
+        resolve(title)
       } else {
         reject(new Error('There was an error in processing your request'))
       }
@@ -176,12 +154,12 @@ function commentRepliesElement(replies) {
 // Templates
 function commentStreamSectionHTML() {
   return `
-    <div class="sc-gsDKAQ sc-czc4w4-0 fPGaEA iXAenB">
-      <div class="sc-dkPtRN xjahx">
+    <div class="commentfeed">
+      <div class="commentfeed--head">
         <div>
-          <div class="sc-17tyxji-0 ftMabG">
-            <h2 class="sc-17tyxji-1 cWQoCs sc-1x7lpda-0 eyJHDC">
-              <span class="sc-17tyxji-2 fFLDzv">Aktuelle</span>
+          <div class="commentfeed--header">
+            <h2 class="commentfeed--title">
+              <span class="commentfeed--highlighted">Aktuelle</span>
               Kommentare
             </h2>
           </div>
@@ -212,7 +190,7 @@ function commentedItemHTML(comment, title) {
       ${commentedItemPosterHTML(comment)}
       <h3 class="comment-meta--title"">
         <a href="${comment.commentable_url}">
-          ${title.title} | ${title.type}
+          ${title}
         </a>
     </div>
   `
@@ -347,6 +325,76 @@ function avatarImageHTML(userAvatar) {
 
 function stylesheetCSS() {
   return `
+    .commentfeed {
+      padding-top: 18px;
+      padding-bottom: 18px;
+      box-sizing: border-box;
+      display: flex;
+      flex: 0 1 auto;
+      flex-flow: row wrap;
+      margin-right: -0.5rem;
+      margin-left: -0.5rem;
+    }
+    .commentfeed--head {
+      box-sizing: border-box;
+      flex: 0 0 100%;
+      padding-right: 0.5rem;
+      padding-left: 0.5rem;
+      max-width: 100%;
+      display: block;
+    }
+    .commentfeed--header {
+      display: flex;
+      position: relative;
+      -webkit-box-align: center;
+      align-items: center;
+      -webkit-box-pack: center;
+      justify-content: center;
+      width: 100%;
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+    .commentfeed--title {
+      display: inline-block;
+      font-family: Oswald, sans-serif;
+      font-stretch: normal;
+      font-weight: 600;
+      font-size: 28px;
+      line-height: 1.13;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 2;
+      margin: 0px;
+      color: rgb(20, 20, 20);
+      margin-bottom: 2px;
+    }
+    .commentfeed--title:before {
+      content: "";
+      background: rgb(236, 237, 237);
+      height: 1px;
+      width: 300%;
+      position: absolute;
+      top: 50%;
+      left: -18px;
+      transform: translate(-100%, -50%);
+      z-index: 1;
+    }
+    .commentfeed--title:after {
+      content: "";
+      background: rgb(236, 237, 237);
+      height: 1px;
+      width: 300%;
+      position: absolute;
+      top: 50%;
+      right: -18px;
+      transform: translate(100%, -50%);
+      z-index: 1;
+    }
+    .commentfeed--highlighted {
+      color: rgb(244, 100, 90);
+    }
+
     .comments {
       margin: 16px 0;
     }
