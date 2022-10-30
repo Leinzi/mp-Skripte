@@ -6,13 +6,14 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.5.3
+// @version             0.5.4
 // ==/UserScript==
 
 const PER_PAGE = 20
 const MAX_PAGES = 10
 
 let currentPage = 1
+let renderedComments = []
 
 if (document.readyState !== 'loading') {
   commentFeedExtension()
@@ -56,14 +57,12 @@ function addCommentStreamToPage(comments) {
 
   if (commentStreamSection) {
     commentsContainer = commentStreamSection.querySelector('.comments')
-    commentsContainer.remove()
-    commentStreamSection.scrollIntoView({ behavior: 'smooth', block: 'center'});
   } else {
     commentStreamSection = createElementFromHTML(commentStreamSectionHTML())
+    commentsContainer = createElementFromHTML(commentsContainerHTML())
+    commentStreamSection.append(commentsContainer)
     dashboardSection.after(commentStreamSection)
   }
-
-  commentsContainer = createElementFromHTML(commentsContainerHTML())
 
   let titles = []
 
@@ -71,11 +70,14 @@ function addCommentStreamToPage(comments) {
     titles.push(makeAjaxRequest(comment.commentable_url).then(fetchPageTitle))
   }
 
-  Promise.all(titles).then(values => {
-    for (let i = 0; i < values.length; i++) {
-      commentsContainer.append(commentContainerElement(comments[i], values[i]))
+  Promise.all(titles).then(titles => {
+    for (let i = 0; i < titles.length; i++) {
+      let comment = comments[i]
+      if (!renderedComments.includes(comment.id)) {
+        commentsContainer.append(commentContainerElement(comment, titles[i]))
+        renderedComments.push(comment.id)
+      }
     }
-    commentStreamSection.append(commentsContainer)
     if (currentPage < MAX_PAGES) {
       addButton(commentStreamSection)
     }
