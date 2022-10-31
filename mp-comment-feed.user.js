@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.5.4
+// @version             0.6.0
 // ==/UserScript==
 
 const PER_PAGE = 20
@@ -74,7 +74,27 @@ function addCommentStreamToPage(comments) {
     for (let i = 0; i < titles.length; i++) {
       let comment = comments[i]
       if (!renderedComments.includes(comment.id)) {
-        commentsContainer.append(commentContainerElement(comment, titles[i]))
+        let commentContainer = commentContainerElement(comment, titles[i])
+        commentContainer.classList.add('-hidden')
+        commentsContainer.append(commentContainer)
+
+        let bodyWrappers = commentContainer.querySelectorAll('.comment--body-wrapper')
+        for (let bodyWrapper of bodyWrappers) {
+          if (bodyWrapper.offsetHeight > 250) {
+            bodyWrapper.classList.add('-truncated')
+            let readMoreElement = createElementFromHTML('<i class="comment--body-read-more">Weiterlesen</i>')
+            bodyWrapper.after(readMoreElement)
+            let shadowElement = createElementFromHTML('<div class="comment--body-shadow"></div>')
+            bodyWrapper.append(shadowElement)
+
+            readMoreElement.addEventListener('click', (event) => {
+              bodyWrapper.classList.remove('-truncated')
+              shadowElement.remove()
+              readMoreElement.remove()
+            })
+          }
+        }
+        commentContainer.classList.remove('-hidden')
         renderedComments.push(comment.id)
       }
     }
@@ -504,7 +524,6 @@ function stylesheetCSS() {
       text-transform: uppercase;
     }
     .comment--body-container {
-      margin: 15px 0px;
       padding: 0px 3px;
       font-size: 15px;
       line-height: 24px;
@@ -513,6 +532,35 @@ function stylesheetCSS() {
       position: relative;
       height: auto;
       overflow: visible;
+      padding-top: 1.25rem;
+    }
+    .comment--body-wrapper.-truncated {
+      position: relative;
+      max-height: 250px;
+      overflow: hidden;
+    }
+    .comment--body-shadow {
+      display: block;
+      position: absolute;
+      right: 0px;
+      bottom: 0px;
+      left: 0px;
+      height: 35px;
+      background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.99));
+      pointer-events: none;
+      color: rgba(255, 255, 255, 0);
+    }
+    .comment--body-read-more {
+      display: inline;
+      transition: color 0.1s ease-in 0s;
+      box-shadow: rgb(244 100 90) 0px -0.12em inset;
+      cursor: pointer;
+    }
+    .comment--body p:first-of-type {
+      margin-top: 0;
+    }
+    .comment--body p:last-of-type {
+      margin-bottom: 0;
     }
 
     .avatar {
