@@ -313,18 +313,79 @@ function ratingHTML(rating) {
 
 function ratingCircleHTML(rating) {
   if (rating.hasOwnProperty('value')) {
+    if (rating.top) {
+      return `
+        <div class="rating--circle">
+          ${ratingBorderHTML(rating.value)}
+          <div class="rating--circle-inner">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="22.5" height="22.5">
+              <g>
+                <path fill="#f4645a" d="M50 85.9A379.3 379.3 0 0 1 17.3 56C11 49 8 39.7 9.3 31.7c1-6.2 4.9-11.6 10.5-14.6 3.2-1.9 6.7-2.9 10.4-2.9 9.8 0 16.6 7.8 16.7 7.9l3.1 3.5 3.1-3.6c.1-.1 7-7.9 16.7-7.9 3.7 0 7.2 1 10.4 2.9 5.6 3 9.5 8.4 10.5 14.6a30.4 30.4 0 0 1-8 24.4A379.3 379.3 0 0 1 50 85.9z"></path>
+              </g>
+            </svg>
+          </div>
+        </div>
+      `
+    } else if (rating.flop) {
+      return `
+        <div class="rating--circle">
+          ${ratingBorderHTML(rating.value)}
+          <div class="rating--circle-inner">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="22.5" height="22.5">
+              <path fill="#f4645a" d="M50.3 11h-.5A39.8 39.8 0 0 0 11 51.3v17.6c0 4.7 7.8 4 11.3 4h10l-.1 8.9c0 3.1 2 7.2 11.6 7.2h12.5c9.6 0 11.6-4.1 11.6-7.2l-.1-8.9h10c3.5 0 11.3.6 11.3-4V51.3A40 40 0 0 0 50.3 11zM35.4 61.7c-6.5 0-11.7-5.2-11.7-11.7s5.2-11.7 11.7-11.7c6.5 0 11.7 5.2 11.7 11.7 0 6.5-5.2 11.7-11.7 11.7zm30.2 0c-6.5 0-11.7-5.2-11.7-11.7 0-6.5 5.2-11.7 11.7-11.7 6.5 0 11.7 5.2 11.7 11.7 0 6.5-5.2 11.7-11.7 11.7z"></path>
+            </svg>
+          </div>
+        </div>
+      `
+    } else {
+      return `
+        <div class="rating--circle">
+          ${ratingBorderHTML(rating.value)}
+          <div class="rating--circle-inner">
+            <div class="rating--circle-value">
+              ${numberRatingHTML(rating.value)}
+            </div>
+          </div>
+        </div>
+      `
+    }
+  } else if (rating.verbalization == "Vorgemerkt") {
     return `
       <div class="rating--circle">
+        ${ratingBorderHTML(0)}
         <div class="rating--circle-inner">
-          <div class="rating--circle-value">
-            <span>${rating.value / 10}</span>
-          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="29.25" height="29.25">
+            <path fill="#f4645a" d="M79.8 42.9a4 4 0 0 0-3.8-2.7H59L53.8 24a4 4 0 0 0-7.5 0L41 40.2H24a4 4 0 0 0-2.3 7.2l13.8 10-5.4 16.1a3.9 3.9 0 0 0 .6 3.5 4 4 0 0 0 3.2 1.6 3.9 3.9 0 0 0 2.3-.8L50 68l13.8 10a3.9 3.9 0 0 0 2.3.8 4 4 0 0 0 3.2-1.6 3.9 3.9 0 0 0 .6-3.5l-5.3-16.3 13.8-10a4 4 0 0 0 1.4-4.5z"></path>
+          </svg>
         </div>
       </div>
     `
   } else {
     return ''
   }
+}
+
+function numberRatingHTML(value) {
+  if (value % 10 == 5) {
+    value = Math.floor(value / 10)
+    return `
+      <span>${value}</span><span class="rating--circle-tiny-value">.5</span>
+    `
+  } else {
+    return `
+      <span>${value / 10}</span>
+    `
+  }
+}
+
+function ratingBorderHTML(value) {
+  return `
+    <svg class="rating--border" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 100 100">
+      <circle fill="#fff" cx="50%" cy="50%" r="50"></circle>
+      <circle stroke="#dcdcdc" fill="transparent" cx="50%" cy="50%" r="50" stroke-width="14"></circle>
+      <circle class="rating--colored-border" fill="transparent" cx="50%" cy="50%" r="50" stroke-dasharray="314.2" stroke-dashoffset="${(100 - value) * Math.PI}" stroke-width="14"></circle>
+    </svg>
+  `
 }
 
 function avatarHTML(userAvatar) {
@@ -641,7 +702,6 @@ function stylesheetCSS() {
       overflow: hidden;
       width: 40px;
       height: 40px;
-      border: 3px solid #dcdcdc;
     }
     .rating--circle-inner {
       position: absolute;
@@ -660,6 +720,27 @@ function stylesheetCSS() {
       text-align: center;
       white-space: nowrap;
       font-size: 20px;
+    }
+
+    .rating--border {
+      display: block;
+      position: relative;
+      transform: rotate(-90deg);
+      transform-origin: center;
+      border-radius: 50%;
+      cursor: default;
+      overflow: hidden;
+    }
+
+    .rating--colored-border {
+      transition: stroke-dashoffset .3s,stroke .1s;
+      transition-timing-function: linear;
+      will-change: stroke-dashoffset;
+      stroke: #f4645a;
+    }
+
+    .rating--circle-tiny-value {
+      font-size: 58%;
     }
 
     [comments--button-more] {
