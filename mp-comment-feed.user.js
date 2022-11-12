@@ -149,11 +149,18 @@ function addStylesheetToHead() {
 // Elements
 function commentContainerElement(comment, title) {
   const commentContainer = createElementFromHTML(commentsCommentHTML(comment, title))
+  const commentBox = createElementFromHTML(`<div class="comment--box"><div>`)
+  const commentWrapper = createElementFromHTML(`<div class="comment--wrapper"><div>`)
   const commentDiv = createElementFromHTML(commentHTML(comment))
+  const commentPoster = createElementFromHTML(commentedItemPosterHTML(comment))
 
-  commentContainer.append(commentDiv)
+  commentWrapper.append(commentDiv)
+  commentBox.append(commentWrapper)
+  commentBox.append(commentPoster)
+  commentContainer.append(commentBox)
+
   if (comment.replies.length > 0) {
-    commentContainer.append(commentRepliesElement(comment.replies))
+    commentWrapper.append(commentRepliesElement(comment.replies))
   }
 
   return commentContainer
@@ -206,11 +213,11 @@ function commentsCommentHTML(comment, title) {
 function commentedItemHTML(comment, title) {
   return `
     <div class="comment-meta">
-      ${commentedItemPosterHTML(comment)}
-      <h3 class="comment-meta--title"">
+      <h3 class="comment-meta--title">
         <a href="${comment.commentable_url}">
           ${title}
         </a>
+      </h3>
     </div>
   `
 }
@@ -218,17 +225,21 @@ function commentedItemHTML(comment, title) {
 function commentedItemPosterHTML(comment) {
   if (comment.commentable_poster_url) {
     return `
-      <img class="comment-meta--image" alt="${comment.commentable_title}" src="${comment.commentable_poster_url}" width="110" height="154">
+      <a href="${comment.commentable_url}" class="comment--image-wrapper">
+        <img class="comment--image" alt="${comment.commentable_title}" src="${comment.commentable_poster_url}" width="110" height="154">
+      </a>
     `
   } else {
     return `
-      <div class="comment-meta--image -placeholder">
-        <div class="comment-meta--image-placeholder-wrapper">
-          <svg class="comment-meta--image-placeholder" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <path d="M14.8 59.2c-.6-2.6-.9-5.3-.9-8.1C13.9 31.7 29.6 16 49 16s35 15.7 35 35.1-15.7 35.1-35 35.1c-15.5 0-28.6-10-33.3-23.9-.5.3-1.1.5-1.7.8-10.1 4.6-9.1 7.1-1.2 12.1 2 1.2 9.7 5 11.3 6.3 2.8 2.3 2 7.1-2.4 14.5H15c7.4-6.2 10.4-10.2 9.1-11.9-2.4-3-11.8-5.6-15.5-8.7-3.1-2.6-2.8-3.7-2.7-6.3.1-2.1 3.1-5.4 8.9-9.9zm14.8-9.6c5.2 0 9.4-4.2 9.4-9.4s-4.2-9.4-9.4-9.4-9.4 4.2-9.4 9.4 4.2 9.4 9.4 9.4zM50 54.7c2.6 0 4.7-2.1 4.7-4.7s-2.1-4.7-4.7-4.7-4.7 2.1-4.7 4.7 2.1 4.7 4.7 4.7zM52.6 38c5.2 0 9.4-4.2 9.4-9.4s-4.2-9.4-9.4-9.4-9.4 4.2-9.4 9.4 4.2 9.4 9.4 9.4zm18.9 18.9c5.2 0 9.4-4.2 9.4-9.4S76.7 38 71.5 38 62 42.3 62 47.5s4.3 9.4 9.5 9.4zm-13.6 23c5.2 0 9.4-4.2 9.4-9.4s-4.2-9.4-9.4-9.4-9.4 4.2-9.4 9.4 4.1 9.4 9.4 9.4zm-24.1-5.2c5.2 0 9.4-4.2 9.4-9.4s-4.2-9.4-9.4-9.4-9.4 4.2-9.4 9.4 4.2 9.4 9.4 9.4z" style="fill:#c2c2c2;"></path>
-          </svg>
+      <a href="${comment.commentable_url}" class="comment--image-wrapper">
+        <div class="comment--image -placeholder">
+          <div class="comment--image-placeholder-wrapper">
+            <svg class="comment--image-placeholder" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14.8 59.2c-.6-2.6-.9-5.3-.9-8.1C13.9 31.7 29.6 16 49 16s35 15.7 35 35.1-15.7 35.1-35 35.1c-15.5 0-28.6-10-33.3-23.9-.5.3-1.1.5-1.7.8-10.1 4.6-9.1 7.1-1.2 12.1 2 1.2 9.7 5 11.3 6.3 2.8 2.3 2 7.1-2.4 14.5H15c7.4-6.2 10.4-10.2 9.1-11.9-2.4-3-11.8-5.6-15.5-8.7-3.1-2.6-2.8-3.7-2.7-6.3.1-2.1 3.1-5.4 8.9-9.9zm14.8-9.6c5.2 0 9.4-4.2 9.4-9.4s-4.2-9.4-9.4-9.4-9.4 4.2-9.4 9.4 4.2 9.4 9.4 9.4zM50 54.7c2.6 0 4.7-2.1 4.7-4.7s-2.1-4.7-4.7-4.7-4.7 2.1-4.7 4.7 2.1 4.7 4.7 4.7zM52.6 38c5.2 0 9.4-4.2 9.4-9.4s-4.2-9.4-9.4-9.4-9.4 4.2-9.4 9.4 4.2 9.4 9.4 9.4zm18.9 18.9c5.2 0 9.4-4.2 9.4-9.4S76.7 38 71.5 38 62 42.3 62 47.5s4.3 9.4 9.5 9.4zm-13.6 23c5.2 0 9.4-4.2 9.4-9.4s-4.2-9.4-9.4-9.4-9.4 4.2-9.4 9.4 4.1 9.4 9.4 9.4zm-24.1-5.2c5.2 0 9.4-4.2 9.4-9.4s-4.2-9.4-9.4-9.4-9.4 4.2-9.4 9.4 4.2 9.4 9.4 9.4z" style="fill:#c2c2c2;"></path>
+            </svg>
+          </div>
         </div>
-      </div>
+      </a>
     `
   }
 }
@@ -424,35 +435,10 @@ function stylesheetCSS() {
     .comment-meta {
       display: flex;
       align-items: center;
-      margin-bottom: 8px;
+      padding-left: 16px;
+      padding-right: 76px;
     }
-    .comment-meta--image {
-      width: 55px;
-      height: 77px;
-      margin-right: 8px;
-    }
-    .comment-meta--image.-placeholder {
-      position: relative;
-    }
-    .comment-meta--image-placeholder-wrapper {
-      display: -webkit-box;
-      display: -ms-flexbox;
-      display: flex;
-      position: absolute;
-      -webkit-box-align: center;
-      -ms-flex-align: center;
-      align-items: center;
-      -webkit-box-pack: center;
-      -ms-flex-pack: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-      background-color: #eceded;
-    }
-    .comment-meta--image-placeholder {
-      width: 70%;
-      height: auto;
-    }
+
     .comment-meta--title {
       font-family: 'Oswald', sans-serif;
       font-weight: 600;
@@ -468,11 +454,53 @@ function stylesheetCSS() {
       color: rgb(244, 100, 90);
     }
 
+    .comment--box {
+      display: flex;
+      gap: 16px;
+    }
+
+    .comment--wrapper {
+      flex: 1;
+    }
+
+    .comment--image-wrapper {
+      flex: 0 0 60px;
+      width: 60px;
+    }
+
+    .comment--image {
+      min-width: 60px;
+      min-height: 80px;
+      width: 60px;
+      height: 80px;
+    }
+    .comment--image.-placeholder {
+      position: relative;
+    }
+    .comment--image-placeholder-wrapper {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      position: absolute;
+      -webkit-box-align: center;
+      -ms-flex-align: center;
+      align-items: center;
+      -webkit-box-pack: center;
+      -ms-flex-pack: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      background-color: #eceded;
+    }
+    .comment--image-placeholder {
+      width: 70%;
+      height: auto;
+    }
+
     .comment {
       padding: 18px 12px;
       transition: opacity 0.5s ease-in 0s;
-      background-color: rgb(255, 255, 255);
-      box-shadow: rgb(20 20 20 / 18%) 0px 0px 7px 0px;
+      background-color: rgb(236, 237, 237);
     }
     .comment--replies {
       margin-left: auto;
@@ -546,7 +574,7 @@ function stylesheetCSS() {
       bottom: 0px;
       left: 0px;
       height: 35px;
-      background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.99));
+      background: linear-gradient(rgba(255, 255, 255, 0), rgba(236, 237, 237, 0.99));
       pointer-events: none;
       color: rgba(255, 255, 255, 0);
     }
@@ -569,6 +597,7 @@ function stylesheetCSS() {
       height: 0px;
       padding-bottom: 100%;
       overflow: hidden;
+      border-radius: 50%;
     }
     .avatar--container {
       width: inherit;
