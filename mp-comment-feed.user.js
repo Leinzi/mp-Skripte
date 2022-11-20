@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.7.0
+// @version             0.7.1
 // ==/UserScript==
 
 const PER_PAGE = 20
@@ -149,8 +149,8 @@ function addStylesheetToHead() {
 // Elements
 function commentContainerElement(comment, title) {
   const commentContainer = createElementFromHTML(commentsCommentHTML(comment, title))
-  const commentBox = createElementFromHTML(`<div class="comment--box"><div>`)
-  const commentWrapper = createElementFromHTML(`<div class="comment--wrapper"><div>`)
+  const commentBox = createElementFromHTML(`<div class="comment--box"></div>`)
+  const commentWrapper = createElementFromHTML(`<div class="comment--wrapper"></div>`)
   const commentDiv = createElementFromHTML(commentHTML(comment))
   const commentPoster = createElementFromHTML(commentedItemPosterHTML(comment))
 
