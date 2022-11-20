@@ -3,8 +3,9 @@
 // @description         Das Skript hängt die eigene Bewertung als Tooltip an Film- und Serien-Links und färbt diese
 // @author              leinzi
 // @grant               none
-// @downloadURL         https://github.com/Leinzi/mp-Skripte/blob/master/mp-link-rating-extension.user.js
-// @include             /^https?:\/\/www\.moviepilot.de\//
+// @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-link-rating-extension.user.js
+// @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-link-rating-extension.user.js
+// @match               https://www.moviepilot.de/*
 // @version             0.1.3
 // ==/UserScript==
 
