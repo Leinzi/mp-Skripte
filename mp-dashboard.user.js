@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-dashboard.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-dashboard.user.js
 // @match               https://www.moviepilot.de
-// @version             0.1.0
+// @version             0.2.0
 // ==/UserScript==
 
 const PER_PAGE = 20
@@ -14,7 +14,7 @@ const MAX_PAGES = 20
 
 let currentPage = 1
 let renderedActivities = []
-let myFeed = false
+let myFeed = true
 let signedIn = false
 
 if (document.readyState !== 'loading') {
@@ -48,18 +48,21 @@ function handleSessionRequest(sessionRequest) {
 }
 
 function addButton(commentStreamSection) {
-  let buttonDiv = createElementFromHTML(`
-    <div class="activities--button-more-wrapper"></div>
-  `)
-  let button = createElementFromHTML(`
-    <button activities--button-more role="button" type="button">Weitere Kommentare laden</button>
-  `)
+  let buttonDiv = createElementFromHTML('<div class="activities--button-more-wrapper"></div>')
+  let button = createElementFromHTML('<button activities--button-more role="button" type="button">Weitere Kommentare laden</button>')
   button.addEventListener('click', onClick)
   buttonDiv.append(button)
 
   Promise.resolve(commentStreamSection.append(buttonDiv))
 }
 
+function onClick(event) {
+  let button = event.currentTarget
+  currentPage = currentPage + 1
+
+  fetchAndBuildActivityFeed()
+  button.parentElement.remove()
+}
 
 function fetchAndBuildActivityFeed() {
   const stream = ((signedIn && myFeed) ? 'personal' : 'community')
@@ -89,18 +92,17 @@ function addActivitesToStream(activities) {
   let commentStreamSection = document.querySelector('.activityfeed')
 
   if (!commentStreamSection) {
-    const dashboardSection = getElementByText('.sc-gsDKAQ', 'Dashboard')
+    const dashboardSection = getElementByText(document, '.sc-gsDKAQ', 'Dashboard')
+    const trendingNewsSection = rewriteNewsInDashboardSection(dashboardSection)
     commentStreamSection = createElementFromHTML(activityStreamSectionHTML())
 
-    let switchDiv = createElementFromHTML(`
-      <div class="activityfeed--buttons"></div>
-    `)
-    let myFeedButton = createElementFromHTML(`
-      <div role="button" tabindex="0" class="activityfeed--button">Mein Feed</div>
-    `)
-    let communityFeedButton = createElementFromHTML(`
-      <div role="button" tabindex="0" class="activityfeed--button -active">Community Feed</div>
-    `)
+    let switchDiv = createElementFromHTML('<div class="activityfeed--buttons"></div>')
+    let myFeedButton = createElementFromHTML('<div role="button" tabindex="0" class="activityfeed--button">Mein Feed</div>')
+    let communityFeedButton = createElementFromHTML('<div role="button" tabindex="0" class="activityfeed--button">Community Feed</div>')
+
+    communityFeedButton.classList.toggle('-active', !myFeed)
+    myFeedButton.classList.toggle('-active', myFeed)
+
     myFeedButton.addEventListener('click', (event) => {
       if (!myFeed) {
         myFeed = true
@@ -137,13 +139,15 @@ function addActivitesToStream(activities) {
       switchDiv.append(myFeedButton)
     }
     switchDiv.append(communityFeedButton)
-    dashboardSection.after(commentStreamSection)
+
+    dashboardSection.after(trendingNewsSection)
     dashboardSection.remove()
+    trendingNewsSection.after(commentStreamSection)
   }
 
   let activitiesContainerWrapper = commentStreamSection.querySelector('.activityfeed--activities')
   if (!activitiesContainerWrapper) {
-    activitiesContainerWrapper = createElementFromHTML(`<div class="activityfeed--activities"></div>`)
+    activitiesContainerWrapper = createElementFromHTML('<div class="activityfeed--activities"></div>')
     commentStreamSection.append(activitiesContainerWrapper)
   }
 
@@ -154,7 +158,10 @@ function addActivitesToStream(activities) {
   }
 
   for (let activity of activities) {
-    if (!renderedActivities.includes([activity.user_username, activity.created_at_timestamp])) {
+    const name = activity.user_username
+    const timestamp = activity.created_at_timestamp
+
+    if (!renderedActivities.some((element) => element.name == name && element.timestamp == timestamp)) {
       let activityContainer = activityContainerElement(activity, activity.feed_type)
       activityContainer.classList.add('-hidden')
       activitiesContainer.append(activityContainer)
@@ -176,7 +183,7 @@ function addActivitesToStream(activities) {
         }
       }
       activityContainer.classList.remove('-hidden')
-      renderedActivities.push([activity.user_username, activity.created_at_timestamp])
+      renderedActivities.push({ name, timestamp })
     }
   }
   if (currentPage < MAX_PAGES) {
@@ -184,25 +191,36 @@ function addActivitesToStream(activities) {
   }
 }
 
-function addButton(commentStreamSection) {
-  let buttonDiv = createElementFromHTML(`
-    <div class="activities--button-more-wrapper"></div>
-  `)
-  let button = createElementFromHTML(`
-    <button activities--button-more role="button" type="button">Weitere Kommentare laden</button>
-  `)
-  button.addEventListener('click', onClick)
-  buttonDiv.append(button)
+function rewriteNewsInDashboardSection(dashboardSection) {
+  const oldTrendingNewsSection = getElementByText(dashboardSection, 'div.sc-dkPtRN.dgWvNh', 'Beliebteste News')
+  const newTrendingNewsSection = createElementFromHTML(trendingNewsSectionHTML())
 
-  Promise.resolve(commentStreamSection.append(buttonDiv))
+  const listElements = oldTrendingNewsSection.querySelectorAll('li')
+  const newsList = createElementFromHTML('<div class="news-list"></div>')
+
+  for (let i = 0; i < listElements.length; i++) {
+    let listElement = listElements[i]
+    let newsElement = createElementFromHTML(transformListElementIntoNewsElement(listElement, i + 1))
+    newsList.append(newsElement)
+  }
+
+  newTrendingNewsSection.append(newsList)
+  return newTrendingNewsSection
 }
 
-function onClick(event) {
-  let button = event.currentTarget
-  currentPage = currentPage + 1
+function transformListElementIntoNewsElement(listElement, position) {
+  const tag = listElement.querySelector('div').textContent
+  const link = listElement.querySelector('a')
+  const articleURL = link.href
+  const title = link.textContent
 
-  fetchAndBuildActivityFeed()
-  button.parentElement.remove()
+  return `
+    <div class="news">
+      <div class="news--position">${position}</div>
+      <div class="news--tag">${tag}</div>
+      <a href="${articleURL}" class="news--title">${title}</a>
+    </div>
+  `
 }
 
 function addStylesheetToHead() {
@@ -291,23 +309,38 @@ function activityStreamSectionHTML() {
     <div class="activityfeed">
       <div class="activityfeed--head">
         <div>
-          <div class="activityfeed--header">
-            <h2 class="activityfeed--title">
-              <span class="activityfeed--highlighted">Mein</span>
-              besseres Dashboard
-            </h2>
-          </div>
+          ${sectionHeaderHTML('Mein', 'Dashboard')}
         </div>
       </div>
     </div>
   `
 }
 
-function activitiesContainerHTML() {
+function trendingNewsSectionHTML() {
   return `
-    <div class="activities">
+    <div class="trending-news">
+      <div class="trending-news--head">
+        <div>
+          ${sectionHeaderHTML('Beliebteste', 'News')}
+        </div>
+      </div>
     </div>
   `
+}
+
+function sectionHeaderHTML(highlightedText, otherText) {
+  return `
+    <div class="section-header">
+      <h2 class="section-header--title">
+        <span class="section-header--highlighted">${highlightedText}</span>
+        ${otherText}
+      </h2>
+    </div>
+  `
+}
+
+function activitiesContainerHTML() {
+  return '<div class="activities"></div>'
 }
 
 function posterHTML(activity) {
@@ -450,13 +483,9 @@ function ratingCircleHTML(rating) {
 function numberRatingHTML(value) {
   if (value % 10 == 5) {
     value = Math.floor(value / 10)
-    return `
-      <span>${value}</span><span class="rating--circle-tiny-value">.5</span>
-    `
+    return `<span>${value}</span><span class="rating--circle-tiny-value">.5</span>`
   } else {
-    return `
-      <span>${value / 10}</span>
-    `
+    return `<span>${value / 10}</span>`
   }
 }
 
@@ -474,10 +503,10 @@ function avatarHTML(userAvatar) {
   const backgroundColor = userAvatar.hasOwnProperty('background') ? userAvatar.background : 'rgb(152, 152, 152)'
 
   return `
-   <div class="avatar" style="background-color: ${backgroundColor}">
-    <div class="avatar--container">
-      ${avatarImageHTML(userAvatar)}
-    </div>
+    <div class="avatar" style="background-color: ${backgroundColor}">
+     <div class="avatar--container">
+       ${avatarImageHTML(userAvatar)}
+     </div>
    </div>
   `
 }
@@ -562,7 +591,7 @@ function stylesheetCSS() {
       display: block;
     }
 
-    .activityfeed--header {
+    .section-header {
       display: flex;
       position: relative;
       -webkit-box-align: center;
@@ -574,7 +603,7 @@ function stylesheetCSS() {
       overflow: hidden;
     }
 
-    .activityfeed--title {
+    .section-header--title {
       display: inline-block;
       font-family: Oswald, sans-serif;
       font-stretch: normal;
@@ -590,7 +619,7 @@ function stylesheetCSS() {
       margin-bottom: 2px;
     }
 
-    .activityfeed--title:before {
+    .section-header--title:before {
       content: "";
       background: rgb(236, 237, 237);
       height: 1px;
@@ -602,7 +631,7 @@ function stylesheetCSS() {
       z-index: 1;
     }
 
-    .activityfeed--title:after {
+    .section-header--title:after {
       content: "";
       background: rgb(236, 237, 237);
       height: 1px;
@@ -614,7 +643,7 @@ function stylesheetCSS() {
       z-index: 1;
     }
 
-    .activityfeed--highlighted {
+    .section-header--highlighted {
       color: rgb(244, 100, 90);
     }
 
@@ -944,6 +973,83 @@ function stylesheetCSS() {
       text-decoration: none;
       text-transform: uppercase;
     }
+
+    .trending-news {
+      padding-top: 18px;
+      padding-bottom: 18px;
+    }
+
+    .news-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 9px 30px;
+    }
+
+    @media only screen and (min-width: 48em) {
+      .news-list {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+    }
+
+    .news {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      grid-template-columns: auto 1fr;
+      grid-template-areas:
+        "position tag"
+        "position title";
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgb(236, 237, 237);
+      line-height: 18px;
+    }
+    .news--position {
+      grid-area: position;
+      align-self: center;
+      display: block;
+      font-family: "Noto Serif", serif;
+      letter-spacing: normal;
+      padding-left: 8px;
+      padding-right: 8px;
+      color: rgb(244, 100, 90);
+      font-size: 30px;
+      font-style: italic;
+      font-weight: 700;
+      line-height: 20px;
+    }
+
+    .news--tag {
+      grid-area: tag;
+      font-family: Oswald, sans-serif;
+      font-stretch: normal;
+      font-weight: 600;
+      letter-spacing: 0.075em;
+      color: rgb(244, 100, 90);
+      font-size: 11px;
+      line-height: 18px;
+      text-transform: uppercase;
+    }
+
+    .news--title {
+      grid-area: title;
+      font-family: Oswald, sans-serif;
+      font-stretch: normal;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      font-size: 14px;
+      line-height: 19px;
+      text-decoration: none;
+      transition: color 0.1s ease-in 0s;
+    }
+
+    @media (min-width: 768px) {
+      .news--title {
+        font-size: 15px;
+      }
+    }
+
+    .news--title:hover {
+      color: rgb(244, 100, 90);
+    }
 	`
 }
 
@@ -976,13 +1082,13 @@ function handleErrors(error) {
   console.error(`[MP-Kommentarfeed]: ${error.message}`)
 }
 
-function getElementByText(selector, text) {
-  let matches = Array.prototype.slice.call(contains(selector, text))
+function getElementByText(parent, selector, text) {
+  let matches = Array.prototype.slice.call(contains(parent, selector, text))
   return matches[0]
 }
 
-function contains(selector, text) {
-   let elements = document.querySelectorAll(selector)
+function contains(parent, selector, text) {
+   let elements = parent.querySelectorAll(selector)
    return Array.prototype.filter.call(elements, function(element) {
       return RegExp(text).test(element.textContent)
    })
