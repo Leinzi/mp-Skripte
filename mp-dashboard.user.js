@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-dashboard.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-dashboard.user.js
 // @match               https://www.moviepilot.de
-// @version             0.2.0
+// @version             0.2.1
 // ==/UserScript==
 
 const PER_PAGE = 20
@@ -92,7 +92,7 @@ function addActivitesToStream(activities) {
   let commentStreamSection = document.querySelector('.activityfeed')
 
   if (!commentStreamSection) {
-    const dashboardSection = getElementByText(document, '.sc-gsDKAQ', 'Dashboard')
+    const dashboardSection = getElementByText(document, '.sc-gTRrQi', 'Dashboard')
     const trendingNewsSection = rewriteNewsInDashboardSection(dashboardSection)
     commentStreamSection = createElementFromHTML(activityStreamSectionHTML())
 
@@ -192,7 +192,7 @@ function addActivitesToStream(activities) {
 }
 
 function rewriteNewsInDashboardSection(dashboardSection) {
-  const oldTrendingNewsSection = getElementByText(dashboardSection, 'div.sc-dkPtRN.dgWvNh', 'Beliebteste News')
+  const oldTrendingNewsSection = getElementByText(dashboardSection, 'div.sc-ewnqHT.dnRAbd', 'Beliebteste News')
   const newTrendingNewsSection = createElementFromHTML(trendingNewsSectionHTML())
 
   const listElements = oldTrendingNewsSection.querySelectorAll('li')
