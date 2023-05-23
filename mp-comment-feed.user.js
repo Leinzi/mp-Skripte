@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.7.1
+// @version             0.7.2
 // ==/UserScript==
 
 const PER_PAGE = 20
@@ -50,7 +50,7 @@ function handleCommentsFeedRequest(request) {
 }
 
 function addCommentStreamToPage(comments) {
-  const dashboardSection = getElementByText('.sc-gsDKAQ', 'Dashboard')
+  const dashboardSection = getElementByText('.sc-gTRrQi', 'Dashboard')
 
   let commentStreamSection = document.querySelector('.commentfeed')
   let commentsContainer
