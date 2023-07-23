@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-dashboard.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-dashboard.user.js
 // @match               https://www.moviepilot.de
-// @version             0.2.1
+// @version             0.2.2
 // ==/UserScript==
 
 const PER_PAGE = 20
@@ -694,6 +694,7 @@ function stylesheetCSS() {
       height: auto;
       overflow: visible;
       padding-top: 1.25rem;
+      word-break: break-word;
     }
 
     .activity--body-wrapper.-truncated {
