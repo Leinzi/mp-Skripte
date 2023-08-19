@@ -6,12 +6,14 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-movies-cleanup.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-movies-cleanup.user.js
 // @match               https://www.moviepilot.de/movies/*
-// @version             4.0.0
+// @version             4.1.0
 // ==/UserScript==
 
 // RegExps
 let regMoviesMain = /^https?:\/\/www\.moviepilot.de\/movies\/([^\/]*)$/
-let regMoviesComments = /^https?:\/\/www\.moviepilot.de\/movies\/([^\/]*)\/kritik([^\/]*)?(\/([^\/]*))?$/
+
+const sectionContainerSelector = '.sc-bgqQcB.sc-325b3011-1.fPKbZG'
+const sectionSelector = '.sc-gTRrQi.sc-325b3011-0.kxAeeW'
 
 if (document.readyState !== 'loading') {
   performCleanUp()
@@ -24,11 +26,8 @@ function performCleanUp() {
     buildAndPlaceCategorySection()
     .then(loadCheckboxValues)
     .then(filterMainPage)
-  } else if (regMoviesComments.test(window.location.href)) {
-   improveComments()
+    .then(addStylesheetToHead)
   }
-
-  removeAds()
 }
 
 // ----- Helper - Anfang -----
@@ -71,61 +70,40 @@ function getElementByText(selector, text) {
 
 // ----- Filter - Ende -----
 
-// ----- Improvements - Anfang -----
-function removeAds() {
-  document.querySelectorAll('.has-vertical-spacing:empty').forEach(element => element.remove())
-  document.querySelectorAll('*[data-google-query-id]').forEach(element => element.remove())
-  document.querySelectorAll('#dfp-header').forEach(element => element.remove())
-
-  let outbrainElement = getElementByText('h2', 'Das könnte dich auch interessieren')
-  if (outbrainElement) {
-    let surroundingSection = outbrainElement.closest('section')
-    surroundingSection.remove()
-  }
-}
-
-function improveComments() {
-  let commentsSection = document.querySelector('section')
-  let commentsDiv = commentsSection.querySelector('.grid--col-sm-12')
-  commentsDiv.classList.add('grid--col-md-10')
-  commentsDiv.classList.add('grid--col-lg-9')
-
-  let paddingRight = document.createElement('div')
-  paddingRight.classList.add('grid--col-md-2')
-  paddingRight.classList.add('grid--col-lg-3')
-  commentsDiv.after(paddingRight)
-}
-
-// ----- Improvements - Ende -----
-
 // ----- Rubrikauswahl - Anfang -----
 
 function buildAndPlaceCategorySection() {
-  let firstSection = document.querySelector('section')
+  const sections = document.querySelectorAll(`${sectionContainerSelector} ${sectionSelector}`)
+  const secondSection = sections[1]
 
   let categorySection = createElementFromHTML(categorySectionHTML())
   categorySection.append(buildCheckboxDivForMoviesMain())
 
-  return Promise.resolve(firstSection.after(categorySection))
+  return Promise.resolve(secondSection.after(categorySection))
+}
+
+function addStylesheetToHead() {
+  let style = document.createElement('style')
+  style.type = 'text/css'
+  style.append(document.createTextNode(stylesheetCSS()))
+
+  return Promise.resolve(document.getElementsByTagName('head')[0].append(style))
 }
 
 function categorySectionHTML() {
   return `
-    <section class="grid--row has-vertical-spacing" mp-cleanup-category-switcher>
-      <div class="grid--col-sm-12">
-        <div class="h2-headline--wrapper">
-          <h2 class="h2-headline">Rubrikenauswahl</h2>
-        </div>
-        <div class="h3-headline--wrapper">
-          <h3 class="h3-headline">Nicht ausgewählte Rubriken werden ausgeblendet</h3>
-        </div>
+    <section class="filter" mp-cleanup-category-switcher>
+      <div class="filter--headline-wrapper">
+        <h2 class="filter--headline">Rubrikenauswahl</h2>
       </div>
+      <h3 class="filter--subline">Nicht ausgewählte Rubriken werden ausgeblendet</h3>
     </section>
   `
 }
 
 function buildCheckboxDivForMoviesMain() {
   let checkboxDiv = document.createElement('div')
+  checkboxDiv.classList.add('filter--entries')
 
   for (let category of categories()) {
     checkboxDiv.append(buildDivForCategory(category))
@@ -137,7 +115,7 @@ function buildCheckboxDivForMoviesMain() {
 
 function buildDivForCategory(options = {}) {
   let htmlString = `
-    <div class="grid--col-sm-6 grid--col-md-4 grid--col-lg-3">
+    <div class="filter--entry">
       <input type="checkbox" id="${options.key}" checked data-headline="${options.title}" data-selector="${options.selector}" data-element-selector="${options.elementSelector}" data-element-title="${options.elementTitle}">
       <label for="${options.key}">${options.title}</label>
     </div>
@@ -147,7 +125,7 @@ function buildDivForCategory(options = {}) {
 
 function buildDivWithSaveButton() {
   let htmlString = `
-    <div class="grid--col-sm-6 grid--col-md-4 grid--col-lg-3">
+    <div class="filter--entry">
     </div>
   `
   let buttonDiv = createElementFromHTML(htmlString)
@@ -157,7 +135,7 @@ function buildDivWithSaveButton() {
 
 function buildButtonWithCallback(label, callback) {
   let htmlString = `
-    <input type="button" value="${label}" class="akU5C" style="border: 2px solid black; margin: 5px 5px 0px; padding: 5px 10px; font-size: 14px;">
+    <input type="button" value="${label}" class="filter--button" style="border: 2px solid black; margin: 5px 5px 0px; padding: 5px 10px; font-size: 14px;">
   `
 
   let button = createElementFromHTML(htmlString)
@@ -189,84 +167,84 @@ function categories() {
     {
       key: 'friends',
       title: 'Deine Freunde',
-      selector: "div[data-hypernova-key='FriendsOpinionsModule']",
+      selector: sectionSelector,
       elementSelector: 'h2',
       elementTitle: 'Deine Freunde',
     },
     {
       key: 'stream',
       title: 'Streaming/TV',
-      selector: "div[data-hypernova-key='ConsumptionModule']",
+      selector: sectionSelector,
       elementSelector: 'h2',
       elementTitle: 'Schaue jetzt',
     },
     {
       key: 'cinema',
       title: 'im Kino',
-      selector: "div[data-hypernova-key='MovieCinemaConsumptionModule']",
+      selector: sectionSelector,
       elementSelector: 'h3',
       elementTitle: 'Aktuelle Vorstellungen',
     },
     {
       key: 'cast',
       title: 'Cast & Crew',
-      selector: 'section',
+      selector: sectionSelector,
       elementSelector: 'h2',
       elementTitle: 'Cast & Crew',
     },
     {
       key: 'videos',
       title: 'Videos & Bilder',
-      selector: 'section',
+      selector: sectionSelector,
       elementSelector: 'h2',
       elementTitle: 'Videos & Bilder',
     },
     {
       key: 'news',
       title: 'News',
-      selector: "div[data-hypernova-key='ArticleSlider']",
+      selector: sectionSelector,
       elementSelector: 'h2',
       elementTitle: 'News',
     },
     {
       key: 'press',
       title: 'Pressestimmen',
-      selector: 'section',
+      selector: sectionSelector,
       elementSelector: 'h2',
       elementTitle: 'Pressestimmen',
     },
     {
       key: 'statistics',
       title: 'Statistiken',
-      selector: 'section',
+      selector: sectionSelector,
       elementSelector: 'h2',
       elementTitle: 'Statistiken',
     },
     {
       key: 'comments',
       title: 'Kommentare',
-      selector: 'section',
+      selector: sectionSelector,
       elementSelector: 'h2',
       elementTitle: 'Kommentare',
     },
     {
       key: 'similar',
       title: 'Filme wie',
-      selector: "div[data-hypernova-key='PosterSlider']",
+      selector: sectionSelector,
       elementSelector: 'h2',
       elementTitle: 'Filme wie',
     },
     {
       key: 'lists',
       title: 'Listen',
-      selector: "div[data-hypernova-key='ListSlider']",
-      elementSelector: 'div.Jt--G',
+      selector: sectionSelector,
+      elementSelector: 'div.sc-9795d339-1',
       elementTitle: 'Trending: Meist diskutierte',
     },
     {
       key: 'moreNews',
       title: 'Weitere Artikel',
-      selector: 'section',
+      selector: sectionSelector,
       elementSelector: 'h2',
       elementTitle: 'Weitere Film-News',
     }
@@ -338,4 +316,82 @@ class MPCleanupStorage {
     storage[MPCleanupStorage.categoryKey()] = categorySettings
     MPCleanupStorage.setStorage(storage)
   }
+}
+
+function stylesheetCSS() {
+  return `
+    .filter {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filter--headline-wrapper {
+      display: block;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgb(20, 20, 20);
+    }
+
+    .filter--headline {
+      font-family: Oswald, sans-serif;
+      font-stretch: normal;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      display: inline-block;
+      margin: 0px 0px -1px;
+      padding: 0px 10px 10px 0px;
+      border-bottom: 1px solid rgb(244, 100, 90);
+      font-size: 23px;
+      line-height: 1.25;
+      text-transform: uppercase;
+    }
+
+    .filter--subline {
+      color: rgb(107, 107, 107);
+      font-size: 15px;
+      font-weight: 400;
+      margin-top: 0;
+    }
+
+    .filter--entries {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .filter--entry {
+      flex: 0 0 33%;
+    }
+
+    .filter--button {
+      margin: 0px;
+      overflow: visible;
+      background: transparent;
+      font-style: inherit;
+      font-variant: inherit;
+      font-optical-sizing: inherit;
+      font-kerning: inherit;
+      font-feature-settings: inherit;
+      font-variation-settings: inherit;
+      -webkit-font-smoothing: inherit;
+      appearance: none;
+      font-family: Oswald, sans-serif;
+      font-stretch: normal;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      display: inline-block;
+      transition-property: border-color, background-color, color;
+      transition-duration: 0.1s;
+      outline: 0px;
+      font-size: 15px;
+      line-height: 1.67;
+      text-align: center;
+      text-decoration: none;
+      text-transform: uppercase;
+      cursor: pointer;
+      position: relative;
+      padding: 7px 11px;
+      border: 3px solid rgb(20, 20, 20);
+      color: rgb(20, 20, 20);
+      width: 264px;
+    }
+	`
 }
