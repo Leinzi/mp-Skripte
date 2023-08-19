@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-series-cleanup.user.js
 // @match               https://www.moviepilot.de/serie/*
-// @version             4.0.0
+// @version             4.0.1
 // ==/UserScript==
 
 //RegExps
@@ -29,7 +29,7 @@ function performCleanUp() {
     cleanUpMainPage()
   } else if (regSeriesSeason.test(window.location.href) ) {
     seriesMainPage = false
-    cleanUpMainPage()
+    //cleanUpMainPage()
   } else if (regSeriesComments.test(window.location.href) || regSeriesSeasonComments.test(window.location.href)) {
    improveComments()
   }
