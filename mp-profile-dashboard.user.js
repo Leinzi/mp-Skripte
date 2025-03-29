@@ -1,12 +1,12 @@
 // ==UserScript==
-// @name                MP-Dashboard (experimentell)
+// @name                MP-Profil-Dashboard (experimentell)
 // @description         Das Skript entfernt das offizielle Dashboard und ersetzt es durch ein neues, das dem früheren Dashboard ähnlicher ist.
 // @author              leinzi
 // @grant               none
-// @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-dashboard.user.js
-// @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-dashboard.user.js
-// @match               https://www.moviepilot.de
-// @version             0.3.0
+// @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-profile-dashboard.user.js
+// @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-profile-dashboard.user.js
+// @match               https://www.moviepilot.de/users/*/dashboard
+// @version             0.1.0
 // ==/UserScript==
 
 const PER_PAGE = 20
@@ -92,8 +92,8 @@ function addActivitesToStream(activities) {
   let commentStreamSection = document.querySelector('.activityfeed')
 
   if (!commentStreamSection) {
-    const dashboardSection = getElementByText(document, '.sc-gTRrQi', 'Dashboard')
-    const trendingNewsSection = rewriteNewsInDashboardSection(dashboardSection)
+    const dashboardSection = getElementByText(document, '.sc-ewnqHT', 'Dashboard')
+    const parentSection = dashboardSection.parentElement
     commentStreamSection = createElementFromHTML(activityStreamSectionHTML())
 
     let switchDiv = createElementFromHTML('<div class="activityfeed--buttons"></div>')
@@ -140,9 +140,8 @@ function addActivitesToStream(activities) {
     }
     switchDiv.append(communityFeedButton)
 
-    dashboardSection.after(trendingNewsSection)
-    dashboardSection.remove()
-    trendingNewsSection.after(commentStreamSection)
+    //dashboardSection.remove()
+    parentSection.replaceChildren(commentStreamSection)
   }
 
   let activitiesContainerWrapper = commentStreamSection.querySelector('.activityfeed--activities')
@@ -198,38 +197,6 @@ function addActivitesToStream(activities) {
   if (currentPage < MAX_PAGES) {
     addButton(activitiesContainerWrapper)
   }
-}
-
-function rewriteNewsInDashboardSection(dashboardSection) {
-  const oldTrendingNewsSection = getElementByText(dashboardSection, 'div.sc-ewnqHT.dnRAbd', 'Beliebteste News')
-  const newTrendingNewsSection = createElementFromHTML(trendingNewsSectionHTML())
-
-  const listElements = oldTrendingNewsSection.querySelectorAll('li')
-  const newsList = createElementFromHTML('<div class="news-list"></div>')
-
-  for (let i = 0; i < listElements.length; i++) {
-    let listElement = listElements[i]
-    let newsElement = createElementFromHTML(transformListElementIntoNewsElement(listElement, i + 1))
-    newsList.append(newsElement)
-  }
-
-  newTrendingNewsSection.append(newsList)
-  return newTrendingNewsSection
-}
-
-function transformListElementIntoNewsElement(listElement, position) {
-  const tag = listElement.querySelector('div').textContent
-  const link = listElement.querySelector('a')
-  const articleURL = link.href
-  const title = link.textContent
-
-  return `
-    <div class="news">
-      <div class="news--position">${position}</div>
-      <div class="news--tag">${tag}</div>
-      <a href="${articleURL}" class="news--title">${title}</a>
-    </div>
-  `
 }
 
 function addStylesheetToHead() {
@@ -347,18 +314,6 @@ function activityStreamSectionHTML() {
       <div class="activityfeed--head">
         <div>
           ${sectionHeaderHTML('Mein', 'Dashboard')}
-        </div>
-      </div>
-    </div>
-  `
-}
-
-function trendingNewsSectionHTML() {
-  return `
-    <div class="trending-news">
-      <div class="trending-news--head">
-        <div>
-          ${sectionHeaderHTML('Beliebteste', 'News')}
         </div>
       </div>
     </div>
@@ -1043,83 +998,6 @@ function stylesheetCSS() {
       line-height: 1.5;
       text-decoration: none;
       text-transform: uppercase;
-    }
-
-    .trending-news {
-      padding-top: 18px;
-      padding-bottom: 18px;
-    }
-
-    .news-list {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 9px 30px;
-    }
-
-    @media only screen and (min-width: 48em) {
-      .news-list {
-        grid-template-columns: 1fr 1fr 1fr;
-      }
-    }
-
-    .news {
-      display: grid;
-      grid-template-rows: auto 1fr;
-      grid-template-columns: auto 1fr;
-      grid-template-areas:
-        "position tag"
-        "position title";
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgb(236, 237, 237);
-      line-height: 18px;
-    }
-    .news--position {
-      grid-area: position;
-      align-self: center;
-      display: block;
-      font-family: "Noto Serif", serif;
-      letter-spacing: normal;
-      padding-left: 8px;
-      padding-right: 8px;
-      color: rgb(244, 100, 90);
-      font-size: 30px;
-      font-style: italic;
-      font-weight: 700;
-      line-height: 20px;
-    }
-
-    .news--tag {
-      grid-area: tag;
-      font-family: Oswald, sans-serif;
-      font-stretch: normal;
-      font-weight: 600;
-      letter-spacing: 0.075em;
-      color: rgb(244, 100, 90);
-      font-size: 11px;
-      line-height: 18px;
-      text-transform: uppercase;
-    }
-
-    .news--title {
-      grid-area: title;
-      font-family: Oswald, sans-serif;
-      font-stretch: normal;
-      font-weight: 500;
-      letter-spacing: 0.02em;
-      font-size: 14px;
-      line-height: 19px;
-      text-decoration: none;
-      transition: color 0.1s ease-in 0s;
-    }
-
-    @media (min-width: 768px) {
-      .news--title {
-        font-size: 15px;
-      }
-    }
-
-    .news--title:hover {
-      color: rgb(244, 100, 90);
     }
 	`
 }
