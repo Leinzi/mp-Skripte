@@ -5,7 +5,8 @@
 // @grant         none
 // @downloadURL   https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/mp-no-relevant-links.user.js
 // @include       /^(https?:\/\/www\.moviepilot.de\/news)(\?page=([1-9][0-9]*))?$/
-// @version       0.1.6
+// @version       0.1.5
+
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {

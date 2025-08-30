@@ -6,7 +6,8 @@
 // @downloadURL         https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/Mp-Cleanup.user.js
 // @include             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/(.*)$/
 // @exclude             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
-// @version             1.2.1
+// @version             1.2.0
+
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {

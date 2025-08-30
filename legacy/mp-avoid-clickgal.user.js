@@ -5,7 +5,8 @@
 // @grant         none
 // @downloadURL   https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/mp-avoid-clickgal.user.js
 // @include       /^(https?:\/\/www\.moviepilot.de\/news\/)(.*?)$/
-// @version       1.11.1
+// @version       1.11.0
+
 // ==/UserScript==
 
 const regWithoutSuffix        = /^(https?:\/\/www\.moviepilot.de\/news\/)([^\/\#]*?)$/;
