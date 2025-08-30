@@ -4,33 +4,32 @@
 // @description   Bilderstrecken auf Moviepilot umgehen
 // @grant         none
 // @downloadURL   https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/mp-avoid-clickgal.user.js
-// @require       https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include       /^(https?:\/\/www\.moviepilot.de\/news\/)(.*?)$/
-// @version       1.10.2
+// @version       1.11.0
 // ==/UserScript==
 
-// jQuery-Konflikte loesen
-//
-this.$ = this.jQuery = jQuery.noConflict(true);
-
-var regWithoutSuffix        = /^(https?:\/\/www\.moviepilot.de\/news\/)([^\/\#]*?)$/;
-var regFirstPageOne         = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\/(seite-1)$/;
-var regLatterPages          = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\/(seite-([2-9]|2[0-6]))$/;
+const regWithoutSuffix        = /^(https?:\/\/www\.moviepilot.de\/news\/)([^\/\#]*?)$/;
+const regFirstPageOne         = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\/(seite-1)$/;
+const regLatterPages          = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\/(seite-([2-9]|2[0-6]))$/;
 
 // gibt es nicht mehr?
-var regWithCommentSuffix    = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\#(comments)$/;
-
-var pages;
+const regWithCommentSuffix    = /^(https?:\/\/www\.moviepilot.de\/news\/)([^"]*?)\#(comments)$/;
 
 // Funktion, damit das Dokument erst fertig geladen wird
-$(document).ready(function(){
-  var isClicktrack = findNodes('.js--article--click-track, .js--pagination').length > 0;
-  var getURL = window.location.href.replace('.html', '');
+if (document.readyState !== 'loading') {
+  init();
+} else {
+  document.addEventListener('DOMContentLoaded', init);
+}
+
+function init() {
+  const isClicktrack = findNodes('.js--article--click-track, .js--pagination').length > 0;
+  const getURL = window.location.href.replace('.html', '');
 
   if (isClicktrack) {
-    var lastPageURL = findNodes('.js--pagination--last')[0].href;
-    var pieces = lastPageURL.split('-');
-    var pageCount = Number(pieces[pieces.length-1].split('.')[0]);
+    const lastPageURL = findNodes('.js--pagination--last')[0].href;
+    const pieces = lastPageURL.split('-');
+    const pageCount = Number(pieces[pieces.length-1].split('.')[0]);
 
     if (regWithoutSuffix.test(getURL)) {
       buildTableOfContents(getURL + '/seite-', pageCount);
@@ -42,62 +41,63 @@ $(document).ready(function(){
       buildTableOfContents(getURL.slice(0, - 9) + '/seite-', pageCount);
     }
   }
-});
-
-function findNodes(query) {
-  return document.querySelectorAll(query);
 }
 
+const findNodes = (query) => document.querySelectorAll(query);
+
 function buildTableOfContents(defURL, pageCount) {
-  var divider = '--------------------';
+  const divider = '--------------------';
 
-  var clickGalContent = $('<div style="margin: 0 auto"></div>');
-  clickGalContent.append('<span><b>Inhaltsverzeichnis:</b></br>'+ divider +'</span></br>');
-  clickGalContent.append('<span id=clickgal_content></span>');
-  clickGalContent.append('<span>'+ divider +'</span></br>');
+  const clickGalContent = document.createElement('div');
+  clickGalContent.style.margin = '0 auto';
+  clickGalContent.insertAdjacentHTML('beforeend', `<span><b>Inhaltsverzeichnis:</b></br>${divider}</span></br>`);
+  const contentSpan = document.createElement('span');
+  contentSpan.id = 'clickgal_content';
+  clickGalContent.append(contentSpan);
+  clickGalContent.insertAdjacentHTML('beforeend', `<span>${divider}</span></br>`);
 
-  var clickGalDiv = $('<div style="display: flex">');
+  const clickGalDiv = document.createElement('div');
+  clickGalDiv.style.display = 'flex';
   clickGalDiv.append(clickGalContent);
 
-  var contentBody = $('.article--content-body');
-  contentBody.after('<hr>');
-  contentBody.after(clickGalDiv);
-  contentBody.after('<hr>');
+  const contentBody = document.querySelector('.article--content-body');
+  contentBody.insertAdjacentHTML('afterend', '<hr>');
+  contentBody.insertAdjacentElement('afterend', clickGalDiv);
+  contentBody.insertAdjacentHTML('afterend', '<hr>');
 
-  pages = new Array(pageCount);
-  for (var i = 2; i <= pageCount; i++) {
-    pages[i-2] = makeAjaxCall(defURL + i, "GET").then(appendEntry, function(reason){
+  const pages = new Array(pageCount);
+  for (let i = 2; i <= pageCount; i++) {
+    pages[i-2] = makeAjaxCall(defURL + i).then(data => appendEntry(data, defURL + i), reason => {
         console.log("error in processing your request", reason);
     });
   }
 
   Promise.all(pages).then (values => {
-    for (var i = 0; i < values.length; i++) {
-      $('#clickgal_content').append(values[i]);
-      if ((i + 1) % 10 == 0) {
-        $('#clickgal_content').append('<br>');
+    const container = document.getElementById('clickgal_content');
+    values.forEach((value, index) => {
+      container.append(value);
+      if ((index + 1) % 10 === 0) {
+        container.append(document.createElement('br'));
       }
-    }
+    });
   });
 }
 
-function appendEntry(data, i) {
-  var header = $(data).find('h1.article--header--title').html();
+function appendEntry(data, url) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(data, 'text/html');
+  const header = doc.querySelector('h1.article--header--title')?.innerHTML;
 
   if(/Das könnte dich auch interessieren/.test(header)) {
     return '';
   } else {
-    var elem = $('<div>')
-    elem.append('<span>' + header + ': </span></br>');
-    elem.append('<a href="' + this.url + '">' + this.url + '</a></br>');
+    const elem = document.createElement('div');
+    elem.insertAdjacentHTML('beforeend', `<span>${header}: </span></br>`);
+    elem.insertAdjacentHTML('beforeend', `<a href="${url}">${url}</a></br>`);
     return elem;
   }
 }
 
-function makeAjaxCall(url, methodType, callback) {
-  return $.ajax({
-      url: url,
-      method: methodType,
-      dataType: 'html'
-  });
+function makeAjaxCall(url) {
+  return fetch(url).then(response => response.text());
 }
