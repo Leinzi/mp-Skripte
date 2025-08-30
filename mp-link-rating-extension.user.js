@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-link-rating-extension.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-link-rating-extension.user.js
 // @match               https://www.moviepilot.de/*
-// @version             0.1.3
+// @version             0.1.4
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
@@ -16,31 +16,28 @@ if (document.readyState !== 'loading') {
 }
 
 function linkRatingExtension() {
-  let sessionURL = 'https://www.moviepilot.de/api/session'
-  makeAjaxRequest(sessionURL)
+  const sessionURL = 'https://www.moviepilot.de/api/session'
+  fetch(sessionURL)
     .then(createUserFromSession)
     .then(addRatingsToLinks)
     .then(addStylesheetToHead)
     .catch(handleErrors)
 }
 
-function createUserFromSession(sessionRequest) {
-  return new Promise(function(resolve, reject) {
-    if (sessionRequest.status == 200) {
-      let data = JSON.parse(sessionRequest.response)
-      if (data.type === 'RegisteredUser') {
-        const baseURL = 'https://www.moviepilot.de'
-        const perPage = 100
-        let signedInUser = new User()
-        signedInUser.setSessionInformationForType('movies', Math.ceil(data.movie_ratings / perPage), baseURL + data.movie_ratings_path)
-        signedInUser.setSessionInformationForType('serie', Math.ceil(data.series_ratings / perPage), baseURL + data.series_ratings_path)
-        resolve(signedInUser)
-      } else {
-      reject(new Error('Only works when signed in.'))
-      }
-    } else {
-      reject(new Error('There was an error in processing your request'))
+function createUserFromSession(response) {
+  if (!response.ok) {
+    return Promise.reject(new Error('There was an error in processing your request'))
+  }
+  return response.json().then(data => {
+    if (data.type === 'RegisteredUser') {
+      const baseURL = 'https://www.moviepilot.de'
+      const perPage = 100
+      let signedInUser = new User()
+      signedInUser.setSessionInformationForType('movies', Math.ceil(data.movie_ratings / perPage), baseURL + data.movie_ratings_path)
+      signedInUser.setSessionInformationForType('serie', Math.ceil(data.series_ratings / perPage), baseURL + data.series_ratings_path)
+      return signedInUser
     }
+    throw new Error('Only works when signed in.')
   })
 }
 
@@ -54,7 +51,7 @@ function addStylesheetToHead() {
   style.append(document.createTextNode('.person--details .regular-link { color: rgb(28, 44, 133) !important }'))
   style.append(document.createTextNode('.person--details .regular-link:hover { color: rgba(28, 44, 133, .75) !important }'))
 
-  document.getElementsByTagName('head')[0].append(style);
+  document.head.append(style)
   return Promise.resolve(true)
 }
 
@@ -134,20 +131,6 @@ function stringToHTML(string) {
   let dom = document.createElement('div')
   dom.innerHTML = string
   return dom
-}
-
-function makeAjaxRequest(url) {
-  return new Promise(function(resolve, reject) {
-    const httpRequest = new XMLHttpRequest()
-    httpRequest.onload = function() {
-      resolve(this)
-    }
-    httpRequest.onerror = function() {
-      reject(new Error("Network error"))
-    }
-    httpRequest.open('GET', url)
-    httpRequest.send()
-  })
 }
 
 function handleErrors(error) {

@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-comment-feed.user.js
 // @match               https://www.moviepilot.de
-// @version             0.7.3
+// @version             0.7.4
 // ==/UserScript==
 
 const PER_PAGE = 20
@@ -28,24 +28,21 @@ function commentFeedExtension() {
 
 function fetchAndBuildCommentFeed() {
   const commentFeedURL = `https://www.moviepilot.de/api/comments?per_page=${PER_PAGE}&page=${currentPage}`
-  makeAjaxRequest(commentFeedURL)
-    .then(handleCommentsFeedRequest)
+  fetch(commentFeedURL)
+    .then(handleCommentsFeedResponse)
     .then(addCommentStreamToPage)
     .catch(handleErrors)
 }
 
-function handleCommentsFeedRequest(request) {
-  return new Promise(function(resolve, reject) {
-    if (request.status == 200) {
-      const data = JSON.parse(request.response)
-      if (data.hasOwnProperty('results')) {
-        resolve(data.results)
-      } else {
-      reject(new Error('No comments found.'))
-      }
-    } else {
-      reject(new Error('There was an error in processing your request'))
+function handleCommentsFeedResponse(response) {
+  if (!response.ok) {
+    return Promise.reject(new Error('There was an error in processing your request'))
+  }
+  return response.json().then(data => {
+    if (data.hasOwnProperty('results')) {
+      return data.results
     }
+    throw new Error('No comments found.')
   })
 }
 
@@ -67,7 +64,7 @@ function addCommentStreamToPage(comments) {
   let titles = []
 
   for (let comment of comments) {
-    titles.push(makeAjaxRequest(comment.commentable_url).then(fetchPageTitle))
+    titles.push(fetch(comment.commentable_url).then(fetchPageTitle))
   }
 
   Promise.all(titles).then(titles => {
@@ -125,16 +122,14 @@ function onClick(event) {
   button.parentElement.remove()
 }
 
-function fetchPageTitle(request) {
-  return new Promise(function(resolve, reject) {
-    if (request.status == 200) {
-      const dom = stringToHTML(request.response)
-      const title = dom.querySelector('title').textContent.replace(' | Moviepilot.de', '')
-
-      resolve(title)
-    } else {
-      reject(new Error('There was an error in processing your request'))
-    }
+function fetchPageTitle(response) {
+  if (!response.ok) {
+    return Promise.reject(new Error('There was an error in processing your request'))
+  }
+  return response.text().then(text => {
+    const dom = stringToHTML(text)
+    const title = dom.querySelector('title').textContent.replace(' | Moviepilot.de', '')
+    return title
   })
 }
 
@@ -143,7 +138,7 @@ function addStylesheetToHead() {
   style.type = 'text/css'
   style.append(document.createTextNode(stylesheetCSS()))
 
-  return Promise.resolve(document.getElementsByTagName('head')[0].append(style))
+  return Promise.resolve(document.head.append(style))
 }
 
 // Elements
@@ -793,20 +788,6 @@ function stringToHTML(string) {
   return dom
 }
 
-function makeAjaxRequest(url) {
-  return new Promise(function(resolve, reject) {
-    const httpRequest = new XMLHttpRequest()
-    httpRequest.onload = function() {
-      resolve(this)
-    }
-    httpRequest.onerror = function() {
-      reject(new Error("Network error"))
-    }
-    httpRequest.open('GET', url)
-    httpRequest.send()
-  })
-}
-
 function createElementFromHTML(htmlString) {
   return stringToHTML(htmlString).children[0]
 }
@@ -816,13 +797,11 @@ function handleErrors(error) {
 }
 
 function getElementByText(selector, text) {
-  let matches = Array.prototype.slice.call(contains(selector, text))
+  let matches = Array.from(contains(selector, text))
   return matches[0]
 }
 
 function contains(selector, text) {
    let elements = document.querySelectorAll(selector)
-   return Array.prototype.filter.call(elements, function(element) {
-      return RegExp(text).test(element.textContent)
-   })
+   return Array.from(elements).filter(element => RegExp(text).test(element.textContent))
 }
