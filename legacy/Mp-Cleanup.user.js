@@ -7,7 +7,6 @@
 // @include             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/(.*)$/
 // @exclude             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
 // @version             1.2.0
-
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
