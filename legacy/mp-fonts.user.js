@@ -6,7 +6,6 @@
 // #downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-fonts.user.js
 // @include             /^https?:\/\/www\.moviepilot.de\//
 // @version             0.0.3
-
 // ==/UserScript==
 
 if (document.readyState !== 'loading') {
