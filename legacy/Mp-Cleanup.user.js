@@ -1,98 +1,105 @@
 // ==UserScript==
-// @name                MP-Cleanup (jQuery)
+// @name                MP-Cleanup
 // @description         Moviepilot generell bereinigen
 // @author              mitcharts, leinzi
 // @grant               none
 // @downloadURL         https://raw.githubusercontent.com/Leinzi/mp-Skripte/master/Mp-Cleanup.user.js
-// @require             https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js
 // @include             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/(.*)$/
 // @exclude             /^(https?:)\/\/(.+\.)?(moviepilot.de)\/serie\/(.*)$/
-// @version             1.1.0
+// @version             1.2.0
 // ==/UserScript==
 
-// jQuery-Konflikte loesen
-this.$ = this.jQuery = jQuery.noConflict(true);
+if (document.readyState !== 'loading') {
+  init();
+} else {
+  document.addEventListener('DOMContentLoaded', init);
+}
 
-// Funktion, damit das Dokument erst fertig geladen wird
-$(document).ready(function(){
-
-  // Variablendefinitionen
-  // Hinweis: 'i' wird bewusst ausgelassen
-  var communitybox = $(".banner--vdt");
-  var separatorssidebar = $(".seperators");
-  var subsocial = $(".navigation--sub--social");
-  var themensidebar = $(".lists--timeline");
-  var vormerkbox = $(".widget--followships");
-
-  var getURL = window.location.href.replace('.html', '');
-
+function init() {
   cleanUpHeader();
   cleanUpFooter();
   cleanUpSidebar();
   cleanUpMiddleBar();
   cleanUpMainPage();
-
   justifyTextContent();
-
-});
-
-function cleanUpMiddleBar(){
-  var recentNews = $(".article--footer-elements > .cards--grid");
-  recentNews.remove();
-  var newsKeywords = $(".keywords");
-  //newsKeywords.remove();
-  var adNews = $(".article--article-advertising");
-  adNews.remove();
-  var socialMediaBar = $(".article--social-header-bar--share");
-  socialMediaBar.remove();
-  var newsShopping = $(".js--consumptions--widget-poster");
-  newsShopping.remove();
 }
 
-function cleanUpSidebar(){
-  var sidebarWerbung = $('#ad-rectangle1-outer');
-  sidebarWerbung.remove();
-  var sidebarTrending = $(".lists--toplist");
-  //sidebarTrending.remove();
-  var sidebarWerbung2 = $(".advertisement--medium-rectangle");
-  sidebarWerbung2.remove();
-  var sidebarNews = $(".news-sidebar");
-  sidebarNews.remove();
-  var sidebarVideo = $(".showheroes--sidebar");
-  sidebarVideo.remove();
-  var sidebarShopping = $(".consumptions--widget-list--items");
-  sidebarShopping.remove();
+function cleanUpMiddleBar() {
+  const recentNews = document.querySelector('.article--footer-elements > .cards--grid');
+  if (recentNews) recentNews.remove();
+
+  const newsKeywords = document.querySelector('.keywords');
+  // if (newsKeywords) newsKeywords.remove();
+
+  const adNews = document.querySelector('.article--article-advertising');
+  if (adNews) adNews.remove();
+
+  const socialMediaBar = document.querySelector('.article--social-header-bar--share');
+  if (socialMediaBar) socialMediaBar.remove();
+
+  const newsShopping = document.querySelector('.js--consumptions--widget-poster');
+  if (newsShopping) newsShopping.remove();
 }
 
-function cleanUpFooter(){
-  var footerVideo = $(".video--player--footer");
-  footerVideo.remove();
-  var footerLinks = $(".footer_ng--secondary");
-  footerLinks.remove();
-  var footerElements = $('article--footer-elements');
-  footerElements.remove();
+function cleanUpSidebar() {
+  const sidebarWerbung = document.querySelector('#ad-rectangle1-outer');
+  if (sidebarWerbung) sidebarWerbung.remove();
+
+  const sidebarTrending = document.querySelector('.lists--toplist');
+  // if (sidebarTrending) sidebarTrending.remove();
+
+  const sidebarWerbung2 = document.querySelector('.advertisement--medium-rectangle');
+  if (sidebarWerbung2) sidebarWerbung2.remove();
+
+  const sidebarNews = document.querySelector('.news-sidebar');
+  if (sidebarNews) sidebarNews.remove();
+
+  const sidebarVideo = document.querySelector('.showheroes--sidebar');
+  if (sidebarVideo) sidebarVideo.remove();
+
+  const sidebarShopping = document.querySelector('.consumptions--widget-list--items');
+  if (sidebarShopping) sidebarShopping.remove();
 }
 
-function cleanUpHeader(){
-  var headerBanner = $("#ads-outer");
-  headerBanner.remove();
+function cleanUpFooter() {
+  const footerVideo = document.querySelector('.video--player--footer');
+  if (footerVideo) footerVideo.remove();
+
+  const footerLinks = document.querySelector('.footer_ng--secondary');
+  if (footerLinks) footerLinks.remove();
+
+  const footerElements = document.querySelector('article--footer-elements');
+  if (footerElements) footerElements.remove();
+}
+
+function cleanUpHeader() {
+  const headerBanner = document.querySelector('#ads-outer');
+  if (headerBanner) headerBanner.remove();
 }
 
 function cleanUpMainPage() {
-  var topTrailer = $(".home--trailer-slider");
-  topTrailer.remove();
-  var topRecommendation = $("#home_personal_recommendations");
-  topRecommendation.remove();
+  const topTrailer = document.querySelector('.home--trailer-slider');
+  if (topTrailer) topTrailer.remove();
+
+  const topRecommendation = document.querySelector('#home_personal_recommendations');
+  if (topRecommendation) topRecommendation.remove();
 }
 
-function justifyTextContent(){
-  // News-Artikel
-  $('.article--content-wrapper').css({'margin': '40px 0 0 0', 'text-align': 'justify'});
-  // Filmdetailseiten
-  $('.movie--summary').css({'text-align': 'justify'});
-  // Kommentare
-  $('.js--comments').css({'text-align': 'justify'});
-  // Darstellerübersicht
-  $('.person--description').css({'text-align': 'justify'});
+function justifyTextContent() {
+  document.querySelectorAll('.article--content-wrapper').forEach((el) => {
+    el.style.margin = '40px 0 0 0';
+    el.style.textAlign = 'justify';
+  });
 
+  document.querySelectorAll('.movie--summary').forEach((el) => {
+    el.style.textAlign = 'justify';
+  });
+
+  document.querySelectorAll('.js--comments').forEach((el) => {
+    el.style.textAlign = 'justify';
+  });
+
+  document.querySelectorAll('.person--description').forEach((el) => {
+    el.style.textAlign = 'justify';
+  });
 }
