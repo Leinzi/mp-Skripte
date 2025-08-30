@@ -6,7 +6,7 @@
 // @downloadURL         https://github.com/Leinzi/mp-Skripte/raw/master/mp-profile-dashboard.user.js
 // @updateURL           https://github.com/Leinzi/mp-Skripte/raw/master/mp-profile-dashboard.user.js
 // @match               https://www.moviepilot.de/users/*/dashboard
-// @version             0.1.0
+// @version             0.1.1
 // ==/UserScript==
 
 const PER_PAGE = 20
@@ -24,26 +24,21 @@ if (document.readyState !== 'loading') {
 }
 
 function activityFeedExtension() {
-  let sessionURL = 'https://www.moviepilot.de/api/session'
+  const sessionURL = 'https://www.moviepilot.de/api/session'
   makeAjaxRequest(sessionURL)
     .then(handleSessionRequest)
     .then(fetchAndBuildActivityFeed)
     .then(addStylesheetToHead)
+    .catch(handleErrors)
 }
 
-function handleSessionRequest(sessionRequest) {
-  return new Promise(function (resolve, reject) {
-    if (sessionRequest.status == 200) {
-      let data = JSON.parse(sessionRequest.response)
-      if (data.type === 'RegisteredUser') {
-        signedIn = true
-      } else {
-        signedIn = false
-      }
-      resolve(signedIn)
-    } else {
-      reject(new Error('There was an error in processing your request'))
-    }
+function handleSessionRequest(response) {
+  if (!response.ok) {
+    throw new Error('There was an error in processing your request')
+  }
+  return response.json().then((data) => {
+    signedIn = data.type === 'RegisteredUser'
+    return signedIn
   })
 }
 
@@ -73,18 +68,15 @@ function fetchAndBuildActivityFeed() {
     .catch(handleErrors)
 }
 
-function handleActivityFeedRequest(request) {
-  return new Promise(function (resolve, reject) {
-    if (request.status == 200) {
-      const data = JSON.parse(request.response)
-      if (data.hasOwnProperty('results')) {
-        resolve(data.results)
-      } else {
-        reject(new Error('No comments found.'))
-      }
-    } else {
-      reject(new Error('There was an error in processing your request'))
+function handleActivityFeedRequest(response) {
+  if (!response.ok) {
+    throw new Error('There was an error in processing your request')
+  }
+  return response.json().then((data) => {
+    if (data.hasOwnProperty('results')) {
+      return data.results
     }
+    throw new Error('No comments found.')
   })
 }
 
@@ -200,11 +192,9 @@ function addActivitesToStream(activities) {
 }
 
 function addStylesheetToHead() {
-  let style = document.createElement('style')
-  style.type = 'text/css'
-  style.append(document.createTextNode(stylesheetCSS()))
-
-  return Promise.resolve(document.getElementsByTagName('head')[0].append(style))
+  const style = document.createElement('style')
+  style.append(stylesheetCSS())
+  document.head.append(style)
 }
 
 // Elements
@@ -1010,16 +1000,11 @@ function stringToHTML(string) {
 }
 
 function makeAjaxRequest(url) {
-  return new Promise(function (resolve, reject) {
-    const httpRequest = new XMLHttpRequest()
-    httpRequest.onload = function () {
-      resolve(this)
+  return fetch(url).then((response) => {
+    if (!response.ok) {
+      throw new Error('Network error')
     }
-    httpRequest.onerror = function () {
-      reject(new Error("Network error"))
-    }
-    httpRequest.open('GET', url)
-    httpRequest.send()
+    return response
   })
 }
 
@@ -1028,7 +1013,7 @@ function createElementFromHTML(htmlString) {
 }
 
 function handleErrors(error) {
-  console.error(`[MP-Kommentarfeed]: ${error.message}`)
+  console.error(`[MP-Profil-Dashboard]: ${error.message}`)
 }
 
 function getElementByText(parent, selector, text) {
